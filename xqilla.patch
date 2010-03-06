@@ -1,5 +1,5 @@
---- qpidc-0.5.819819/cpp/src/qpid/xml/XmlExchange.cpp	2010-02-08 10:08:03.000000000 +0000
-+++ qpidc-0.5.819819/cpp/src/qpid/xml/XmlExchange.cpp	2010-02-08 10:17:33.000000000 +0000
+--- cpp/src/qpid/xml/XmlExchange.cpp	2010-02-08 10:08:03.000000000 +0000
++++ cpp/src/qpid/xml/XmlExchange.cpp	2010-02-08 10:17:33.000000000 +0000
 @@ -38,6 +38,8 @@ 
  
  #include <xqilla/context/ItemFactory.hpp>

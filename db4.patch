@@ -1,5 +1,6 @@
---- rhm-0.5.3684/configure.ac	2009-08-14 15:00:10.000000000 -0400
-+++ rhm-0.5.3684/configure.ac	2010-02-08 14:31:52.415778607 -0500
+diff -r -U3 store-0.6.3795/configure.ac store-0.6.3795-new/configure.ac
+--- configure.ac	2010-01-13 10:12:58.000000000 -0500
++++ configure.ac	2010-03-05 17:44:45.114165920 -0500
 @@ -177,17 +177,17 @@
  AC_SUBST([LIB_DLOPEN])
  LIBS=$gl_saved_libs
