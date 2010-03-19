@@ -26,7 +26,7 @@
 %global qpid_svnrev         895736
 %global store_svnrev        3795
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num         1
+%global release_num         2
 
 # NOTE: no more than one of these flags should be set at the same time!
 # RHEL-6 builds (the default) should have all these flags set to 0.
@@ -83,6 +83,7 @@ Patch0:         so_number.patch
 Patch1:		xqilla.patch
 Patch2:		boost_system.patch
 Patch3:		db4.patch
+Patch4:		qpidd.patch
 %endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if %{rhel_5}
@@ -689,6 +690,7 @@ exit 1
 %patch0
 %patch1
 %patch2
+%patch4
 pushd ../store-%{qpid_release}.%{store_svnrev}
 %patch3
 popd
@@ -847,6 +849,9 @@ rm -rf %{buildroot}
 /sbin/ldconfig
 
 %changelog
+* Fri Mar 19 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-2
+- BZ574880 - Add restorecon to qpid init script
+
 * Tue Mar 2 2010 Kim van der Riet<kim.vdriet@redhat.com> - 0.6.895736-1
 - Imported unified specfile from RHEL maintained by Kim van der Riet
 
