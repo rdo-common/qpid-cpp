@@ -26,7 +26,7 @@
 %global qpid_svnrev         895736
 %global store_svnrev        3795
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num         2
+%global release_num         3
 
 # NOTE: no more than one of these flags should be set at the same time!
 # RHEL-6 builds (the default) should have all these flags set to 0.
@@ -267,7 +267,7 @@ Group: System Environment/Daemons
 Requires: %{pkg_name}-client = %{version}-%{release}
 Requires: cyrus-sasl
 Requires(post): policycoreutils
-Requires(post): selinux-policy-minimum
+Requires(post): selinux-policy-base
 Requires(post): /usr/sbin/semodule
 Requires(postun): /usr/sbin/semodule
 Obsoletes: qpidd < %{version}
@@ -849,6 +849,9 @@ rm -rf %{buildroot}
 /sbin/ldconfig
 
 %changelog
+* Tue Apr  6 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-3
+- BZ529448 - qpidd should not require selinux-policy-minimum
+
 * Fri Mar 19 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-2
 - BZ574880 - Add restorecon to qpid init script
 
