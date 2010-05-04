@@ -26,7 +26,7 @@
 %global qpid_svnrev         895736
 %global store_svnrev        3795
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num         3
+%global release_num         4
 
 # NOTE: no more than one of these flags should be set at the same time!
 # RHEL-6 builds (the default) should have all these flags set to 0.
@@ -84,6 +84,7 @@ Patch1:		xqilla.patch
 Patch2:		boost_system.patch
 Patch3:		db4.patch
 Patch4:		qpidd.patch
+Patch5:		qmf.rb.patch
 %endif
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if %{rhel_5}
@@ -691,6 +692,7 @@ exit 1
 %patch1
 %patch2
 %patch4
+%patch5
 pushd ../store-%{qpid_release}.%{store_svnrev}
 %patch3
 popd
@@ -849,6 +851,9 @@ rm -rf %{buildroot}
 /sbin/ldconfig
 
 %changelog
+* Mon May  3 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-4
+- Patch for qmf.rb
+
 * Tue Apr  6 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-3
 - BZ529448 - qpidd should not require selinux-policy-minimum
 
