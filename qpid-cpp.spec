@@ -116,6 +116,7 @@ BuildRequires: doxygen
 BuildRequires: libtool
 BuildRequires: pkgconfig
 BuildRequires: ruby
+BuildRequires: ruby-libs
 BuildRequires: ruby-devel
 BuildRequires: python
 BuildRequires: python-devel
