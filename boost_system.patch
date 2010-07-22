@@ -1,6 +1,6 @@
---- cpp/src/Makefile.am	2009-12-15 13:24:02.000000000 -0500
-+++ cpp/src/Makefile.am	2010-03-05 17:13:57.588164999 -0500
-@@ -312,6 +312,7 @@
+--- cpp/src/Makefile.am    2010-07-21 08:56:58.722904842 -0400
++++ cpp/src/Makefile.am    2010-07-21 08:54:18.510029787 -0400
+@@ -311,6 +311,7 @@
  libqpidcommon_la_LIBADD = \
    -lboost_program_options \
    -lboost_filesystem \

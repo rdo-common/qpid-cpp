@@ -81,7 +81,7 @@
 
 Name:           %{name}
 Version:        %{qpid_release}.%{qpid_svnrev}
-Release:        %{release_num}%{?dist}.1
+Release:        %{release_num}%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
