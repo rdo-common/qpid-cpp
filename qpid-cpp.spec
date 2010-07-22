@@ -70,7 +70,7 @@
 
 Name:           qpid-cpp
 Version:        %{qpid_release}.%{qpid_svnrev}
-Release:        %{release_num}%{?dist}
+Release:        %{release_num}%{?dist}.1
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
@@ -851,6 +851,9 @@ rm -rf %{buildroot}
 /sbin/ldconfig
 
 %changelog
+* Thu Jul 22 2010 David Malcolm <dmalcolm@redhat.com> - 0.6.895736-4.1
+- Rebuilt for https://fedoraproject.org/wiki/Features/Python_2.7/MassRebuild
+
 * Mon May  3 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-4
 - Patch for qmf.rb
 
