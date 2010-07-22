@@ -804,8 +804,10 @@ rm -rf %{buildroot}%_datadir/qpidc/examples/xml-exchange
 %if ! %{rhel_4}
 install -d %{buildroot}%{_datadir}/selinux/packages
 install -m 644 %{_builddir}/%{name}-%{version}/selinux/qpidd.pp %{buildroot}%{_datadir}/selinux/packages
+%if %{ruby_qmf}
 install -pm 644 %{_builddir}/%{name}-%{version}/cpp/bindings/qmf/ruby/qmf.rb %{buildroot}%{ruby_sitelib}
 install -pm 755 %{_builddir}/%{name}-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengine.so %{buildroot}%{ruby_sitearch}
+%endif
 %endif
 
 rm -f %{buildroot}%_libdir/_*
