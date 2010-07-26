@@ -95,6 +95,7 @@ Source2:        qpidd.pp
 %if %{fedora}
 #Patch0:         so_number.patch
 Patch0:         boost_system.patch
+Patch1:         swig.patch
 %endif
 
 %if %{rhel_4}
@@ -677,6 +678,7 @@ popd
 
 %if %{fedora}
 %patch0
+%patch1
 %endif
 
 # apply qpid patch
