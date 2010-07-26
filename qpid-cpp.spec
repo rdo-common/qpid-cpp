@@ -706,7 +706,7 @@ CXXFLAGS="%{optflags} -DNDEBUG -O3" \
 %configure --disable-static --without-cpg --without-graphviz --without-help2man --without-rdma
 %else
 CXXFLAGS="%{optflags} -DNDEBUG -O3" \
-%configure --disable-static --with-cpg --without-graphviz --without-help2man
+%configure --disable-static --with-cpg --without-graphviz --without-help2man --with-swig
 %endif
 ECHO=echo make %{LIB_VERSION_MAKE_PARAMS}
 
