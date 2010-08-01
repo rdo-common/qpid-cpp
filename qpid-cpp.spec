@@ -26,7 +26,7 @@
 %global qpid_svnrev  946106
 %global store_svnrev 3975
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  2
+%global release_num  3
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -944,6 +944,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Sun Aug  1 2010 Thomas Spura <tomspur@fedoreproject.org> - 0.7.946106-3
+- Rebuilt for https://fedoraproject.org/wiki/Features/Python_2.7/MassRebuild
+
 * Tue Jul 22 2010 Nuno Santos <nsantos@nsantos-laptop> - 0.7.946106-1
 - Rebased to sync with mrg
 
