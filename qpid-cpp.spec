@@ -67,6 +67,9 @@
 %ifnarch s390 s390x
 %global client_rdma       %{MRG_non_core}
 %global server_rdma       %{MRG_non_core}
+%else
+%global client_rdma       0
+%global server_rdma       0
 %endif
 %global client_ssl        %{MRG_non_core}
 %global server_ssl        %{MRG_non_core}
