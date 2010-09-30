@@ -26,7 +26,7 @@
 %global qpid_svnrev  946106
 %global store_svnrev 3975
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  3
+%global release_num  4
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -64,8 +64,10 @@
 %global client_devel_docs %{MRG_core}
 %global server_devel      %{MRG_core}
 %global qmf_devel         %{MRG_core}
+%ifnarch s390 s390x
 %global client_rdma       %{MRG_non_core}
 %global server_rdma       %{MRG_non_core}
+%endif
 %global client_ssl        %{MRG_non_core}
 %global server_ssl        %{MRG_non_core}
 %global server_xml        %{MRG_non_core}
@@ -109,7 +111,10 @@ Patch6:         store_1.3.x.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
+# limit the architectures only in RHEL
+%if 0%{?rhel}
 ExclusiveArch:  i386 i686 x86_64
+%endif
 #Vendor:         Red Hat, Inc.
 
 BuildRequires: boost-devel
@@ -125,9 +130,11 @@ BuildRequires: cyrus-sasl-devel
 BuildRequires: cyrus-sasl-lib
 %endif
 BuildRequires: cyrus-sasl
+%if %{client_rdma} || %{server_rdma}
 BuildRequires: libibverbs-devel
 %if ! %{rhel_4}
 BuildRequires: librdmacm-devel
+%endif
 %endif
 BuildRequires: nss-devel
 BuildRequires: nspr-devel
@@ -944,6 +951,10 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Sep 30 2010 Dan Horák <dan[at]danny.cz> - 0.7.946106-4
+- don't build with InfiniBand support on s390(x)
+- don't limit architectures in Fedora
+
 * Sun Aug  1 2010 Thomas Spura <tomspur@fedoreproject.org> - 0.7.946106-3
 - Rebuilt for https://fedoraproject.org/wiki/Features/Python_2.7/MassRebuild
 
