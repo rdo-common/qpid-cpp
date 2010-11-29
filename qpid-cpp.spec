@@ -26,7 +26,7 @@
 %global qpid_svnrev  946106
 %global store_svnrev 3975
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  4
+%global release_num  3
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -64,13 +64,8 @@
 %global client_devel_docs %{MRG_core}
 %global server_devel      %{MRG_core}
 %global qmf_devel         %{MRG_core}
-%ifnarch s390 s390x
 %global client_rdma       %{MRG_non_core}
 %global server_rdma       %{MRG_non_core}
-%else
-%global client_rdma       0
-%global server_rdma       0
-%endif
 %global client_ssl        %{MRG_non_core}
 %global server_ssl        %{MRG_non_core}
 %global server_xml        %{MRG_non_core}
@@ -114,10 +109,7 @@ Patch6:         store_1.3.x.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-# limit the architectures only in RHEL
-%if 0%{?rhel}
 ExclusiveArch:  i386 i686 x86_64
-%endif
 #Vendor:         Red Hat, Inc.
 
 BuildRequires: boost-devel
@@ -133,11 +125,9 @@ BuildRequires: cyrus-sasl-devel
 BuildRequires: cyrus-sasl-lib
 %endif
 BuildRequires: cyrus-sasl
-%if %{client_rdma} || %{server_rdma}
 BuildRequires: libibverbs-devel
 %if ! %{rhel_4}
 BuildRequires: librdmacm-devel
-%endif
 %endif
 BuildRequires: nss-devel
 BuildRequires: nspr-devel
@@ -321,7 +311,7 @@ the open AMQP messaging protocol.
 %dir %_libdir/qpid/daemon
 %_libdir/qpid/daemon/acl.so
 %attr(755, qpidd, qpidd) %_localstatedir/lib/qpidd
-%attr(755, qpidd, qpidd) /var/run/qpidd
+%ghost %attr(755, qpidd, qpidd) /var/run/qpidd
 %attr(600, qpidd, qpidd) %config(noreplace) %_localstatedir/lib/qpidd/qpidd.sasldb
 %doc %_mandir/man1/qpidd.*
 
@@ -954,18 +944,14 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
-* Thu Sep 30 2010 Dan Horák <dan[at]danny.cz> - 0.7.946106-4
-- don't build with InfiniBand support on s390(x)
-- don't limit architectures in Fedora
+* Mon Nov 29 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-3
+- BZ656680 - Update Spec File to use ghost macro on files in /var/run
 
-* Sun Aug  1 2010 Thomas Spura <tomspur@fedoreproject.org> - 0.7.946106-3
-- Rebuilt for https://fedoraproject.org/wiki/Features/Python_2.7/MassRebuild
+* Tue Jul 27 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-2
+- Patch for autoconf swig version comparison macro
 
-* Tue Jul 22 2010 Nuno Santos <nsantos@nsantos-laptop> - 0.7.946106-1
+* Tue Jul 22 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-1
 - Rebased to sync with mrg
-
-* Thu Jul 22 2010 David Malcolm <dmalcolm@redhat.com> - 0.6.895736-4.1
-- Rebuilt for https://fedoraproject.org/wiki/Features/Python_2.7/MassRebuild
 
 * Mon May  3 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-4
 - Patch for qmf.rb
