@@ -26,7 +26,7 @@
 %global qpid_svnrev  946106
 %global store_svnrev 3975
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  3
+%global release_num  4
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -944,7 +944,7 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
-* Mon Nov 29 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-3
+* Mon Nov 29 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-4
 - BZ656680 - Update Spec File to use ghost macro on files in /var/run
 
 * Tue Jul 27 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-2
