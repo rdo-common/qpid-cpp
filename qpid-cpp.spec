@@ -22,11 +22,11 @@
 %global MRG_non_core 1
 
 # Release numbers
-%global qpid_release 0.7
-%global qpid_svnrev  946106
-%global store_svnrev 3975
+%global qpid_release 0.8
+%global qpid_svnrev  1037942
+%global store_svnrev 4411
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  4
+%global release_num  1
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -59,6 +59,7 @@
 %global client            %{MRG_core}
 %global server            %{MRG_core}
 %global qmf               %{MRG_core}
+%global python_qmf        %{MRG_core}
 %global ruby_qmf          %{MRG_core}
 %global client_devel      %{MRG_core}
 %global client_devel_docs %{MRG_core}
@@ -80,32 +81,30 @@
 %global pkg_name qpid-cpp
 
 Name:           %{name}
-Version:        %{qpid_release}.%{qpid_svnrev}
+Version:        %{qpid_release}
 Release:        %{release_num}%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
 URL:            http://qpid.apache.org
-Source0:        %{name}-%{version}.tar.gz
+Source0:        qpid-%{version}.tar.gz
 Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 %if ! %{rhel_4}
 Source2:        qpidd.pp
 %endif
 
+Patch0:         bootstrap.patch
+Patch1:         store-4411.patch
+
 %if %{fedora}
-#Patch0:         so_number.patch
-Patch0:         boost_system.patch
-Patch1:         swig.patch
+Patch2:         fedora.patch
 %endif
 
 %if %{rhel_4}
-Patch0:         RHEL4_SASL_Conf.patch
-Patch1:         qpidd.patch
-Patch2:         bz530364-rhel4.patch
+Patch3:         RHEL4_SASL_Conf.patch
+Patch4:         qpidd.patch
+Patch5:         bz530364-rhel4.patch
 %endif
-
-Patch5:         mrg_1.3.x.patch
-Patch6:         store_1.3.x.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -179,9 +178,10 @@ the AMQP protocol.
 
 %files -n %{pkg_name}-client
 %defattr(-,root,root,-)
-%doc cpp/LICENSE cpp/NOTICE cpp/README cpp/INSTALL cpp/RELEASE_NOTES cpp/DESIGN
+%doc cpp/LICENSE cpp/NOTICE cpp/README.txt cpp/INSTALL cpp/RELEASE_NOTES cpp/DESIGN
 %_libdir/libqpidcommon.so.*
 %_libdir/libqpidclient.so.*
+%_libdir/libqpidtypes.so.*
 %_libdir/libqpidmessaging.so.*
 %dir %_libdir/qpid
 %dir %_libdir/qpid/client
@@ -234,6 +234,7 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %_includedir/qmf
 %_libdir/libqpidcommon.so
 %_libdir/libqpidclient.so
+%_libdir/libqpidtypes.so
 %_libdir/libqpidmessaging.so
 %if ! %{rhel_4}
 %_datadir/qpidc/examples/messaging
@@ -388,11 +389,12 @@ Group: System Environment/Daemons
 Requires: %{pkg_name}-client = %version-%release
 
 %description -n qmf
-An extensible managememt framework layered on QPID messaging.
+An extensible management framework layered on QPID messaging.
 
 %files -n qmf
 %defattr(-,root,root,-)
 %_libdir/libqmf.so.*
+%_libdir/libqmf2.so.*
 %_libdir/libqmfengine.so.*
 %_libdir/libqmfconsole.so.*
 
@@ -421,10 +423,31 @@ components.
 %files -n qmf-devel
 %defattr(-,root,root,-)
 %_libdir/libqmf.so
+%_libdir/libqmf2.so
 %_libdir/libqmfengine.so
 %_libdir/libqmfconsole.so
 %_bindir/qmf-gen
 %{python_sitelib}/qmfgen
+
+%endif
+
+# === Package: python-qmf ===
+
+%if %{python_qmf} && ! %{rhel_4}
+
+%package -n python-qmf
+Summary: The QPID Management Framework bindings for python
+Group: System Environment/Libraries
+Requires: %{pkg_name}-client = %version-%release
+
+%description -n python-qmf
+An extensible management framework layered on QPID messaging, bindings
+for python.
+
+%files -n python-qmf
+%defattr(-,root,root,-)
+%{python_sitelib}/cqmf2.py*
+%{python_sitelib}/qmf2.py*
 
 %endif
 
@@ -438,13 +461,16 @@ Group: System Environment/Libraries
 Requires: %{pkg_name}-client = %version-%release
 
 %description -n ruby-qmf
-An extensible managememt framework layered on QPID messaging, bindings
+An extensible management framework layered on QPID messaging, bindings
 for ruby.
 
 %files -n ruby-qmf
 %defattr(-,root,root,-)
 %{ruby_sitelib}/qmf.rb
+%{ruby_sitelib}/qmf2.rb
 %{ruby_sitearch}/qmfengine.so
+%{ruby_sitearch}/cqpid.so
+%{ruby_sitearch}/cqmf2.so
 
 %endif
 
@@ -607,7 +633,7 @@ usermod -g ais -G root qpidd
 Summary: Red Hat persistence extension to the Qpid messaging system
 Group: System Environment/Libraries
 License: LGPL 2.1+
-Requires: %{pkg_name}-server = %{qpid_release}.%{qpid_svnrev}
+Requires: %{pkg_name}-server = %{qpid_release}
 Requires: db4
 Requires: libaio
 Obsoletes: rhm
@@ -658,8 +684,9 @@ to receive at all.
 # ===
 
 %prep
-%setup -q -n %{name}-%{version}
-%setup -q -T -D -b 1 -n %{name}-%{version}
+%setup -q -n qpid-%{version}
+%setup -q -T -D -b 1 -n qpid-%{version}
+
 %if %{rhel_4}
 # set up boost for rhel-4
 pushd ./cpp/boost-1.32-support
@@ -670,23 +697,20 @@ make apply
 popd
 
 # apply rhel-4 patches
-%patch0
-%patch1
-%patch2
-
+%patch3
+%patch4
+%patch5
 %endif
+
+%patch0
 
 %if %{fedora}
-%patch0
-%patch1
+%patch2
 %endif
-
-# apply qpid patch
-%patch5 -p2
 
 # apply store patch
 pushd ../store-%{qpid_release}.%{store_svnrev}
-%patch6 -p1
+%patch1
 popd
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
@@ -731,6 +755,19 @@ cat run_failover_soak.orig | sed -e "s#^src_root=..#src_root=/usr/sbin#" \
 popd
 popd
 
+%if %{fedora}
+pushd python
+./setup.py build
+popd
+pushd tools
+./setup.py build
+popd
+pushd extras/qmf
+./setup.py build
+popd
+%endif
+
+
 # Store
 pushd ../store-%{qpid_release}.%{store_svnrev}
 %if %{rhel_4}
@@ -739,15 +776,16 @@ export CXXFLAGS="%{optflags} -DNDEBUG -I/usr/include/qpid-boost"
 export CXXFLAGS="%{optflags} -DNDEBUG" 
 %endif
 ./bootstrap
-%configure --disable-static --disable-rpath --disable-dependency-tracking --with-qpid-checkout=%{_builddir}/%{name}-%{version}
+%configure --disable-static --disable-rpath --disable-dependency-tracking --with-qpid-checkout=%{_builddir}/qpid-%{version}
 make
 popd
 
 %install
 rm -rf %{buildroot}
 mkdir -p -m0755 %{buildroot}/%_bindir
-pushd %{_builddir}/%{name}-%{version}/cpp
+pushd %{_builddir}/qpid-%{version}/cpp
 make install DESTDIR=%{buildroot}
+
 install -Dp -m0755 etc/qpidd %{buildroot}%{_initrddir}/qpidd
 install -d -m0755 %{buildroot}%{_localstatedir}/lib/qpidd
 install -d -m0755 %{buildroot}%_libdir/qpidd
@@ -801,23 +839,25 @@ rm -rf %{buildroot}%_datadir/qpidc/examples/request-response
 rm -rf %{buildroot}%_datadir/qpidc/examples/tradedemo
 rm -rf %{buildroot}%_datadir/qpidc/examples/xml-exchange
 
-
 %if ! %{rhel_4}
 install -d %{buildroot}%{_datadir}/selinux/packages
-install -m 644 %{_builddir}/%{name}-%{version}/selinux/qpidd.pp %{buildroot}%{_datadir}/selinux/packages
+install -m 644 %{_builddir}/qpid-%{version}/selinux/qpidd.pp %{buildroot}%{_datadir}/selinux/packages
 %if %{ruby_qmf}
 install -d %{buildroot}%{ruby_sitelib}
 install -d %{buildroot}%{ruby_sitearch}
-install -pm 644 %{_builddir}/%{name}-%{version}/cpp/bindings/qmf/ruby/qmf.rb %{buildroot}%{ruby_sitelib}
-install -pm 755 %{_builddir}/%{name}-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengine.so %{buildroot}%{ruby_sitearch}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/qmf.rb %{buildroot}%{ruby_sitelib}
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengine.so %{buildroot}%{ruby_sitearch}
 %endif
 %endif
 
 rm -f %{buildroot}%_libdir/_*
+rm -f %{buildroot}%_libdir/pkgconfig/qpid.pc
 rm -fr %{buildroot}%_libdir/qpid/tests
 rm -fr %{buildroot}%_libexecdir/qpid/tests
 %if ! %{rhel_4}
 rm -f %{buildroot}%{ruby_sitearch}/qmfengine.la
+rm -f %{buildroot}%{ruby_sitearch}/cqpid.la
+rm -f %{buildroot}%{ruby_sitearch}/cqmf2.la
 %endif
 popd
 
@@ -944,6 +984,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Jan 10 2011 Nuno Santos <nsantos@redhat.com> - 0.8-1
+- Rebased to sync with upstream's official 0.8 release, based on svn rev 1037942
+
 * Mon Nov 29 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-4
 - BZ656680 - Update Spec File to use ghost macro on files in /var/run
 
