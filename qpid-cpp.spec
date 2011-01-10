@@ -65,8 +65,13 @@
 %global client_devel_docs %{MRG_core}
 %global server_devel      %{MRG_core}
 %global qmf_devel         %{MRG_core}
+%ifnarch s390 s390x
 %global client_rdma       %{MRG_non_core}
 %global server_rdma       %{MRG_non_core}
+%else
+%global client_rdma       0
+%global server_rdma       0
+%endif
 %global client_ssl        %{MRG_non_core}
 %global server_ssl        %{MRG_non_core}
 %global server_xml        %{MRG_non_core}
@@ -108,7 +113,10 @@ Patch5:         bz530364-rhel4.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
+# limit the architectures only in RHEL
+%if 0%{?rhel}
 ExclusiveArch:  i386 i686 x86_64
+%endif
 #Vendor:         Red Hat, Inc.
 
 BuildRequires: boost-devel
@@ -124,9 +132,11 @@ BuildRequires: cyrus-sasl-devel
 BuildRequires: cyrus-sasl-lib
 %endif
 BuildRequires: cyrus-sasl
+%if %{client_rdma} || %{server_rdma}
 BuildRequires: libibverbs-devel
 %if ! %{rhel_4}
 BuildRequires: librdmacm-devel
+%endif
 %endif
 BuildRequires: nss-devel
 BuildRequires: nspr-devel
@@ -986,6 +996,10 @@ rm -rf %{buildroot}
 %changelog
 * Mon Jan 10 2011 Nuno Santos <nsantos@redhat.com> - 0.8-1
 - Rebased to sync with upstream's official 0.8 release, based on svn rev 1037942
+
+* Tue Dec 21 2010 Dan Horák <dan[at]danny.cz> - 0.7.946106-4.1
+- don't build with InfiniBand support on s390(x)
+- don't limit architectures in Fedora
 
 * Mon Nov 29 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-4
 - BZ656680 - Update Spec File to use ghost macro on files in /var/run
