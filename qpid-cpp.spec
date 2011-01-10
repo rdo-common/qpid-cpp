@@ -198,6 +198,12 @@ the AMQP protocol.
 %dir %_sysconfdir/qpid
 %config(noreplace) %_sysconfdir/qpid/qpidc.conf
 
+%post -n %{pkg_name}-client
+/sbin/ldconfig
+
+%postun -n %{pkg_name}-client
+/sbin/ldconfig
+
 %endif
 
 # === Package: qpid-cpp-client-devel ===
@@ -256,6 +262,12 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %_bindir/qpid-latency-test
 %_bindir/qpid-client-test
 %_bindir/qpid-txtest
+
+%post -n %{pkg_name}-client-devel
+/sbin/ldconfig
+
+%postun -n %{pkg_name}-client-devel
+/sbin/ldconfig
 
 %endif
 
@@ -387,6 +399,12 @@ Qpid broker daemon.
 %_libdir/libqpidbroker.so
 %_includedir/qpid/broker
 
+%post -n %{pkg_name}-server-devel
+/sbin/ldconfig
+
+%postun -n %{pkg_name}-server-devel
+/sbin/ldconfig
+
 %endif
 
 # === Package: qmf ===
@@ -439,6 +457,12 @@ components.
 %_bindir/qmf-gen
 %{python_sitelib}/qmfgen
 
+%post -n qmf-devel
+/sbin/ldconfig
+
+%postun -n qmf-devel
+/sbin/ldconfig
+
 %endif
 
 # === Package: python-qmf ===
@@ -448,7 +472,7 @@ components.
 %package -n python-qmf
 Summary: The QPID Management Framework bindings for python
 Group: System Environment/Libraries
-Requires: %{pkg_name}-client = %version-%release
+Requires: qmf = %version-%release
 
 %description -n python-qmf
 An extensible management framework layered on QPID messaging, bindings
@@ -456,8 +480,16 @@ for python.
 
 %files -n python-qmf
 %defattr(-,root,root,-)
+%{python_sitelib}/cqpid.so
+%{python_sitelib}/_cqpid.py
 %{python_sitelib}/cqmf2.py*
 %{python_sitelib}/qmf2.py*
+
+%post -n python-qmf
+/sbin/ldconfig
+
+%postun -n python-qmf
+/sbin/ldconfig
 
 %endif
 
@@ -468,7 +500,7 @@ for python.
 %package -n ruby-qmf
 Summary: The QPID Management Framework bindings for ruby
 Group: System Environment/Libraries
-Requires: %{pkg_name}-client = %version-%release
+Requires: qmf = %version-%release
 
 %description -n ruby-qmf
 An extensible management framework layered on QPID messaging, bindings
@@ -481,6 +513,12 @@ for ruby.
 %{ruby_sitearch}/qmfengine.so
 %{ruby_sitearch}/cqpid.so
 %{ruby_sitearch}/cqmf2.so
+
+%post -n ruby-qmf
+/sbin/ldconfig
+
+%postun -n ruby-qmf
+/sbin/ldconfig
 
 %endif
 
@@ -531,6 +569,12 @@ transport for AMQP messaging.
 %defattr(-,root,root,-)
 %_libdir/qpid/daemon/rdma.so
 
+%post -n %{pkg_name}-server-rdma
+/sbin/ldconfig
+
+%postun -n %{pkg_name}-server-rdma
+/sbin/ldconfig
+
 %endif
 
 # === Package: qpid-cpp-client-ssl ===
@@ -579,6 +623,12 @@ messaging.
 %defattr(-,root,root,-)
 %_libdir/qpid/daemon/ssl.so
 
+%post -n %{pkg_name}-server-ssl
+/sbin/ldconfig
+
+%postun -n %{pkg_name}-server-ssl
+/sbin/ldconfig
+
 %endif
 
 # === Package: qpid-cpp-server-xml ===
@@ -600,6 +650,12 @@ messages.
 %files -n %{pkg_name}-server-xml
 %defattr(-,root,root,-)
 %_libdir/qpid/daemon/xml.so
+
+%post -n %{pkg_name}-server-xml
+/sbin/ldconfig
+
+%postun -n %{pkg_name}-server-xml
+/sbin/ldconfig
 
 %endif
 
@@ -626,12 +682,24 @@ A Qpid daemon plugin enabling broker clustering using openais
 %_libexecdir/qpid/qpidd_watchdog
 
 
-%if %{rhel_5}
 %post -n %{pkg_name}-server-cluster
+%if %{rhel_5}
 # Make the qpidd user a member of the root group, and also make
 # qpidd's primary group == ais.
 usermod -g ais -G root qpidd
+%else
+# [RHEL-6, Fedora] corosync: Set up corosync permissions for user qpidd
+cat > /etc/corosync/uidgid.d/qpidd <<EOF
+uidgid {
+        uid: qpidd
+        gid: qpidd
+}
+EOF
 %endif
+/sbin/ldconfig
+
+%postun -n %{pkg_name}-server-cluster
+/sbin/ldconfig
 
 %endif
 
@@ -662,8 +730,13 @@ with Berkeley DB.
 %_libexecdir/qpid/janal.py*
 %_libexecdir/qpid/resize
 %_libexecdir/qpid/store_chk
-
 %attr(0775,qpidd,qpidd) %dir %_localstatedir/rhm
+
+%post -n %{pkg_name}-server-store
+/sbin/ldconfig
+
+%postun -n %{pkg_name}-server-store
+/sbin/ldconfig
 
 %endif
 
@@ -852,12 +925,29 @@ rm -rf %{buildroot}%_datadir/qpidc/examples/xml-exchange
 %if ! %{rhel_4}
 install -d %{buildroot}%{_datadir}/selinux/packages
 install -m 644 %{_builddir}/qpid-%{version}/selinux/qpidd.pp %{buildroot}%{_datadir}/selinux/packages
+
+%if %{python_qmf}
+install -d %{buildroot}%{python_sitelib}/qpid
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitelib}/qpid
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/.libs/cqpid.so %{buildroot}%{python_sitelib}/qpid
+install -d %{buildroot}%{python_sitelib}/qmf
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/*.py %{buildroot}%{python_sitelib}/qmf
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_qmfengine.so %{buildroot}%{python_sitelib}/qmf
+install -d %{buildroot}%{python_sitelib}/qmf2
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/*.py %{buildroot}%{python_sitelib}/qmf2
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_cqmf2.so %{buildroot}%{python_sitelib}/qmf2
+%endif
+
 %if %{ruby_qmf}
 install -d %{buildroot}%{ruby_sitelib}
 install -d %{buildroot}%{ruby_sitearch}
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/qmf.rb %{buildroot}%{ruby_sitelib}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/qmf2.rb %{buildroot}%{ruby_sitelib}
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/ruby/.libs/cqpid.so %{buildroot}%{ruby_sitearch}
 install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengine.so %{buildroot}%{ruby_sitearch}
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/cqmf2.so %{buildroot}%{ruby_sitearch}
 %endif
+
 %endif
 
 rm -f %{buildroot}%_libdir/_*
@@ -865,9 +955,7 @@ rm -f %{buildroot}%_libdir/pkgconfig/qpid.pc
 rm -fr %{buildroot}%_libdir/qpid/tests
 rm -fr %{buildroot}%_libexecdir/qpid/tests
 %if ! %{rhel_4}
-rm -f %{buildroot}%{ruby_sitearch}/qmfengine.la
-rm -f %{buildroot}%{ruby_sitearch}/cqpid.la
-rm -f %{buildroot}%{ruby_sitearch}/cqmf2.la
+rm -f %{buildroot}%{ruby_sitearch}/*.la
 %endif
 popd
 
