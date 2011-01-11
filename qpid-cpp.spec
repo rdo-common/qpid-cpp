@@ -851,20 +851,20 @@ popd
 popd
 
 %if %{fedora}
-pushd python
+pushd ../python
 ./setup.py build
 popd
-pushd tools
+pushd ../tools
 ./setup.py build
 popd
-pushd extras/qmf
+pushd ../extras/qmf
 ./setup.py build
 popd
 %endif
 
 
 # Store
-pushd ../store-%{qpid_release}.%{store_svnrev}
+pushd ../../store-%{qpid_release}.%{store_svnrev}
 %if %{rhel_4}
 export CXXFLAGS="%{optflags} -DNDEBUG -I/usr/include/qpid-boost" 
 %else
