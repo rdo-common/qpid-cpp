@@ -79,8 +79,10 @@
 %global server_store      %{MRG_non_core}
 %if %{fedora}
 %global rh_tests          0
+%global qpid_tools        1
 %else
 %global rh_tests          %{MRG_non_core}
+%global qpid_tools        0
 %endif
 
 %global name     qpid-cpp
@@ -772,7 +774,39 @@ to receive at all.
 
 %endif
 
+# === Package: qpid-tools ===
+
+%if %{qpid_tools}
+
+%package -n qpid-tools
+Summary:   Management and diagnostic tools for Apache Qpid
+Group:     System Environment/Tools
+Requires:  python-qpid >= 0.8
+Requires:  python-qmf = %{version}
+BuildArch: noarch
+
+%description -n qpid-tools
+Management and diagnostic tools for Apache Qpid brokers and clients.
+
+%files -n qpid-tools
+%defattr(-,root,root,-)
+%{_bindir}/qpid-cluster
+%{_bindir}/qpid-cluster-store
+%{_bindir}/qpid-config
+%{_bindir}/qpid-printevents
+%{_bindir}/qpid-queue-stats
+%{_bindir}/qpid-route
+%{_bindir}/qpid-stat
+%{_bindir}/qpid-tool
+%doc LICENSE NOTICE
+%if "%{python_version}" >= "2.6"
+%{python_sitelib}/qpid_tools-*.egg-info
+%endif
+
+%endif
+
 # ===
+
 
 %prep
 %setup -q -n qpid-%{version}
@@ -862,7 +896,6 @@ pushd ../extras/qmf
 popd
 %endif
 
-
 # Store
 pushd ../../store-%{qpid_release}.%{store_svnrev}
 %if %{rhel_4}
@@ -913,6 +946,9 @@ pushd docs/api
 make html
 popd
 
+pushd ../tools
+./setup.py install --skip-build --root $RPM_BUILD_ROOT
+popd
 
 # remove things we don't want to package
 rm -f %{buildroot}%_libdir/*.a
