@@ -798,6 +798,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %{_bindir}/qpid-route
 %{_bindir}/qpid-stat
 %{_bindir}/qpid-tool
+%{_bindir}/qmf-tool
 %doc LICENSE NOTICE
 %if "%{python_version}" >= "2.6"
 %{python_sitelib}/qpid_tools-*.egg-info

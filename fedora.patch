@@ -267,6 +267,18 @@ Index: cpp/src/qmf/AgentSubscription.cpp
 +    return true;
 +}
 +
+Index: cpp/src/qmf/DataAddr.cpp
+===================================================================
+--- cpp/src/qmf/DataAddr.cpp	(revision 1056407)
++++ cpp/src/qmf/DataAddr.cpp	(working copy)
+@@ -38,6 +38,7 @@
+ bool DataAddr::operator==(const DataAddr& o) { return *impl == *o.impl; }
+ bool DataAddr::operator<(const DataAddr& o) { return *impl < *o.impl; }
+ 
++DataAddr::DataAddr(const qpid::types::Variant::Map& m) { PI::ctor(*this, new DataAddrImpl(m)); }
+ DataAddr::DataAddr(const string& n, const string& a, uint32_t e) { PI::ctor(*this, new DataAddrImpl(n, a, e)); }
+ const string& DataAddr::getName() const { return impl->getName(); }
+ const string& DataAddr::getAgentName() const { return impl->getAgentName(); }
 Index: cpp/src/qmf/SubscriptionImpl.h
 ===================================================================
 --- cpp/src/qmf/SubscriptionImpl.h	(revision 0)
@@ -439,6 +451,47 @@ Index: cpp/src/qmf/SchemaImpl.h
      };
  
      struct SchemaImplAccess
+Index: cpp/src/qmf/DataAddrImpl.h
+===================================================================
+--- cpp/src/qmf/DataAddrImpl.h	(revision 1056407)
++++ cpp/src/qmf/DataAddrImpl.h	(working copy)
+@@ -32,7 +32,6 @@
+         //
+         // Impl-only methods
+         //
+-        DataAddrImpl(const qpid::types::Variant::Map&);
+         void setName(const std::string& n) { name = n; }
+         void setAgent(const std::string& n, uint32_t e=0) { agentName = n; agentEpoch = e; }
+ 
+@@ -41,6 +40,7 @@
+         //
+         bool operator==(const DataAddrImpl&);
+         bool operator<(const DataAddrImpl&);
++        DataAddrImpl(const qpid::types::Variant::Map&);
+         DataAddrImpl(const std::string& _name, const std::string& _agentName, uint32_t _agentEpoch=0) :
+             agentName(_agentName), name(_name), agentEpoch(_agentEpoch) {}
+         const std::string& getName() const { return name; }
+Index: cpp/src/qmf/AgentEvent.cpp
+===================================================================
+--- cpp/src/qmf/AgentEvent.cpp	(revision 1056407)
++++ cpp/src/qmf/AgentEvent.cpp	(working copy)
+@@ -21,6 +21,7 @@
+ 
+ #include "qmf/AgentEventImpl.h"
+ #include "qmf/PrivateImplRef.h"
++#include "qmf/SchemaImpl.h"
+ 
+ using namespace std;
+ using namespace qmf;
+@@ -64,6 +65,8 @@
+ 
+ void AgentEventImpl::addReturnArgument(const string& key, const Variant& val, const string& subtype)
+ {
++    if (schema.isValid() && !SchemaImplAccess::get(schema).isValidMethodOutArg(methodName, key, val))
++        throw QmfException("Output argument is unknown or the type is incompatible");
+     outArguments[key] = val;
+     if (!subtype.empty())
+         outArgumentSubtypes[key] = subtype;
 Index: cpp/src/qmf/AgentSession.cpp
 ===================================================================
 --- cpp/src/qmf/AgentSession.cpp	(revision 1056407)
@@ -619,7 +672,7 @@ Index: cpp/src/qmf/AgentSession.cpp
      iter = content.find("_arguments");
      if (iter != content.end())
          eventImpl->setArguments(iter->second.asMap());
-@@ -626,6 +639,29 @@
+@@ -626,6 +639,32 @@
      if (iter != content.end())
          eventImpl->setArgumentSubtypes(iter->second.asMap());
  
@@ -634,22 +687,25 @@ Index: cpp/src/qmf/AgentSession.cpp
 +            return;
 +        }
 +
-+        if (DataImplAccess::get(iter->second).getSchema().isValid())
++        const Schema& schema(DataImplAccess::get(iter->second).getSchema());
++        if (schema.isValid()) {
++            eventImpl->setSchema(schema);
 +            for (Variant::Map::const_iterator aIter = eventImpl->getArguments().begin();
 +                 aIter != eventImpl->getArguments().end(); aIter++) {
 +                const Schema& schema(DataImplAccess::get(iter->second).getSchema());
 +                if (!SchemaImplAccess::get(schema).isValidMethodInArg(eventImpl->getMethodName(), aIter->first, aIter->second)) {
-+                AgentEvent event(eventImpl.release());
-+                raiseException(event, "Invalid argument: " + aIter->first);
-+                return;
++                    AgentEvent event(eventImpl.release());
++                    raiseException(event, "Invalid argument: " + aIter->first);
++                    return;
 +                }
 +            }
++        }
 +    }
 +
      enqueueEvent(AgentEvent(eventImpl.release()));
  }
  
-@@ -668,19 +704,19 @@
+@@ -668,19 +707,19 @@
      Variant::Map map;
      Variant::Map& headers(msg.getProperties());
  
@@ -675,7 +731,7 @@ Index: cpp/src/qmf/AgentSession.cpp
              iter = schemata.find(query.getSchemaId());
              if (iter != schemata.end())
                  content.push_back(SchemaImplAccess::get(iter->second).asMap());
-@@ -698,9 +734,7 @@
+@@ -698,9 +737,7 @@
  
      msg.setCorrelationId(eventImpl.getCorrelationId());
      encode(content, msg);
@@ -686,7 +742,7 @@ Index: cpp/src/qmf/AgentSession.cpp
  
      QPID_LOG(trace, "SENT QueryResponse(Schema) to=" << eventImpl.getReplyTo());
  }
-@@ -744,13 +778,11 @@
+@@ -744,13 +781,11 @@
      Message reply;
      Variant::Map& headers(reply.getProperties());
  
@@ -702,7 +758,7 @@ Index: cpp/src/qmf/AgentSession.cpp
  }
  
  
-@@ -759,12 +791,12 @@
+@@ -759,12 +794,12 @@
      const Variant::Map& properties(msg.getProperties());
      Variant::Map::const_iterator iter;
  
@@ -718,7 +774,7 @@ Index: cpp/src/qmf/AgentSession.cpp
          if (iter == properties.end()) {
              QPID_LOG(trace, "Message received with no 'qmf.opcode' header");
              return;
-@@ -776,7 +808,7 @@
+@@ -776,7 +811,7 @@
              Variant::List content;
              decode(msg, content);
  
@@ -727,7 +783,7 @@ Index: cpp/src/qmf/AgentSession.cpp
              else {
                  QPID_LOG(trace, "Unexpected QMFv2 opcode with 'amqp/list' content: " << opcode);
              }
-@@ -785,8 +817,8 @@
+@@ -785,8 +820,8 @@
              Variant::Map content;
              decode(msg, content);
  
@@ -738,7 +794,7 @@ Index: cpp/src/qmf/AgentSession.cpp
              else {
                  QPID_LOG(trace, "Unexpected QMFv2 opcode with 'amqp/map' content: " << opcode);
              }
-@@ -835,17 +867,17 @@
+@@ -835,17 +870,17 @@
          }
      }
  
@@ -764,7 +820,7 @@ Index: cpp/src/qmf/AgentSession.cpp
  
      encode(map, msg);
      topicSender.send(msg);
-@@ -853,19 +885,36 @@
+@@ -853,19 +888,36 @@
  }
  
  
@@ -807,7 +863,7 @@ Index: cpp/src/qmf/AgentSession.cpp
  
      Variant::List body;
      AgentEventImpl& eventImpl(AgentEventImplAccess::get(event));
-@@ -878,9 +927,7 @@
+@@ -878,9 +930,7 @@
  
      msg.setCorrelationId(eventImpl.getCorrelationId());
      encode(body, msg);
@@ -818,7 +874,7 @@ Index: cpp/src/qmf/AgentSession.cpp
  
      QPID_LOG(trace, "SENT QueryResponse to=" << eventImpl.getReplyTo());
  }
-@@ -894,6 +941,7 @@
+@@ -894,6 +944,7 @@
      //
      if (seconds == lastVisit)
          return;
@@ -1328,6 +1384,34 @@ Index: cpp/src/qmf/Subscription.cpp
 +{
 +    return *item.impl;
 +}
+Index: cpp/src/qmf/AgentEventImpl.h
+===================================================================
+--- cpp/src/qmf/AgentEventImpl.h	(revision 1056407)
++++ cpp/src/qmf/AgentEventImpl.h	(working copy)
+@@ -29,6 +29,7 @@
+ #include "qmf/Query.h"
+ #include "qmf/DataAddr.h"
+ #include "qmf/Data.h"
++#include "qmf/Schema.h"
+ #include <queue>
+ 
+ namespace qmf {
+@@ -45,6 +46,7 @@
+         void setArguments(const qpid::types::Variant::Map& a) { arguments = a; }
+         void setArgumentSubtypes(const qpid::types::Variant::Map& a) { argumentSubtypes = a; }
+         void setReplyTo(const qpid::messaging::Address& r) { replyTo = r; }
++        void setSchema(const Schema& s) { schema = s; }
+         const qpid::messaging::Address& getReplyTo() { return replyTo; }
+         void setCorrelationId(const std::string& c) { correlationId = c; }
+         const std::string& getCorrelationId() { return correlationId; }
+@@ -73,6 +75,7 @@
+         std::string correlationId;
+         Query query;
+         DataAddr dataAddr;
++        Schema schema;
+         std::string methodName;
+         qpid::types::Variant::Map arguments;
+         qpid::types::Variant::Map argumentSubtypes;
 Index: cpp/src/qmf/ConsoleSessionImpl.h
 ===================================================================
 --- cpp/src/qmf/ConsoleSessionImpl.h	(revision 1056407)
@@ -1381,6 +1465,15 @@ Index: cpp/src/qmf.mk
  
  libqmfengine_la_SOURCES =			\
    $(QMF_ENGINE_API)				\
+@@ -151,7 +158,7 @@
+ libqmf2_la_LIBADD = libqpidmessaging.la libqpidtypes.la
+ libqmfengine_la_LIBADD = libqpidclient.la
+ 
+-QMF_VERSION_INFO = 1:0:0
++QMF_VERSION_INFO = 2:0:0
+ QMF2_VERSION_INFO = 1:0:0
+ QMFENGINE_VERSION_INFO  = 1:1:0
+ 
 Index: cpp/src/qpid/agent/ManagementAgentImpl.h
 ===================================================================
 --- cpp/src/qpid/agent/ManagementAgentImpl.h	(revision 1056407)
@@ -1623,6 +1716,157 @@ Index: cpp/src/qpid/management/Manageable.cpp
 +    return true;
 +}
 +
+Index: cpp/bindings/swig_python_typemaps.i
+===================================================================
+--- cpp/bindings/swig_python_typemaps.i	(revision 1056407)
++++ cpp/bindings/swig_python_typemaps.i	(working copy)
+@@ -271,19 +271,27 @@
+     Py_INCREF($result);
+ }
+ 
+-%typemap(typecheck) qpid::types::Variant::Map& {
+-    $1 = PyDict_Check($input) ? 1 : 0;
+-}
+-
+ /*
+  * Variant types: C++ --> Python
+  */
++%typemap(out) qpid::types::Variant::Map {
++    $result = MapToPy(&$1);
++    if ($result)
++        Py_INCREF($result);
++}
++
+ %typemap(out) qpid::types::Variant::Map& {
+     $result = MapToPy($1);
+     if ($result)
+         Py_INCREF($result);
+ }
+ 
++%typemap(out) qpid::types::Variant::List {
++    $result = ListToPy(&$1);
++    if ($result)
++        Py_INCREF($result);
++}
++
+ %typemap(out) qpid::types::Variant::List& {
+     $result = ListToPy($1);
+     if ($result)
+@@ -314,6 +322,16 @@
+     PyToList($input, $1);
+ }
+ 
++%typemap(in) const qpid::types::Variant::Map const & {
++    $1 = new qpid::types::Variant::Map();
++    PyToMap($input, $1);
++}
++
++%typemap(in) const qpid::types::Variant::List const & {
++    $1 = new qpid::types::Variant::List();
++    PyToList($input, $1);
++}
++
+ %typemap(freearg) qpid::types::Variant& {
+     delete $1;
+ }
+@@ -334,7 +352,7 @@
+     $1 = PyDict_Check($input) ? 1 : 0;
+ }
+ 
+-%typemap(typecheck) qpid::types::Variant::List& {
++%typemap(typecheck)  qpid::types::Variant::List& {
+     $1 = PyList_Check($input) ? 1 : 0;
+ }
+ 
+@@ -348,6 +366,24 @@
+           PyBool_Check($input)) ? 1 : 0;
+ }
+ 
++%typemap(typecheck) const qpid::types::Variant::Map const & {
++    $1 = PyDict_Check($input) ? 1 : 0;
++}
++
++%typemap(typecheck) const qpid::types::Variant::List const & {
++    $1 = PyList_Check($input) ? 1 : 0;
++}
++
++%typemap(typecheck) const qpid::types::Variant const & {
++    $1 = (PyFloat_Check($input)  ||
++          PyString_Check($input) ||
++          PyInt_Check($input)    ||
++          PyLong_Check($input)   ||
++          PyDict_Check($input)   ||
++          PyList_Check($input)   ||
++          PyBool_Check($input)) ? 1 : 0;
++}
++
+ %typemap(typecheck) bool {
+     $1 = PyBool_Check($input) ? 1 : 0;
+ }
+Index: cpp/bindings/swig_ruby_typemaps.i
+===================================================================
+--- cpp/bindings/swig_ruby_typemaps.i	(revision 1056407)
++++ cpp/bindings/swig_ruby_typemaps.i	(working copy)
+@@ -237,10 +237,18 @@
+ /*
+  * Variant types: C++ --> Ruby
+  */
++%typemap(out) qpid::types::Variant::Map {
++    $result = MapToRb(&$1);
++}
++
+ %typemap(out) qpid::types::Variant::Map& {
+     $result = MapToRb($1);
+ }
+ 
++%typemap(out) qpid::types::Variant::List {
++    $result = ListToRb(&$1);
++}
++
+ %typemap(out) qpid::types::Variant::List& {
+     $result = ListToRb($1);
+ }
+@@ -267,6 +275,16 @@
+     RbToList($input, $1);
+ }
+ 
++%typemap(in) const qpid::types::Variant::Map const & {
++    $1 = new qpid::types::Variant::Map();
++    RbToMap($input, $1);
++}
++
++%typemap(in) const qpid::types::Variant::List const & {
++    $1 = new qpid::types::Variant::List();
++    RbToList($input, $1);
++}
++
+ %typemap(freearg) qpid::types::Variant& {
+     delete $1;
+ }
+@@ -300,6 +318,23 @@
+           TYPE($input) == T_FALSE) ? 1 : 0;
+ }
+ 
++%typemap(typecheck) qpid::types::Variant::Map const & {
++    $1 = (TYPE($input) == T_HASH) ? 1 : 0;
++}
++
++%typemap(typecheck) qpid::types::Variant::List const & {
++    $1 = (TYPE($input) == T_ARRAY) ? 1 : 0;
++}
++
++%typemap(typecheck) const qpid::types::Variant const & {
++    $1 = (TYPE($input) == T_FLOAT  ||
++          TYPE($input) == T_STRING ||
++          TYPE($input) == T_FIXNUM ||
++          TYPE($input) == T_BIGNUM ||
++          TYPE($input) == T_TRUE   ||
++          TYPE($input) == T_FALSE) ? 1 : 0;
++}
++
+ %typemap(typecheck) bool {
+     $1 = (TYPE($input) == T_TRUE ||
+           TYPE($input) == T_FALSE) ? 1 : 0;
 Index: cpp/bindings/qmf2/python/Makefile.am
 ===================================================================
 --- cpp/bindings/qmf2/python/Makefile.am	(revision 1056407)
@@ -1649,7 +1893,30 @@ Index: cpp/bindings/qmf2/python/qmf2.py
 ===================================================================
 --- cpp/bindings/qmf2/python/qmf2.py	(revision 1056407)
 +++ cpp/bindings/qmf2/python/qmf2.py	(working copy)
-@@ -385,10 +385,8 @@
+@@ -311,7 +311,7 @@
+     """
+     """
+     if q.__class__ == Query:
+-      q_arg = Query._impl
++      q_arg = q._impl
+     else:
+       q_arg = q
+     dur = cqpid.Duration(cqpid.Duration.SECOND.getMilliseconds() * timeout)
+@@ -366,10 +366,11 @@
+   """
+   """
+ 
+-  def __init__(self, *kwargs):
++  def __init__(self, arg1, arg2=None, arg3=None, *kwargs):
+     """
+     """
+-    pass
++    if arg1.__class__ == DataAddr:
++      self._impl = cqmf2.Query(arg1._impl)
+ 
+ #===================================================================================================
+ # DATA
+@@ -385,10 +386,8 @@
        self._impl = cqmf2.Data()
      elif arg.__class__ == cqmf2.Data:
        self._impl = arg
@@ -1661,7 +1928,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
      else:
        raise Exception("Unsupported initializer for Data")
      self._schema = None
-@@ -444,6 +442,7 @@
+@@ -444,6 +443,7 @@
      ## validate that we have the right number of arguments supplied, and marshall them
      ## into a map for transmission.
      ##
@@ -1669,7 +1936,33 @@ Index: cpp/bindings/qmf2/python/qmf2.py
      methods = self._schema.getMethods()
      for m in methods:
        if m.getName() == name:
-@@ -683,6 +682,11 @@
+@@ -519,8 +519,11 @@
+   """
+   """
+ 
+-  def __init__(self, impl):
+-    self._impl = impl
++  def __init__(self, arg):
++    if arg.__class__ == dict:
++      self._impl = cqmf2.DataAddr(arg)
++    else:
++      self._impl = arg
+ 
+   def __repr__(self):
+     return "%s:%s" % (self.getAgentName(), self.getName())
+@@ -530,6 +533,11 @@
+         self.getName() == other.getName() and \
+         self.getAgentEpoch() == other.getAgentEpoch()
+ 
++  def asMap(self):
++    """
++    """
++    return self._impl.asMap()
++
+   def getAgentName(self):
+     """
+     """
+@@ -683,6 +691,11 @@
      """
      return self._impl.getName()
  
@@ -1703,18 +1996,53 @@ Index: cpp/bindings/qmf2/ruby/qmf2.rb
      def register_schema(cls)    @impl.registerSchema(cls.impl) end
  
      def add_data(data, name="", persistent=:false)
-@@ -250,10 +250,8 @@
+@@ -233,8 +233,10 @@
+ 
+   class Query
+     attr_reader :impl
+-    def initialize
+-      @impl = nil
++    def initialize(arg1, arg2=nil, arg3=nil)
++      if arg1.class == Qmf2::DataAddr
++        @impl = Cqmf2::Query.new(arg1.impl)
++      end
+     end
+   end
+ 
+@@ -250,10 +252,8 @@
          @impl = Cqmf2::Data.new
        elsif arg.class == Cqmf2::Data
          @impl = arg
 -      elsif arg.class == SchemaId
--        @impl = Cqmf2::Data(arg.impl)
-       elsif arg.class == Schema
++      elsif arg.class == Schema
+         @impl = Cqmf2::Data(arg.impl)
+-      elsif arg.class == Schema
 -        @impl = Cqmf2::Data(arg.impl.getSchemaId)
-+        @impl = Cqmf2::Data(arg.impl)
        else
          raise "Unsupported initializer for Data"
        end
+@@ -392,14 +392,19 @@
+   class DataAddr
+     attr_reader :impl
+ 
+-    def initialize(impl)
+-      @impl = impl
++    def initialize(arg)
++      if arg.class == Hash
++        @impl = Cqmf2::DataAddr.new(arg)
++      else
++        @impl = arg
++      end
+     end
+ 
+     def ==(other)
+       return @impl == other.impl
+     end
+ 
++    def as_map()       @impl.asMap          end
+     def agent_name()   @impl.getAgentName   end
+     def name()         @impl.getName        end
+     def agent_epoch()  @impl.getAgentEpoch  end
 Index: cpp/bindings/qmf2/ruby/Makefile.am
 ===================================================================
 --- cpp/bindings/qmf2/ruby/Makefile.am	(revision 1056407)
@@ -1781,7 +2109,47 @@ Index: cpp/bindings/qmf2/examples/python/agent.py
      self.connection.close()
  
  
-@@ -141,10 +143,13 @@
+@@ -86,7 +88,15 @@
+           ex.details = args['details']
+           self.session.raiseException(handle, ex)
+ 
++      elif methodName == "create_child":
++        name = args['name']
++        child = Data(self.sch_child)
++        child.name = name
++        addr = self.session.addData(child, name)
++        handle.addReturnArgument("childAddr", addr.asMap())
++        self.session.methodSuccess(handle)
+ 
++
+   def setupSchema(self):
+     """
+     Create and register the schema for this agent.
+@@ -124,11 +134,23 @@
+     failMethod.addArgument(SchemaProperty("details", SCHEMA_DATA_MAP, direction=DIR_IN))
+     self.sch_control.addMethod(failMethod)
+ 
++    createMethod = SchemaMethod("create_child", desc="Create Child Object")
++    createMethod.addArgument(SchemaProperty("name", SCHEMA_DATA_STRING, direction=DIR_IN))
++    createMethod.addArgument(SchemaProperty("childAddr", SCHEMA_DATA_MAP, direction=DIR_OUT))
++    self.sch_control.addMethod(createMethod)
++
+     ##
++    ## Declare a child object
++    ##
++    self.sch_child = Schema(SCHEMA_TYPE_DATA, package, "child")
++    self.sch_child.addProperty(SchemaProperty("name", SCHEMA_DATA_STRING))
++
++    ##
+     ## Register our schemata with the agent session.
+     ##
+     self.session.registerSchema(self.sch_exception)
+     self.session.registerSchema(self.sch_control)
++    self.session.registerSchema(self.sch_child)
+ 
+ 
+   def populateData(self):
+@@ -141,10 +163,13 @@
      self.controlAddr = self.session.addData(self.control, "singleton")
  
  
@@ -1804,7 +2172,15 @@ Index: cpp/bindings/qmf2/examples/cpp/agent.cpp
 ===================================================================
 --- cpp/bindings/qmf2/examples/cpp/agent.cpp	(revision 1056407)
 +++ cpp/bindings/qmf2/examples/cpp/agent.cpp	(working copy)
-@@ -60,7 +60,7 @@
+@@ -48,6 +48,7 @@
+     AgentSession session;
+     Schema sch_exception;
+     Schema sch_control;
++    Schema sch_child;
+     Data control;
+     DataAddr controlAddr;
+ 
+@@ -60,7 +61,7 @@
      //
      // Create and open a messaging connection to a broker.
      //
@@ -1813,7 +2189,31 @@ Index: cpp/bindings/qmf2/examples/cpp/agent.cpp
      connection.open();
  
      //
-@@ -132,7 +132,7 @@
+@@ -120,11 +121,23 @@
+     failMethod.addArgument(SchemaProperty("details", SCHEMA_DATA_MAP, "{dir:IN}"));
+     sch_control.addMethod(failMethod);
+ 
++    SchemaMethod createMethod("create_child", "{desc:'Create Child Object'}");
++    createMethod.addArgument(SchemaProperty("name", SCHEMA_DATA_STRING, "{dir:IN}"));
++    createMethod.addArgument(SchemaProperty("childAddr", SCHEMA_DATA_MAP, "{dir:OUT}"));
++    sch_control.addMethod(createMethod);
++
+     //
++    // Declare the child class
++    //
++    sch_child = Schema(SCHEMA_TYPE_DATA, package, "child");
++    sch_child.addProperty(SchemaProperty("name", SCHEMA_DATA_STRING));
++
++    //
+     // Register our schemata with the agent session.
+     //
+     session.registerSchema(sch_exception);
+     session.registerSchema(sch_control);
++    session.registerSchema(sch_child);
+ }
+ 
+ void ExampleAgent::populateData()
+@@ -132,7 +145,7 @@
      //
      // Create a control object and give it to the agent session to manage.
      //
@@ -1822,7 +2222,7 @@ Index: cpp/bindings/qmf2/examples/cpp/agent.cpp
      control.setProperty("state", "OPERATIONAL");
      control.setProperty("methodCount", 0);
      controlAddr = session.addData(control, "singleton");
-@@ -178,7 +178,7 @@
+@@ -178,13 +191,22 @@
              if (event.getArguments()["useString"])
                  session.raiseException(event, event.getArguments()["stringVal"]);
              else {
@@ -1831,6 +2231,21 @@ Index: cpp/bindings/qmf2/examples/cpp/agent.cpp
                  ex.setProperty("whatHappened", "It Failed");
                  ex.setProperty("howBad", 75);
                  ex.setProperty("details", event.getArguments()["details"]);
+                 session.raiseException(event, ex);
+             }
+         }
++
++        if (name == "create_child") {
++            const string& name(event.getArguments()["name"]);
++            Data child(sch_child);
++            child.setProperty("name", name);
++            DataAddr addr(session.addData(child, name));
++            event.addReturnArgument("childAddr", addr.asMap());
++            session.methodSuccess(event);
++        }
+     }
+ 
+     return true;
 Index: cpp/bindings/qmf2/examples/cpp/Makefile.am
 ===================================================================
 --- cpp/bindings/qmf2/examples/cpp/Makefile.am	(revision 1056407)
@@ -1982,6 +2397,18 @@ Index: cpp/include/qmf/AgentSession.h
           * methodSuccess - Indicate the successful completion of a method call.
           */
          QMF_EXTERN void authAccept(AgentEvent&);
+Index: cpp/include/qmf/DataAddr.h
+===================================================================
+--- cpp/include/qmf/DataAddr.h	(revision 1056407)
++++ cpp/include/qmf/DataAddr.h	(working copy)
+@@ -44,6 +44,7 @@
+         QMF_EXTERN bool operator==(const DataAddr&);
+         QMF_EXTERN bool operator<(const DataAddr&);
+ 
++        QMF_EXTERN DataAddr(const qpid::types::Variant::Map&);
+         QMF_EXTERN DataAddr(const std::string& name, const std::string& agentName, uint32_t agentEpoch=0);
+         QMF_EXTERN const std::string& getName() const;
+         QMF_EXTERN const std::string& getAgentName() const;
 Index: cpp/include/qmf/ConsoleEvent.h
 ===================================================================
 --- cpp/include/qmf/ConsoleEvent.h	(revision 1056407)
@@ -3257,6 +3684,20 @@ ___________________________________________________________________
 Added: svn:executable
    + *
 
+Index: tools/setup.py
+===================================================================
+--- tools/setup.py	(revision 1056407)
++++ tools/setup.py	(working copy)
+@@ -23,7 +23,8 @@
+       version="0.8",
+       author="Apache Qpid",
+       author_email="dev@qpid.apache.org",
+-      scripts=["src/py/qpid-cluster",
++      scripts=["src/py/qmf-tool",
++               "src/py/qpid-cluster",
+                "src/py/qpid-cluster-store",
+                "src/py/qpid-config",
+                "src/py/qpid-printevents",
 Index: extras/qmf/src/py/qmf2/common.py
 ===================================================================
 --- extras/qmf/src/py/qmf2/common.py	(revision 1056407)
