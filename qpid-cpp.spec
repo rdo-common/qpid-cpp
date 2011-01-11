@@ -77,7 +77,11 @@
 %global server_xml        %{MRG_non_core}
 %global server_cluster    %{MRG_non_core}
 %global server_store      %{MRG_non_core}
+%if %{fedora}
+%global rh_tests          0
+%else
 %global rh_tests          %{MRG_non_core}
+%endif
 
 %global name     qpid-cpp
 # This overrides the package name - do not change this! It keeps all package
@@ -480,10 +484,14 @@ for python.
 
 %files -n python-qmf
 %defattr(-,root,root,-)
-%{python_sitelib}/cqpid.so
-%{python_sitelib}/_cqpid.py
-%{python_sitelib}/cqmf2.py*
+%{python_sitelib}/cqpid.py*
+%{python_sitelib}/_cqpid.so
+%{python_sitelib}/qmf.py*
+%{python_sitelib}/qmfengine.py*
+%{python_sitelib}/_qmfengine.so
 %{python_sitelib}/qmf2.py*
+%{python_sitelib}/cqmf2.py*
+%{python_sitelib}/_cqmf2.so
 
 %post -n python-qmf
 /sbin/ldconfig
@@ -927,15 +935,13 @@ install -d %{buildroot}%{_datadir}/selinux/packages
 install -m 644 %{_builddir}/qpid-%{version}/selinux/qpidd.pp %{buildroot}%{_datadir}/selinux/packages
 
 %if %{python_qmf}
-install -d %{buildroot}%{python_sitelib}/qpid
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitelib}/qpid
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/.libs/cqpid.so %{buildroot}%{python_sitelib}/qpid
-install -d %{buildroot}%{python_sitelib}/qmf
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/*.py %{buildroot}%{python_sitelib}/qmf
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_qmfengine.so %{buildroot}%{python_sitelib}/qmf
-install -d %{buildroot}%{python_sitelib}/qmf2
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/*.py %{buildroot}%{python_sitelib}/qmf2
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_cqmf2.so %{buildroot}%{python_sitelib}/qmf2
+install -d %{buildroot}%{python_sitelib}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitelib}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/.libs/_cqpid.so %{buildroot}%{python_sitelib}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/*.py %{buildroot}%{python_sitelib}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_qmfengine.so %{buildroot}%{python_sitelib}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/*.py %{buildroot}%{python_sitelib}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/.libs/_cqmf2.so %{buildroot}%{python_sitelib}
 %endif
 
 %if %{ruby_qmf}
@@ -945,7 +951,7 @@ install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/qmf.rb %{buil
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/qmf2.rb %{buildroot}%{ruby_sitelib}
 install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/ruby/.libs/cqpid.so %{buildroot}%{ruby_sitearch}
 install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengine.so %{buildroot}%{ruby_sitearch}
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/cqmf2.so %{buildroot}%{ruby_sitearch}
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/.libs/cqmf2.so %{buildroot}%{ruby_sitearch}
 %endif
 
 %endif
