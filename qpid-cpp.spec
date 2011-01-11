@@ -832,6 +832,8 @@ pushd src/tests
 for ptest in %{perftests}; do
   ECHO=echo make $ptest
 done
+
+%if %{rh_tests}
 # Make rh-qpid-test programs (RH internal)
 for rhtest in %{rh_qpid_tests_failover} %{rh_qpid_tests_clients}; do
         make $rhtest
@@ -844,6 +846,8 @@ cat run_failover_soak.orig | sed -e "s#^src_root=..#src_root=/usr/sbin#" \
                                  -e "s#^exec #cd /opt/rh-qpid/clients; exec #" > run_failover_soak
 
 popd
+%endif
+
 popd
 
 %if %{fedora}
@@ -891,6 +895,8 @@ pushd src/tests/
 for ptest in %{perftests}; do
   libtool --mode=install install -m755 $ptest %{buildroot}/%_bindir
 done
+
+%if %{rh_tests}
 # Install rh-qpid-test programs (RH internal)
 mkdir -p -m 0755 %{buildroot}/opt/rh-qpid/failover
 mkdir -p -m 0755 %{buildroot}/opt/rh-qpid/clients
@@ -900,6 +906,7 @@ done
 for rhtest in %{rh_qpid_tests_clients} ; do
         libtool --mode=install install -m 755 $rhtest %{buildroot}/opt/rh-qpid/clients/
 done
+%endif
 
 popd
 pushd docs/api
