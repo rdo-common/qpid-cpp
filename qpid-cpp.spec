@@ -26,7 +26,7 @@
 %global qpid_svnrev  1037942
 %global store_svnrev 4411
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  3
+%global release_num  4
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -307,11 +307,6 @@ Summary: An AMQP message broker daemon
 Group: System Environment/Daemons
 Requires: %{pkg_name}-client = %version-%release
 Requires: cyrus-sasl
-%if ! %{rhel_4}
-Requires(pre): selinux-policy-base
-Requires(post): /usr/sbin/semodule
-Requires(postun): /usr/sbin/semodule
-%endif
 Obsoletes: qpidd
 Obsoletes: qpidd-acl
 
@@ -363,11 +358,6 @@ if [ $1 -ge 1 ]; then
         /sbin/service qpidd condrestart >/dev/null 2>&1 || :
 fi
 /sbin/ldconfig
-%if ! %{rhel_4}
-if [ $1 = 0 ]; then
-	/usr/sbin/semodule -r qpidd
-fi
-%endif
 
 %endif
 
@@ -1115,6 +1105,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-4
+- BZ671520 - SELinux is preventing /usr/bin/updatedb from 'getattr' accesses on the directory /var/run/qpidd
+
 * Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-3
 - Updated qmf-related patch, includes previous size_t-related patch
 - New patch to deal with updated boost
