@@ -109,6 +109,7 @@ Patch1:         store-4411.patch
 
 %if %{fedora}
 Patch2:         fedora.patch
+Patch6:         boost_filesystem_v2.patch
 %endif
 
 %if %{rhel_4}
@@ -832,6 +833,7 @@ popd
 
 %if %{fedora}
 %patch2
+%patch6
 %endif
 
 # apply store patch
@@ -1134,6 +1136,7 @@ rm -rf %{buildroot}
 %changelog
 * Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-3
 - Updated qmf-related patch, includes previous size_t-related patch
+- New patch to deal with updated boost
 
 * Thu Jan 21 2011 Dan Horák <dan[at]danny.cz> - 0.8-2
 - fix build with different size_t - https://issues.apache.org/jira/browse/QPID-2996
