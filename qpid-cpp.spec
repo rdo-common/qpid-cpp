@@ -26,7 +26,7 @@
 %global qpid_svnrev  1037942
 %global store_svnrev 4411
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  2
+%global release_num  3
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -116,9 +116,6 @@ Patch3:         RHEL4_SASL_Conf.patch
 Patch4:         qpidd.patch
 Patch5:         bz530364-rhel4.patch
 %endif
-
-# https://issues.apache.org/jira/browse/QPID-2996 (resolved)
-Patch6:         qpid-0.8-size_t.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -842,9 +839,6 @@ pushd ../store-%{qpid_release}.%{store_svnrev}
 %patch1
 popd
 
-# fix build with different size_t - https://issues.apache.org/jira/browse/QPID-2996
-%patch6 -p1
-
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
 %global rh_qpid_tests_failover "failover_soak run_failover_soak"
@@ -1138,6 +1132,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-3
+- Updated qmf-related patch, includes previous size_t-related patch
+
 * Thu Jan 21 2011 Dan Horák <dan[at]danny.cz> - 0.8-2
 - fix build with different size_t - https://issues.apache.org/jira/browse/QPID-2996
 
