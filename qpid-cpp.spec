@@ -100,9 +100,6 @@ License:        ASL 2.0
 URL:            http://qpid.apache.org
 Source0:        qpid-%{version}.tar.gz
 Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
-%if ! %{rhel_4}
-Source2:        qpidd.pp
-%endif
 
 Patch0:         bootstrap.patch
 Patch1:         store-4411.patch
@@ -324,9 +321,6 @@ the open AMQP messaging protocol.
 
 %files -n %{pkg_name}-server
 %defattr(-,root,root,-)
-%if ! %{rhel_4}
-%_datadir/selinux/packages/qpidd.pp
-%endif
 %_libdir/libqpidbroker.so.*
 %_libdir/qpid/daemon/replicating_listener.so
 %_libdir/qpid/daemon/replication_exchange.so
@@ -356,9 +350,6 @@ exit 0
 # This adds the proper /etc/rc*.d links for the script
 /sbin/chkconfig --add qpidd
 /sbin/ldconfig
-%if ! %{rhel_4}
-/usr/sbin/semodule -i %_datadir/selinux/packages/qpidd.pp
-%endif
 
 %preun -n %{pkg_name}-server
 # Check that this is actual deinstallation, not just removing for upgrade.
@@ -847,11 +838,6 @@ popd
 
 %global rh_qpid_tests_clients "replaying_sender resuming_receiver declare_queues"
 
-%if ! %{rhel_4}
-install -d selinux
-install %{SOURCE2} selinux
-%endif
-
 %build
 pushd cpp
 ./bootstrap
@@ -977,8 +963,6 @@ rm -rf %{buildroot}%_datadir/qpidc/examples/tradedemo
 rm -rf %{buildroot}%_datadir/qpidc/examples/xml-exchange
 
 %if ! %{rhel_4}
-install -d %{buildroot}%{_datadir}/selinux/packages
-install -m 644 %{_builddir}/qpid-%{version}/selinux/qpidd.pp %{buildroot}%{_datadir}/selinux/packages
 
 %if %{python_qmf}
 install -d %{buildroot}%{python_sitelib}
@@ -1047,9 +1031,6 @@ rm -f  %{buildroot}%{ruby_sitearch}/qmfengine.so
 rm -f  %{buildroot}%_libexecdir/qpid/qpidd_watchdog
 rm -f  %{buildroot}%_sbindir/qpidd
 rm -f  %{buildroot}%_datadir/man/man1/qpidd.1
-%if ! %{rhel_4}
-rm -f  %{buildroot}%_datadir/selinux/packages/qpidd.pp
-%endif
 rm -f  %{buildroot}%_localstatedir/lib/qpidd/qpidd.sasldb
 # The following should be removed when -devel becomes part of non-core:
 rm -rf %{buildroot}%_includedir/qmf
@@ -1137,6 +1118,7 @@ rm -rf %{buildroot}
 * Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-3
 - Updated qmf-related patch, includes previous size_t-related patch
 - New patch to deal with updated boost
+- BZ665366 - qpidd post install is blowing away default SELinux policy
 
 * Thu Jan 21 2011 Dan Horák <dan[at]danny.cz> - 0.8-2
 - fix build with different size_t - https://issues.apache.org/jira/browse/QPID-2996

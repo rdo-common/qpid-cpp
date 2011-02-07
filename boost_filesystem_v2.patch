@@ -1,4 +1,4 @@
---- cpp/src/Makefile.am~	2010-10-27 14:01:27.000000000 -0400
+--- cpp/src/Makefile.am	2010-10-27 14:01:27.000000000 -0400
 +++ cpp/src/Makefile.am	2011-02-07 15:35:30.962680422 -0500
 @@ -122,6 +122,8 @@
  tmoduledir = $(libdir)/qpid/tests
