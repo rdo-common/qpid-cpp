@@ -93,7 +93,7 @@
 
 Name:           %{name}
 Version:        %{qpid_release}
-Release:        %{release_num}%{?dist}
+Release:        %{release_num}%{?dist}.1
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
@@ -1105,6 +1105,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8-4.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-4
 - BZ671520 - SELinux is preventing /usr/bin/updatedb from 'getattr' accesses on the directory /var/run/qpidd
 
