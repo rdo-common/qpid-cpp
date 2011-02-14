@@ -4319,6 +4319,75 @@ Index: cpp/bindings/qmf2/examples/cpp/agent.cpp
      }
  
      return true;
+Index: cpp/bindings/qmf2/examples/cpp/print_events.cpp
+===================================================================
+--- cpp/bindings/qmf2/examples/cpp/print_events.cpp	(revision 0)
++++ cpp/bindings/qmf2/examples/cpp/print_events.cpp	(revision 0)
+@@ -0,0 +1,64 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements.  See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership.  The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License.  You may obtain a copy of the License at
++ * 
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ * 
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied.  See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++#include <qpid/messaging/Connection.h>
++#include <qpid/messaging/Duration.h>
++#include <qmf/ConsoleSession.h>
++#include <qmf/ConsoleEvent.h>
++#include <qmf/Data.h>
++#include <qpid/types/Variant.h>
++#include <string>
++#include <iostream>
++
++using namespace std;
++using namespace qmf;
++using qpid::types::Variant;
++using qpid::messaging::Duration;
++
++int main(int argc, char** argv)
++{
++    string url("localhost");
++    string connectionOptions;
++    string sessionOptions;
++
++    if (argc > 1)
++        url = argv[1];
++    if (argc > 2)
++        connectionOptions = argv[2];
++    if (argc > 3)
++        sessionOptions = argv[3];
++
++    qpid::messaging::Connection connection(url, connectionOptions);
++    connection.open();
++
++    ConsoleSession session(connection, sessionOptions);
++    session.open();
++
++    while (true) {
++        ConsoleEvent event;
++        if (session.nextEvent(event)) {
++            if (event.getType() == CONSOLE_EVENT) {
++                const Data& data(event.getData(0));
++                cout << "Event: timestamp=" << event.getTimestamp() << " severity=" <<
++                    event.getSeverity() << " content=" << data.getProperties() << endl;
++            }
++        }
++    }
++}
++
 Index: cpp/bindings/qmf2/examples/cpp/Makefile.am
 ===================================================================
 --- cpp/bindings/qmf2/examples/cpp/Makefile.am	(revision 1056407)
@@ -4328,7 +4397,7 @@ Index: cpp/bindings/qmf2/examples/cpp/Makefile.am
  AM_CPPFLAGS = $(INCLUDE)
  
 -noinst_PROGRAMS=agent
-+noinst_PROGRAMS=agent list_agents printevents
++noinst_PROGRAMS=agent list_agents print_events
 +
  agent_SOURCES=agent.cpp
  agent_LDADD=$(top_builddir)/src/libqmf2.la
@@ -4336,8 +4405,8 @@ Index: cpp/bindings/qmf2/examples/cpp/Makefile.am
 +list_agents_SOURCES=list_agents.cpp
 +list_agents_LDADD=$(top_builddir)/src/libqmf2.la
 +
-+printevents_SOURCES=printevents.cpp
-+printevents_LDADD=$(top_builddir)/src/libqmf2.la
++print_events_SOURCES=print_events.cpp
++print_events_LDADD=$(top_builddir)/src/libqmf2.la
 Index: cpp/bindings/qmf2/examples/cpp/list_agents.cpp
 ===================================================================
 --- cpp/bindings/qmf2/examples/cpp/list_agents.cpp	(revision 0)
