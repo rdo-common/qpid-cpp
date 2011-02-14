@@ -4328,7 +4328,7 @@ Index: cpp/bindings/qmf2/examples/cpp/Makefile.am
  AM_CPPFLAGS = $(INCLUDE)
  
 -noinst_PROGRAMS=agent
-+noinst_PROGRAMS=agent list_agents print_events
++noinst_PROGRAMS=agent list_agents printevents
 +
  agent_SOURCES=agent.cpp
  agent_LDADD=$(top_builddir)/src/libqmf2.la
@@ -4336,8 +4336,8 @@ Index: cpp/bindings/qmf2/examples/cpp/Makefile.am
 +list_agents_SOURCES=list_agents.cpp
 +list_agents_LDADD=$(top_builddir)/src/libqmf2.la
 +
-+print_events_SOURCES=print_events.cpp
-+print_events_LDADD=$(top_builddir)/src/libqmf2.la
++printevents_SOURCES=printevents.cpp
++printevents_LDADD=$(top_builddir)/src/libqmf2.la
 Index: cpp/bindings/qmf2/examples/cpp/list_agents.cpp
 ===================================================================
 --- cpp/bindings/qmf2/examples/cpp/list_agents.cpp	(revision 0)
