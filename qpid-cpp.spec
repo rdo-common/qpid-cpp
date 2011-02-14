@@ -1105,8 +1105,12 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+<<<<<<< HEAD
 * Mon Feb 14 2011 Nuno Santos <nsantos@redhat.com> - 0.8-5
 - Updated qmf patch
+
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8-4.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
 * Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-4
 - BZ671520 - SELinux is preventing /usr/bin/updatedb from 'getattr' accesses on the directory /var/run/qpidd
