@@ -101,7 +101,6 @@ URL:            http://qpid.apache.org
 Source0:        qpid-%{version}.tar.gz
 Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 
-Patch0:         bootstrap.patch
 Patch1:         store-4411.patch
 
 %if %{fedora}
@@ -809,8 +808,6 @@ popd
 %patch4
 %patch5
 %endif
-
-%patch0
 
 %if %{fedora}
 %patch2
