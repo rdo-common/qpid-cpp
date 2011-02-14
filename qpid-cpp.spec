@@ -1105,7 +1105,6 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
-<<<<<<< HEAD
 * Mon Feb 14 2011 Nuno Santos <nsantos@redhat.com> - 0.8-5
 - Updated qmf patch
 
