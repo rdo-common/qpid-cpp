@@ -44,6 +44,15 @@ Index: cpp/src/qmf/Agent.cpp
                  result = context->response;
              else {
                  auto_ptr<ConsoleEventImpl> impl(new ConsoleEventImpl(CONSOLE_EXCEPTION));
+@@ -331,7 +339,7 @@
+     uint32_t correlator;
+     boost::shared_ptr<SyncContext> context;
+ 
+-    QPID_LOG(trace, "RCVD MethodResponse map=" << response);
++    QPID_LOG(trace, "RCVD MethodResponse cid=" << cid << " map=" << response);
+ 
+     aIter = response.find("_arguments");
+     if (aIter != response.end())
 @@ -369,9 +377,43 @@
  }
  
@@ -90,7 +99,7 @@ Index: cpp/src/qmf/Agent.cpp
  }
  
  
-@@ -507,15 +549,18 @@
+@@ -507,17 +549,21 @@
      Variant::Map map;
      Variant::Map& headers(msg.getProperties());
  
@@ -105,16 +114,21 @@ Index: cpp/src/qmf/Agent.cpp
      msg.setCorrelationId(boost::lexical_cast<string>(correlator));
 -    msg.setSubject(name);
 +    msg.setSubject(directSubject);
-+    if (!session.authUser.empty())
-+        msg.setUserId(session.authUser);
++    string userId(session.connection.getAuthenticatedUsername());
++    if (!userId.empty())
++        msg.setUserId(userId);
      encode(QueryImplAccess::get(query).asMap(), msg);
 -    session.directSender.send(msg);
-+    if (sender.isValid())
+-
+-    QPID_LOG(trace, "SENT QueryRequest to=" << name);
++    if (sender.isValid()) {
 +        sender.send(msg);
- 
-     QPID_LOG(trace, "SENT QueryRequest to=" << name);
++        QPID_LOG(trace, "SENT QueryRequest to=" << sender.getName() << "/" << directSubject << " cid=" << correlator);
++    }
  }
-@@ -527,9 +572,9 @@
+ 
+ 
+@@ -527,9 +573,9 @@
      Variant::Map map;
      Variant::Map& headers(msg.getProperties());
  
@@ -127,35 +141,45 @@ Index: cpp/src/qmf/Agent.cpp
  
      map["_method_name"] = method;
      map["_object_id"] = addr.asMap();
-@@ -537,9 +582,12 @@
+@@ -537,11 +583,15 @@
  
      msg.setReplyTo(session.replyAddress);
      msg.setCorrelationId(boost::lexical_cast<string>(correlator));
 -    msg.setSubject(name);
 +    msg.setSubject(directSubject);
-+    if (!session.authUser.empty())
-+        msg.setUserId(session.authUser);
++    string userId(session.connection.getAuthenticatedUsername());
++    if (!userId.empty())
++        msg.setUserId(userId);
      encode(map, msg);
 -    session.directSender.send(msg);
-+    if (sender.isValid())
+-
+-    QPID_LOG(trace, "SENT MethodRequest method=" << method << " to=" << name);
++    if (sender.isValid()) {
 +        sender.send(msg);
- 
-     QPID_LOG(trace, "SENT MethodRequest method=" << method << " to=" << name);
++        QPID_LOG(trace, "SENT MethodRequest method=" << method << " to=" << sender.getName() << "/" << directSubject << " content=" << map << " cid=" << correlator);
++    }
  }
-@@ -577,8 +625,11 @@
+ 
+ void AgentImpl::sendSchemaRequest(const SchemaId& id)
+@@ -577,10 +627,14 @@
      Message msg;
      msg.setReplyTo(session.replyAddress);
      msg.setContent(content);
 -    msg.setSubject(name);
 -    session.directSender.send(msg);
+-
+-    QPID_LOG(trace, "SENT V1SchemaRequest to=" << name);
 +    msg.setSubject(directSubject);
-+    if (!session.authUser.empty())
-+        msg.setUserId(session.authUser);
-+    if (sender.isValid())
++    string userId(session.connection.getAuthenticatedUsername());
++    if (!userId.empty())
++        msg.setUserId(userId);
++    if (sender.isValid()) {
 +        sender.send(msg);
- 
-     QPID_LOG(trace, "SENT V1SchemaRequest to=" << name);
++        QPID_LOG(trace, "SENT V1SchemaRequest to=" << sender.getName() << "/" << directSubject);
++    }
  }
+ 
+ 
 Index: cpp/src/qmf/Schema.cpp
 ===================================================================
 --- cpp/src/qmf/Schema.cpp	(revision 1056407)
@@ -902,11 +926,20 @@ Index: cpp/src/qmf/AgentSession.cpp
      topicSender.send(msg);
  
 -    QPID_LOG(trace, "SENT EventIndication to=agent.ind.event");
-+    QPID_LOG(trace, "SENT EventIndication to=" << subject);
++    QPID_LOG(trace, "SENT EventIndication to=" << topicSender.getName() << "/" << subject);
  }
  
  
-@@ -573,22 +640,20 @@
+@@ -558,7 +625,7 @@
+ 
+ void AgentSessionImpl::handleLocateRequest(const Variant::List& predicate, const Message& msg)
+ {
+-    QPID_LOG(trace, "RCVD AgentLocateRequest");
++    QPID_LOG(trace, "RCVD AgentLocateRequest from=" << msg.getReplyTo());
+ 
+     if (!predicate.empty()) {
+         Query agentQuery(QUERY_OBJECT);
+@@ -573,28 +640,26 @@
      Variant::Map map;
      Variant::Map& headers(reply.getProperties());
  
@@ -938,6 +971,13 @@ Index: cpp/src/qmf/AgentSession.cpp
  }
  
  
+ void AgentSessionImpl::handleMethodRequest(const Variant::Map& content, const Message& msg)
+ {
+-    QPID_LOG(trace, "RCVD MethodRequest map=" << content << " from=" << msg.getReplyTo());
++    QPID_LOG(trace, "RCVD MethodRequest map=" << content << " from=" << msg.getReplyTo() << " cid=" << msg.getCorrelationId());
+ 
+     //
+     // Construct an AgentEvent to be sent to the application.
 @@ -614,10 +679,6 @@
      }
      eventImpl->setMethodName(iter->second.asString());
@@ -949,7 +989,7 @@ Index: cpp/src/qmf/AgentSession.cpp
      iter = content.find("_arguments");
      if (iter != content.end())
          eventImpl->setArguments(iter->second.asMap());
-@@ -626,6 +687,32 @@
+@@ -626,13 +687,39 @@
      if (iter != content.end())
          eventImpl->setArgumentSubtypes(iter->second.asMap());
  
@@ -982,6 +1022,14 @@ Index: cpp/src/qmf/AgentSession.cpp
      enqueueEvent(AgentEvent(eventImpl.release()));
  }
  
+ 
+ void AgentSessionImpl::handleQueryRequest(const Variant::Map& content, const Message& msg)
+ {
+-    QPID_LOG(trace, "RCVD QueryRequest query=" << content << " from=" << msg.getReplyTo());
++    QPID_LOG(trace, "RCVD QueryRequest query=" << content << " from=" << msg.getReplyTo() << " cid=" << msg.getCorrelationId());
+ 
+     //
+     // Construct an AgentEvent to be sent to the application or directly handled by the agent.
 @@ -668,19 +755,19 @@
      Variant::Map map;
      Variant::Map& headers(msg.getProperties());
@@ -1242,7 +1290,7 @@ Index: cpp/src/qmf/ConsoleSession.cpp
 -    connection(c), domain("default"), maxAgentAgeMinutes(5), opened(false),
 -    thread(0), threadCanceled(false),
 -    lastVisit(0), lastAgePass(0), connectedBrokerInAgentList(false), schemaCache(new SchemaCache())
-+    connection(c), domain("default"), authUser(c.getAuthenticatedUsername()), maxAgentAgeMinutes(5),
++    connection(c), domain("default"), maxAgentAgeMinutes(5),
 +    opened(false), thread(0), threadCanceled(false), lastVisit(0), lastAgePass(0),
 +    connectedBrokerInAgentList(false), schemaCache(new SchemaCache())
  {
@@ -1409,9 +1457,11 @@ Index: cpp/src/qmf/ConsoleSession.cpp
  
      QPID_LOG(trace, "SENT AgentLocate to broker");
  }
-@@ -355,9 +395,9 @@
+@@ -354,19 +394,20 @@
+ {
      Message msg;
      Variant::Map& headers(msg.getProperties());
++    static const string subject("console.request.agent_locate");
  
 -    headers["method"] = "request";
 -    headers["qmf.opcode"] = "_agent_locate_request";
@@ -1422,7 +1472,18 @@ Index: cpp/src/qmf/ConsoleSession.cpp
  
      msg.setReplyTo(replyAddress);
      msg.setCorrelationId("agent-locate");
-@@ -382,17 +422,28 @@
+-    msg.setSubject("console.request.agent_locate");
++    msg.setSubject(subject);
+     encode(agentQuery.getPredicate(), msg);
+ 
+     topicSender.send(msg);
+ 
+-    QPID_LOG(trace, "SENT AgentLocate to topic");
++    QPID_LOG(trace, "SENT AgentLocate to=" << topicSender.getName() << "/" << subject);
+ }
+ 
+ 
+@@ -382,17 +423,28 @@
          return;
      Variant::Map attrs(iter->second.asMap());
  
@@ -1453,7 +1514,7 @@ Index: cpp/src/qmf/ConsoleSession.cpp
          }
          return;
      }
-@@ -415,7 +466,7 @@
+@@ -415,7 +467,7 @@
              //
              auto_ptr<AgentImpl> impl(new AgentImpl(agentName, epoch, *this));
              for (iter = attrs.begin(); iter != attrs.end(); iter++)
@@ -1462,7 +1523,7 @@ Index: cpp/src/qmf/ConsoleSession.cpp
                      impl->setAttribute(iter->first, iter->second);
              agent = Agent(impl.release());
              agents[agentName] = agent;
-@@ -430,6 +481,7 @@
+@@ -430,6 +482,7 @@
              //
              // This is a refresh of an agent we are already tracking.
              //
@@ -1470,7 +1531,7 @@ Index: cpp/src/qmf/ConsoleSession.cpp
              agent = aIter->second;
              AgentImpl& impl(AgentImplAccess::get(agent));
              impl.touch();
-@@ -442,19 +494,23 @@
+@@ -442,19 +495,23 @@
                  auto_ptr<ConsoleEventImpl> eventImpl(new ConsoleEventImpl(CONSOLE_AGENT_RESTART));
                  eventImpl->setAgent(agent);
                  enqueueEventLH(ConsoleEvent(eventImpl.release()));
@@ -1850,11 +1911,9 @@ Index: cpp/src/qmf/ConsoleSessionImpl.h
  
      protected:
          mutable qpid::sys::Mutex lock;
-@@ -70,7 +72,10 @@
-         qpid::messaging::Sender directSender;
+@@ -71,6 +73,8 @@
          qpid::messaging::Sender topicSender;
          std::string domain;
-+        std::string authUser;
          uint32_t maxAgentAgeMinutes;
 +        bool listenOnDirect;
 +        bool strictSecurity;
@@ -2968,7 +3027,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
 +          reason = 'filter'
 +          if event.getAgentDelReason() == cqmf2.AGENT_DEL_AGED:
 +            reason = 'aged'
-+          self.agentDeleted(Agent(event.getAgent(), reason))
++          self.agentDeleted(Agent(event.getAgent()), reason)
 +
 +        elif event.getType() == cqmf2.CONSOLE_AGENT_RESTART:
 +          self.agentRestarted(Agent(event.getAgent()))
@@ -3070,17 +3129,24 @@ Index: cpp/bindings/qmf2/python/qmf2.py
      """
      self._impl = cqmf2.AgentSession(connection, options)
  
-@@ -261,9 +373,7 @@
+@@ -261,7 +373,15 @@
      else:
        self._impl.raiseException(handle, data)
  
 -  ## TODO: async and external operations
++  def raiseEvent(self, data, severity=None):
++    """
++    """
++    if not severity:
++      self._impl.raiseEvent(data._impl)
++    else:
++      if (severity.__class__ != int and severity.__class__ != long) or severity < 0 or severity > 7:
++        raise Exception("Severity must be an int between 0..7")
++      self._impl.raiseEvent(data._impl, severity);
  
--
+ 
  #===================================================================================================
- # AGENT PROXY
- #===================================================================================================
-@@ -311,7 +421,7 @@
+@@ -311,7 +431,7 @@
      """
      """
      if q.__class__ == Query:
@@ -3089,7 +3155,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
      else:
        q_arg = q
      dur = cqpid.Duration(cqpid.Duration.SECOND.getMilliseconds() * timeout)
-@@ -366,11 +476,35 @@
+@@ -366,11 +486,35 @@
    """
    """
  
@@ -3127,7 +3193,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
  #===================================================================================================
  # DATA
  #===================================================================================================
-@@ -385,10 +519,8 @@
+@@ -385,10 +529,8 @@
        self._impl = cqmf2.Data()
      elif arg.__class__ == cqmf2.Data:
        self._impl = arg
@@ -3139,7 +3205,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
      else:
        raise Exception("Unsupported initializer for Data")
      self._schema = None
-@@ -412,6 +544,17 @@
+@@ -412,6 +554,17 @@
      """
      return Agent(self._impl.getAgent())
  
@@ -3157,7 +3223,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
    def getProperties(self):
      """
      """
-@@ -444,6 +587,7 @@
+@@ -444,6 +597,7 @@
      ## validate that we have the right number of arguments supplied, and marshall them
      ## into a map for transmission.
      ##
@@ -3165,7 +3231,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
      methods = self._schema.getMethods()
      for m in methods:
        if m.getName() == name:
-@@ -519,8 +663,13 @@
+@@ -519,8 +673,13 @@
    """
    """
  
@@ -3181,7 +3247,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
  
    def __repr__(self):
      return "%s:%s" % (self.getAgentName(), self.getName())
-@@ -530,6 +679,11 @@
+@@ -530,6 +689,11 @@
          self.getName() == other.getName() and \
          self.getAgentEpoch() == other.getAgentEpoch()
  
@@ -3193,7 +3259,7 @@ Index: cpp/bindings/qmf2/python/qmf2.py
    def getAgentName(self):
      """
      """
-@@ -683,6 +837,11 @@
+@@ -683,6 +847,11 @@
      """
      return self._impl.getName()
  
@@ -3539,7 +3605,7 @@ Index: cpp/bindings/qmf2/ruby/qmf2.rb
      def initialize(connection, options="")
        @impl = Cqmf2::AgentSession.new(connection, options)
      end
-@@ -134,28 +423,16 @@
+@@ -134,10 +423,10 @@
      def set_instance(val)       @impl.setInstance(val)         end
      def set_attribute(key, val) @impl.setAttribute(key, val)   end
      def open()                  @impl.open                     end
@@ -3552,10 +3618,10 @@ Index: cpp/bindings/qmf2/ruby/qmf2.rb
        DataAddr.new(@impl.addData(data.impl, name, persistent))
      end
  
-     def del_data(addr)
+@@ -145,15 +434,11 @@
        @impl.del_data(addr.impl)
      end
--
+ 
 -    def method_success(handle)
 -      @impl.methodSuccess(handle)
 -    end
@@ -3563,14 +3629,16 @@ Index: cpp/bindings/qmf2/ruby/qmf2.rb
 -    def raise_exception(handle, data)
 -      if data.class == Data
 -        @impl.raiseException(handle, data.impl)
--      else
++    def raise_event(data, severity=nil)
++      if !severity
++        @impl.raiseEvent(data.impl)
+       else
 -        @impl.raiseException(handle, data)
--      end
--    end
++        @impl.raiseEvent(data.impl, severity)
+       end
+     end
    end
- 
-   ##==============================================================================
-@@ -228,14 +505,26 @@
+@@ -228,14 +513,26 @@
    end
  
    ##==============================================================================
@@ -3600,7 +3668,7 @@ Index: cpp/bindings/qmf2/ruby/qmf2.rb
    end
  
    ##==============================================================================
-@@ -246,18 +535,17 @@
+@@ -246,18 +543,17 @@
      attr_reader :impl
  
      def initialize(arg=nil)
@@ -3622,7 +3690,7 @@ Index: cpp/bindings/qmf2/ruby/qmf2.rb
      end
  
      def to_s
-@@ -271,6 +559,10 @@
+@@ -271,6 +567,10 @@
        return nil
      end
  
@@ -3633,7 +3701,7 @@ Index: cpp/bindings/qmf2/ruby/qmf2.rb
      def addr
        if @impl.hasAddr
          return DataAddr.new(@impl.getAddr)
-@@ -282,6 +574,17 @@
+@@ -282,6 +582,17 @@
        return Agent.new(@impl.getAgent)
      end
  
@@ -3651,7 +3719,7 @@ Index: cpp/bindings/qmf2/ruby/qmf2.rb
      def properties
        return @impl.getProperties
      end
-@@ -392,14 +695,21 @@
+@@ -392,14 +703,21 @@
    class DataAddr
      attr_reader :impl
  
@@ -3741,23 +3809,78 @@ Index: cpp/bindings/qmf2/examples/python/agent.py
      self.connection.close()
  
  
-@@ -86,7 +88,15 @@
-           ex.details = args['details']
-           self.session.raiseException(handle, ex)
+@@ -67,26 +69,43 @@
+     if addr == self.controlAddr:
+       self.control.methodCount += 1
  
-+      elif methodName == "create_child":
-+        name = args['name']
-+        child = Data(self.sch_child)
-+        child.name = name
-+        addr = self.session.addData(child, name)
-+        handle.addReturnArgument("childAddr", addr.asMap())
-+        self.session.methodSuccess(handle)
+-      if methodName == "stop":
+-        self.session.methodSuccess(handle)
+-        self.cancel()
++      try:
++        if methodName == "stop":
++          self.session.methodSuccess(handle)
++          self.cancel()
  
+-      elif methodName == "echo":
+-        handle.addReturnArgument("sequence", args["sequence"])
+-        handle.addReturnArgument("map", args["map"])
+-        self.session.methodSuccess(handle)
++        elif methodName == "echo":
++          handle.addReturnArgument("sequence", args["sequence"])
++          handle.addReturnArgument("map", args["map"])
++          self.session.methodSuccess(handle)
+ 
+-      elif methodName == "fail":
+-        if args['useString']:
+-          self.session.raiseException(handle, args['stringVal'])
+-        else:
+-          ex = Data(self.sch_exception)
+-          ex.whatHappened = "It Failed"
+-          ex.howBad = 75
+-          ex.details = args['details']
+-          self.session.raiseException(handle, ex)
++        elif methodName == "event":
++          ev = Data(self.sch_event)
++          ev.text = args['text']
++          self.session.raiseEvent(ev, args['severity'])
++          self.session.methodSuccess(handle)
+ 
++        elif methodName == "fail":
++          if args['useString']:
++            self.session.raiseException(handle, args['stringVal'])
++          else:
++            ex = Data(self.sch_exception)
++            ex.whatHappened = "It Failed"
++            ex.howBad = 75
++            ex.details = args['details']
++            self.session.raiseException(handle, ex)
+ 
++        elif methodName == "create_child":
++          name = args['name']
++          child = Data(self.sch_child)
++          child.name = name
++          addr = self.session.addData(child, name)
++          handle.addReturnArgument("childAddr", addr.asMap())
++          self.session.methodSuccess(handle)
++      except BaseException, e:
++        self.session.raiseException(handle, "%r" % e)
++
 +
    def setupSchema(self):
      """
      Create and register the schema for this agent.
-@@ -124,11 +134,23 @@
+@@ -118,17 +137,41 @@
+     echoMethod.addArgument(SchemaProperty("map", SCHEMA_DATA_MAP, direction=DIR_IN_OUT))
+     self.sch_control.addMethod(echoMethod)
+ 
++    eventMethod = SchemaMethod("event", desc="Raise an Event")
++    eventMethod.addArgument(SchemaProperty("text", SCHEMA_DATA_STRING, direction=DIR_IN))
++    eventMethod.addArgument(SchemaProperty("severity", SCHEMA_DATA_INT, direction=DIR_IN))
++    self.sch_control.addMethod(eventMethod)
++
+     failMethod = SchemaMethod("fail", desc="Expected to Fail")
+     failMethod.addArgument(SchemaProperty("useString", SCHEMA_DATA_BOOL, direction=DIR_IN))
+     failMethod.addArgument(SchemaProperty("stringVal", SCHEMA_DATA_STRING, direction=DIR_IN))
      failMethod.addArgument(SchemaProperty("details", SCHEMA_DATA_MAP, direction=DIR_IN))
      self.sch_control.addMethod(failMethod)
  
@@ -3773,15 +3896,22 @@ Index: cpp/bindings/qmf2/examples/python/agent.py
 +    self.sch_child.addProperty(SchemaProperty("name", SCHEMA_DATA_STRING))
 +
 +    ##
++    ## Declare the event class
++    ##
++    self.sch_event = Schema(SCHEMA_TYPE_EVENT, package, "event")
++    self.sch_event.addProperty(SchemaProperty("text", SCHEMA_DATA_STRING))
++
++    ##
      ## Register our schemata with the agent session.
      ##
      self.session.registerSchema(self.sch_exception)
      self.session.registerSchema(self.sch_control)
 +    self.session.registerSchema(self.sch_child)
++    self.session.registerSchema(self.sch_event)
  
  
    def populateData(self):
-@@ -141,10 +163,13 @@
+@@ -141,10 +184,13 @@
      self.controlAddr = self.session.addData(self.control, "singleton")
  
  
@@ -4193,12 +4323,12 @@ Index: cpp/bindings/qmf2/examples/cpp/Makefile.am
 ===================================================================
 --- cpp/bindings/qmf2/examples/cpp/Makefile.am	(revision 1056407)
 +++ cpp/bindings/qmf2/examples/cpp/Makefile.am	(working copy)
-@@ -21,6 +21,11 @@
+@@ -21,6 +21,13 @@
  
  AM_CPPFLAGS = $(INCLUDE)
  
 -noinst_PROGRAMS=agent
-+noinst_PROGRAMS=agent list_agents
++noinst_PROGRAMS=agent list_agents print_events
 +
  agent_SOURCES=agent.cpp
  agent_LDADD=$(top_builddir)/src/libqmf2.la
@@ -4206,6 +4336,8 @@ Index: cpp/bindings/qmf2/examples/cpp/Makefile.am
 +list_agents_SOURCES=list_agents.cpp
 +list_agents_LDADD=$(top_builddir)/src/libqmf2.la
 +
++print_events_SOURCES=print_events.cpp
++print_events_LDADD=$(top_builddir)/src/libqmf2.la
 Index: cpp/bindings/qmf2/examples/cpp/list_agents.cpp
 ===================================================================
 --- cpp/bindings/qmf2/examples/cpp/list_agents.cpp	(revision 0)
@@ -4284,6 +4416,19 @@ Index: cpp/bindings/qmf2/examples/cpp/list_agents.cpp
 +    }
 +}
 +
+Index: cpp/bootstrap
+===================================================================
+--- cpp/bootstrap	(revision 1056407)
++++ cpp/bootstrap	(working copy)
+@@ -36,7 +36,7 @@
+ 	\$(mgen_cmd)
+ EOF
+ 
+-automake
++automake --add-missing
+ autoconf
+ 
+ # Optionally do the build as well.
 Index: cpp/include/qmf/Agent.h
 ===================================================================
 --- cpp/include/qmf/Agent.h	(revision 1056407)
@@ -4599,6 +4744,55 @@ Index: cpp/managementgen/Makefile.am
  	qmfgen/management-types.xml
  
  EXTRA_DIST = $(nobase_qmfpython_DATA) CMakeLists.txt
+Index: cpp/managementgen/qmf-gen
+===================================================================
+--- cpp/managementgen/qmf-gen	(revision 1056407)
++++ cpp/managementgen/qmf-gen	(working copy)
+@@ -47,12 +47,15 @@
+                   help="Generate makefile for Qpid broker")
+ parser.add_option("-b", "--broker-plugin", dest="brokerplugin", default=False, action="store_true",
+                   help="Generate code for use in a qpid broker plugin")
++parser.add_option("-2", "--v2-style", dest="v2_style", default=False, action="store_true",
++                  help="Generate code for use with the QMFv2 Agent API")
+ 
+ (opts, args) = parser.parse_args()
+ 
+ typefile    = opts.typefile
+ templatedir = opts.templatedir
+ outdir      = opts.outputdir
++v2_style    = opts.v2_style
+ gen         = Generator(outdir, templatedir)
+ 
+ if len(args) == 0:
+@@ -70,15 +73,20 @@
+ for schemafile in args:
+   package = SchemaPackage(typefile, schemafile, opts)
+ 
+-  gen.setPackage      (package.packageName)
+-  gen.makeClassFiles  ("Class.h",     package, vars=vargs)
+-  gen.makeClassFiles  ("Class.cpp",   package, vars=vargs)
+-  gen.makeMethodFiles ("Args.h",      package, vars=vargs)
+-  gen.makeEventFiles  ("Event.h",     package, vars=vargs)
+-  gen.makeEventFiles  ("Event.cpp",   package, vars=vargs)
+-  gen.makePackageFile ("Package.h",   package, vars=vargs)
+-  gen.makePackageFile ("Package.cpp", package, vars=vargs)
++  gen.setPackage(package.packageName)
+ 
++  if v2_style:
++    gen.makeV2PackageFile("V2Package.h",   package, vars=vargs)
++    gen.makeV2PackageFile("V2Package.cpp", package, vars=vargs)
++  else:
++    gen.makeClassFiles  ("Class.h",     package, vars=vargs)
++    gen.makeClassFiles  ("Class.cpp",   package, vars=vargs)
++    gen.makeMethodFiles ("Args.h",      package, vars=vargs)
++    gen.makeEventFiles  ("Event.h",     package, vars=vargs)
++    gen.makeEventFiles  ("Event.cpp",   package, vars=vargs)
++    gen.makePackageFile ("Package.h",   package, vars=vargs)
++    gen.makePackageFile ("Package.cpp", package, vars=vargs)
++
+ if opts.makefile != None:
+   args = {}
+   args["qpidbroker"] = opts.qpidbroker
 Index: cpp/managementgen/qmfgen/generate.py
 ===================================================================
 --- cpp/managementgen/qmfgen/generate.py	(revision 1056407)
@@ -5693,6 +5887,209 @@ Index: tools/setup.py
                 "src/py/qpid-cluster-store",
                 "src/py/qpid-config",
                 "src/py/qpid-printevents",
+Index: extras/qmf/src/py/qmf/console.py
+===================================================================
+--- extras/qmf/src/py/qmf/console.py	(revision 1056413)
++++ extras/qmf/src/py/qmf/console.py	(working copy)
+@@ -53,6 +53,10 @@
+     """ Invoked when a connection is established to a broker """
+     pass
+ 
++  def brokerConnectionFailed(self, broker):
++    """ Invoked when a connection to a broker fails """
++    pass
++
+   def brokerDisconnected(self, broker):
+     """ Invoked when the connection to a broker is lost """
+     pass
+@@ -376,7 +380,8 @@
+           dp.routing_key = self.getV2RoutingKey()
+           mp = self._broker.amqpSession.message_properties()
+           mp.content_type = "amqp/map"
+-          mp.user_id = self._broker.authUser
++          if self._broker.saslUser:
++            mp.user_id = self._broker.saslUser
+           mp.correlation_id = str(seq)
+           mp.app_id = "qmf2"
+           mp.reply_to = self._broker.amqpSession.reply_to("qmf.default.direct", self._broker.v2_direct_queue)
+@@ -1206,11 +1211,11 @@
+     try:
+       agentName = ah["qmf.agent"]
+       values = content["_values"]
+-      timestamp = values["timestamp"]
+-      interval = values["heartbeat_interval"]
++      timestamp = values["_timestamp"]
++      interval = values["_heartbeat_interval"]
+       epoch = 0
+-      if 'epoch' in values:
+-        epoch = values['epoch']
++      if '_epoch' in values:
++        epoch = values['_epoch']
+     except Exception,e:
+       return
+ 
+@@ -1239,7 +1244,7 @@
+       agent.touch()
+     if self.rcvHeartbeats and self.console and agent:
+       self._heartbeatCallback(agent, timestamp)
+-    agent.update_schema_timestamp(values.get("schema_timestamp", 0))
++    agent.update_schema_timestamp(values.get("_schema_updated", 0))
+ 
+ 
+   def _v2HandleAgentLocateRsp(self, broker, mp, ah, content):
+@@ -1488,7 +1493,8 @@
+           dp.routing_key = objectId.getV2RoutingKey()
+           mp = broker.amqpSession.message_properties()
+           mp.content_type = "amqp/map"
+-          mp.user_id = broker.authUser
++          if broker.saslUser:
++            mp.user_id = broker.saslUser
+           mp.correlation_id = str(seq)
+           mp.app_id = "qmf2"
+           mp.reply_to = broker.amqpSession.reply_to("qmf.default.direct", broker.v2_direct_queue)
+@@ -2227,9 +2233,12 @@
+     self.port = port
+     self.mechanisms = authMechs
+     self.ssl = ssl
++    if connTimeout is not None:
++	connTimeout = float(connTimeout)
+     self.connTimeout = connTimeout
+     self.authUser = authUser
+     self.authPass = authPass
++    self.saslUser = None
+     self.cv = Condition()
+     self.seqToAgentMap = {}
+     self.error = None
+@@ -2403,6 +2412,11 @@
+       self.conn.start()
+       sock.settimeout(oldTimeout)
+       self.conn.aborted = oldAborted
++      uid = self.conn.user_id
++      if uid.__class__ == tuple and len(uid) == 2:
++        self.saslUser = uid[1]
++      else:
++        self.saslUser = None
+ 
+       # prevent topic queues from filling up (and causing the agents to
+       # disconnect) by discarding the oldest queued messages when full.
+@@ -2508,6 +2522,8 @@
+     except Exception, e:
+       self.error = "Exception during connection setup: %s - %s" % (e.__class__.__name__, e)
+       self.conn_exc = e
++      if self.session.console:
++        self.session.console.brokerConnectionFailed(self)
+       return False     # connection failed
+ 
+   def _updateAgent(self, obj):
+@@ -2571,7 +2587,7 @@
+       for agent in to_notify:
+         self.session._delAgentCallback(agent)
+ 
+-  def _v2SendAgentLocate(self, predicate={}):
++  def _v2SendAgentLocate(self, predicate=[]):
+     """
+     Broadcast an agent-locate request to cause all agents in the domain to tell us who they are.
+     """
+@@ -2579,13 +2595,14 @@
+     dp = self.amqpSession.delivery_properties()
+     dp.routing_key = "console.request.agent_locate"
+     mp = self.amqpSession.message_properties()
+-    mp.content_type = "amqp/map"
+-    mp.user_id = self.authUser
++    mp.content_type = "amqp/list"
++    if self.saslUser:
++      mp.user_id = self.saslUser
+     mp.app_id = "qmf2"
+     mp.reply_to = self.amqpSession.reply_to("qmf.default.direct", self.v2_direct_queue)
+     mp.application_headers = {'qmf.opcode':'_agent_locate_request'}
+     sendCodec = Codec()
+-    sendCodec.write_map(predicate)
++    sendCodec.write_list(predicate)
+     msg = Message(dp, mp, sendCodec.encoded)
+     self._send(msg, "qmf.default.topic")
+ 
+@@ -2622,7 +2639,8 @@
+       dp.ttl = ttl
+     mp = self.amqpSession.message_properties()
+     mp.content_type = "x-application/qmf"
+-    mp.user_id = self.authUser
++    if self.saslUser:
++      mp.user_id = self.saslUser
+     mp.reply_to = self.amqpSession.reply_to("amq.direct", self.replyName)
+     return Message(dp, mp, body)
+ 
+@@ -2853,7 +2871,7 @@
+             content = None
+         else:
+           content = None
+-  
++
+         if content != None:
+           ##
+           ## Directly handle agent heartbeats and agent locate responses as these are broker-scope (they are
+@@ -3366,6 +3384,9 @@
+     Handle a QMFv2 data indication from the agent.  Note: called from context
+     of the Broker thread.
+     """
++    if content.__class__ != list:
++      return
++
+     if mp.correlation_id:
+       try:
+         self.lock.acquire()
+@@ -3382,8 +3403,6 @@
+     if "qmf.content" in ah:
+       kind = ah["qmf.content"]
+     if kind == "_data":
+-      if content.__class__ != list:
+-        return
+       for omap in content:
+         context.addV2QueryResult(omap)
+       context.processV2Data()
+@@ -3391,14 +3410,15 @@
+         context.signal()
+ 
+     elif kind == "_event":
+-      event = Event(self, v2Map=content)
+-      if event.classKey is None or event.schema:
+-        # schema optional or present
+-        context.doEvent(event)
+-      else:
+-        # schema not optional and not present
+-        if context.addPendingEvent(event):
+-          self._v2SendSchemaRequest(event.classKey)
++      for omap in content:
++        event = Event(self, v2Map=omap)
++        if event.classKey is None or event.schema:
++          # schema optional or present
++          context.doEvent(event)
++        else:
++          # schema not optional and not present
++          if context.addPendingEvent(event):
++            self._v2SendSchemaRequest(event.classKey)
+ 
+     elif kind == "_schema_id":
+       for sid in content:
+@@ -3533,7 +3553,8 @@
+     dp.routing_key = self.getV2RoutingKey()
+     mp = self.broker.amqpSession.message_properties()
+     mp.content_type = "amqp/map"
+-    mp.user_id = self.broker.authUser
++    if self.broker.saslUser:
++      mp.user_id = self.broker.saslUser
+     mp.correlation_id = str(sequence)
+     mp.app_id = "qmf2"
+     mp.reply_to = self.broker.amqpSession.reply_to("qmf.default.direct", self.broker.v2_direct_queue)
+@@ -3976,6 +3997,9 @@
+   def brokerConnected(self, broker):
+     print "brokerConnected:", broker
+ 
++  def brokerConnectionFailed(self, broker):
++    print "brokerConnectionFailed:", broker
++
+   def brokerDisconnected(self, broker):
+     print "brokerDisconnected:", broker
+ 
 Index: extras/qmf/src/py/qmf2/common.py
 ===================================================================
 --- extras/qmf/src/py/qmf2/common.py	(revision 1056407)
@@ -16110,16 +16507,3 @@ Index: extras/qmf/setup.py
        package_dir={"": "src/py"},
        url="http://qpid.apache.org/",
        license="Apache Software License",
-Index: cpp/src/qpid/framing/SendContent.h
-===================================================================
---- cpp/src/qpid/framing/SendContent.h	2009-03-12 16:55:34.000000000 -0400
-+++ cpp/src/qpid/framing/SendContent.h	2011-02-07 16:12:01.949172798 -0500
-@@ -37,7 +37,7 @@
-  */
- class SendContent
- {
--    mutable FrameHandler& handler;
-+    FrameHandler& handler;
-     const uint16_t maxFrameSize;
-     uint expectedFrameCount;
-     uint frameCount;

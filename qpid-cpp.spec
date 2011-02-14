@@ -26,7 +26,7 @@
 %global qpid_svnrev  1037942
 %global store_svnrev 4411
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  4
+%global release_num  5
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -1105,6 +1105,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Feb 14 2011 Nuno Santos <nsantos@redhat.com> - 0.8-5
+- Updated qmf patch
+
 * Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-4
 - BZ671520 - SELinux is preventing /usr/bin/updatedb from 'getattr' accesses on the directory /var/run/qpidd
 
