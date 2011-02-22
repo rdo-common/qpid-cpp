@@ -26,7 +26,7 @@
 %global qpid_svnrev  1037942
 %global store_svnrev 4411
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  5
+%global release_num  6
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -394,48 +394,52 @@ Qpid broker daemon.
 
 %endif
 
-# === Package: qmf ===
+# === Package: qpid-qmf ===
 
 %if %{qmf}
 
-%package -n qmf
+%package -n qpid-qmf
 Summary: The QPID Management Framework
 Group: System Environment/Daemons
 Requires: %{pkg_name}-client = %version-%release
+Provides: qmf = %version-%release
+Obsoletes: qmf < %version-%release
 
-%description -n qmf
+%description -n qpid-qmf
 An extensible management framework layered on QPID messaging.
 
-%files -n qmf
+%files -n qpid-qmf
 %defattr(-,root,root,-)
 %_libdir/libqmf.so.*
 %_libdir/libqmf2.so.*
 %_libdir/libqmfengine.so.*
 %_libdir/libqmfconsole.so.*
 
-%post -n qmf
+%post -n qpid-qmf
 /sbin/ldconfig
 
-%postun -n qmf
+%postun -n qpid-qmf
 /sbin/ldconfig
 
 %endif
 
-# === Package: qmf-devel ===
+# === Package: qpid-qmf-devel ===
 
 %if %{qmf_devel}
 
-%package -n qmf-devel
+%package -n qpid-qmf-devel
 Summary: Header files and tools for developing QMF extensions
 Group: Development/System
-Requires: qmf = %version-%release
+Requires: qpid-qmf = %version-%release
 Requires: %{pkg_name}-client-devel = %version-%release
+Provides: qmf-devel = %version-%release
+Obsoletes: qmf-devel < %version-%release
 
-%description -n qmf-devel
+%description -n qpid-qmf-devel
 Header files and code-generation tools needed for developers of QMF-managed
 components.
 
-%files -n qmf-devel
+%files -n qpid-qmf-devel
 %defattr(-,root,root,-)
 %_libdir/libqmf.so
 %_libdir/libqmf2.so
@@ -444,28 +448,30 @@ components.
 %_bindir/qmf-gen
 %{python_sitelib}/qmfgen
 
-%post -n qmf-devel
+%post -n qpid-qmf-devel
 /sbin/ldconfig
 
-%postun -n qmf-devel
+%postun -n qpid-qmf-devel
 /sbin/ldconfig
 
 %endif
 
-# === Package: python-qmf ===
+# === Package: python-qpid-qmf ===
 
 %if %{python_qmf} && ! %{rhel_4}
 
-%package -n python-qmf
+%package -n python-qpid-qmf
 Summary: The QPID Management Framework bindings for python
 Group: System Environment/Libraries
-Requires: qmf = %version-%release
+Requires: qpid-qmf = %version-%release
+Provides: python-qmf = %version-%release
+Obsoletes: python-qmf < %version-%release
 
-%description -n python-qmf
+%description -n python-qpid-qmf
 An extensible management framework layered on QPID messaging, bindings
 for python.
 
-%files -n python-qmf
+%files -n python-qpid-qmf
 %defattr(-,root,root,-)
 %{python_sitelib}/cqpid.py*
 %{python_sitelib}/_cqpid.so
@@ -476,28 +482,30 @@ for python.
 %{python_sitelib}/cqmf2.py*
 %{python_sitelib}/_cqmf2.so
 
-%post -n python-qmf
+%post -n python-qpid-qmf
 /sbin/ldconfig
 
-%postun -n python-qmf
+%postun -n python-qpid-qmf
 /sbin/ldconfig
 
 %endif
 
-# === Package: ruby-qmf ===
+# === Package: ruby-qpid-qmf ===
 
 %if %{ruby_qmf} && ! %{rhel_4}
 
-%package -n ruby-qmf
+%package -n ruby-qpid-qmf
 Summary: The QPID Management Framework bindings for ruby
 Group: System Environment/Libraries
-Requires: qmf = %version-%release
+Requires: qpid-qmf = %version-%release
+Provides: ruby-qmf = %version-%release
+Obsoletes: ruby-qmf < %version-%release
 
-%description -n ruby-qmf
+%description -n ruby-qpid-qmf
 An extensible management framework layered on QPID messaging, bindings
 for ruby.
 
-%files -n ruby-qmf
+%files -n ruby-qpid-qmf
 %defattr(-,root,root,-)
 %{ruby_sitelib}/qmf.rb
 %{ruby_sitelib}/qmf2.rb
@@ -505,10 +513,10 @@ for ruby.
 %{ruby_sitearch}/cqpid.so
 %{ruby_sitearch}/cqmf2.so
 
-%post -n ruby-qmf
+%post -n ruby-qpid-qmf
 /sbin/ldconfig
 
-%postun -n ruby-qmf
+%postun -n ruby-qpid-qmf
 /sbin/ldconfig
 
 %endif
@@ -1102,6 +1110,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Feb 22 2011 Nuno Santos <nsantos@redhat.com> - 0.8-6
+- BZ661736 - renaming qmf subpackage to qpid-qmf
+
 * Mon Feb 14 2011 Nuno Santos <nsantos@redhat.com> - 0.8-5
 - Updated qmf patch
 
