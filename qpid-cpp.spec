@@ -26,7 +26,7 @@
 %global qpid_svnrev  1037942
 %global store_svnrev 4411
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  6
+%global release_num  7
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -1110,6 +1110,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Mar 10 2011 Kalev Lember <kalev@smartlink.ee> - 0.8-7
+- Rebuilt with xerces-c 3.1
+
 * Tue Feb 22 2011 Nuno Santos <nsantos@redhat.com> - 0.8-6
 - BZ661736 - renaming qmf subpackage to qpid-qmf
 
