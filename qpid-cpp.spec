@@ -22,11 +22,11 @@
 %global MRG_non_core 1
 
 # Release numbers
-%global qpid_release 0.8
-%global qpid_svnrev  1037942
-%global store_svnrev 4411
+%global qpid_release 0.10
+%global qpid_svnrev  1091571
+%global store_svnrev 4446
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  8
+%global release_num  1
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -38,15 +38,17 @@
 %global rhel_5                0
 
 # LIBRARY VERSIONS
-%global QPIDCOMMON_VERSION_INFO             3:0:0
-%global QPIDBROKER_VERSION_INFO             3:0:0
-%global QPIDCLIENT_VERSION_INFO             3:0:0
-%global QPIDMESSAGING_VERSION_INFO          3:0:0
-%global QMF_VERSION_INFO                    2:0:0
-%global QMFENGINE_VERSION_INFO              2:0:0
-%global QMFCONSOLE_VERSION_INFO             3:0:0
-%global RDMAWRAP_VERSION_INFO               3:0:0
-%global SSLCOMMON_VERSION_INFO              3:0:0
+%global QPIDCOMMON_VERSION_INFO             5:0:0
+%global QPIDTYPES_VERSION_INFO              3:0:2
+%global QPIDBROKER_VERSION_INFO             5:0:0
+%global QPIDCLIENT_VERSION_INFO             5:0:0
+%global QPIDMESSAGING_VERSION_INFO          4:0:1
+%global QMF_VERSION_INFO                    4:0:0
+%global QMF2_VERSION_INFO                   1:0:0
+%global QMFENGINE_VERSION_INFO              4:0:0
+%global QMFCONSOLE_VERSION_INFO             5:0:0
+%global RDMAWRAP_VERSION_INFO               5:0:0
+%global SSLCOMMON_VERSION_INFO              5:0:0
 
 # Single var with all lib version params (except store) for make
 %global LIB_VERSION_MAKE_PARAMS QPIDCOMMON_VERSION_INFO=%{QPIDCOMMON_VERSION_INFO} QPIDBROKER_VERSION_INFO=%{QPIDBROKER_VERSION_INFO} QPIDCLIENT_VERSION_INFO=%{QPIDCLIENT_VERSION_INFO} QPIDMESSAGING_VERSION_INFO=%{QPIDMESSAGING_VERSION_INFO} QMF_VERSION_INFO=%{QMF_VERSION_INFO} QMFENGINE_VERSION_INFO=%{QMFENGINE_VERSION_INFO} QMFCONSOLE_VERSION_INFO=%{QMFCONSOLE_VERSION_INFO} RDMAWRAP_VERSION_INFO=%{RDMAWRAP_VERSION_INFO} SSLCOMMON_VERSION_INFO=%{SSLCOMMON_VERSION_INFO}
@@ -104,7 +106,7 @@ Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 Patch1:         store-4411.patch
 
 %if %{fedora}
-Patch2:         fedora.patch
+Patch2:         qpid-3159.patch
 Patch6:         boost_filesystem_v2.patch
 %endif
 
@@ -257,6 +259,7 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %_libdir/libqpidmessaging.so
 %if ! %{rhel_4}
 %_datadir/qpidc/examples/messaging
+%_datadir/qpidc/examples/old_api
 %endif
 %defattr(755,root,root,-)
 %_bindir/qpid-perftest
@@ -330,7 +333,7 @@ the open AMQP messaging protocol.
 %_libdir/qpid/daemon/acl.so
 %attr(755, qpidd, qpidd) %_localstatedir/lib/qpidd
 %ghost %attr(755, qpidd, qpidd) /var/run/qpidd
-%attr(600, qpidd, qpidd) %config(noreplace) %_localstatedir/lib/qpidd/qpidd.sasldb
+#%attr(600, qpidd, qpidd) %config(noreplace) %_localstatedir/lib/qpidd/qpidd.sasldb
 %doc %_mandir/man1/qpidd.*
 
 %pre -n %{pkg_name}-server
@@ -818,13 +821,13 @@ popd
 %endif
 
 %if %{fedora}
-%patch2
-%patch6
+%patch2 -p2
+###%patch6
 %endif
 
 # apply store patch
 pushd ../store-%{qpid_release}.%{store_svnrev}
-%patch1
+###%patch1
 popd
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
@@ -944,6 +947,7 @@ rm -f %{buildroot}%_libdir/librdmawrap.so
 rm -f %{buildroot}%_libdir/libsslcommon.so
 rm -f %{buildroot}%_libdir/qpid/client/*.la
 rm -f %{buildroot}%_libdir/qpid/daemon/*.la
+rm -f %{buildroot}%_libdir/libcqpid_perl.so
 
 # this should be fixed in the examples Makefile (make install)
 rm -f %{buildroot}%_datadir/qpidc/examples/Makefile
@@ -1110,6 +1114,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon May  2 2011 Nuno Santos <nsantos@redhat.com> - 0.10-1
+- Rebased to sync with upstream's official 0.10 release
+
 * Sun Apr 17 2011 Kalev Lember <kalev@smartlink.ee> - 0.8-8
 - Rebuilt for boost 1.46.1 soname bump
 

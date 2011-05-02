@@ -1,0 +1,29 @@
+From c26786f952a8bf80eb8c836bc616f559b9fd2e3f Mon Sep 17 00:00:00 2001
+From: Ted Ross <tross@apache.org>
+Date: Tue, 22 Mar 2011 21:39:31 +0000
+Subject: [PATCH] QPID-3159 - Applied patch from Angus Salkeld
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1084359 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/managementgen/qmfgen/schema.py |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/qpid/cpp/managementgen/qmfgen/schema.py b/qpid/cpp/managementgen/qmfgen/schema.py
+index afdfe42..59e951f 100755
+--- a/qpid/cpp/managementgen/qmfgen/schema.py
++++ b/qpid/cpp/managementgen/qmfgen/schema.py
+@@ -1731,9 +1731,9 @@ class SchemaPackage:
+                   stream.write("            qmf::SchemaProperty arg(\"%s\", %s);\n" % (arg.name, typeName))
+                   if subType:
+                       stream.write("            arg.setSubtype(\"%s\");\n" % subType)
+-                  if stat.unit:
++                  if arg.unit:
+                       stream.write("            arg.setUnit(\"%s\");\n" % arg.unit)
+-                  if stat.desc:
++                  if arg.desc:
+                       stream.write("            arg.setDesc(\"%s\");\n" % arg.desc)
+                   stream.write("            arg.setDirection(%s);\n" % self.qmfv2Dir(arg.dir))
+                   stream.write("            method.addArgument(arg);\n")
+-- 
+1.6.2.5
+
