@@ -108,6 +108,7 @@ Patch1:         store-4411.patch
 %if %{fedora}
 Patch2:         qpid-3159.patch
 Patch6:         boost_filesystem_v2.patch
+Patch7:         mutable.patch
 %endif
 
 %if %{rhel_4}
@@ -823,6 +824,7 @@ popd
 %if %{fedora}
 %patch2 -p2
 ###%patch6
+%patch7
 %endif
 
 # apply store patch
