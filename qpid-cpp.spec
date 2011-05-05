@@ -853,7 +853,7 @@ CXXFLAGS="%{optflags} -DNDEBUG -O3" \
 CXXFLAGS="%{optflags} -DNDEBUG -O3" \
 %configure --disable-static --with-cpg --without-graphviz --without-help2man --with-swig
 %endif
-ECHO=echo make %{LIB_VERSION_MAKE_PARAMS}
+ECHO=echo make %{LIB_VERSION_MAKE_PARAMS} %{?_smp_mflags}
 
 # Make perftest utilities
 pushd src/tests
@@ -899,7 +899,7 @@ export CXXFLAGS="%{optflags} -DNDEBUG"
 %endif
 ./bootstrap
 %configure --disable-static --disable-rpath --disable-dependency-tracking --with-qpid-checkout=%{_builddir}/qpid-%{version}
-make
+make %{?_smp_mflags}
 popd
 
 %install
