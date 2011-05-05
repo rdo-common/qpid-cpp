@@ -26,7 +26,7 @@
 %global qpid_svnrev  1091571
 %global store_svnrev 4446
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  1
+%global release_num  2
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -477,6 +477,7 @@ for python.
 
 %files -n python-qpid-qmf
 %defattr(-,root,root,-)
+%dir %{python_sitelib}/qmf
 %{python_sitelib}/cqpid.py*
 %{python_sitelib}/_cqpid.so
 %{python_sitelib}/qmf.py*
