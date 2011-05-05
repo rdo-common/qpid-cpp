@@ -486,6 +486,10 @@ for python.
 %{python_sitelib}/qmf2.py*
 %{python_sitelib}/cqmf2.py*
 %{python_sitelib}/_cqmf2.so
+%{_bindir}/qpid-python-test
+%exclude %{python_sitelib}/mllib
+%exclude %{python_sitelib}/qpid
+%exclude %{python_sitelib}/*.egg-info
 
 %post -n python-qpid-qmf
 /sbin/ldconfig
@@ -901,6 +905,10 @@ popd
 %install
 rm -rf %{buildroot}
 mkdir -p -m0755 %{buildroot}/%_bindir
+
+(cd python; %{__python} setup.py install --skip-build --root %{buildroot})
+(cd extras/qmf; %{__python} setup.py install --skip-build --root %{buildroot})
+
 pushd %{_builddir}/qpid-%{version}/cpp
 make install DESTDIR=%{buildroot}
 
