@@ -26,7 +26,7 @@
 %global qpid_svnrev  1091571
 %global store_svnrev 4446
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  2
+%global release_num  3
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -133,6 +133,7 @@ BuildRequires: ruby
 BuildRequires: ruby-devel
 BuildRequires: python
 BuildRequires: python-devel
+BuildRequires: perl-devel
 BuildRequires: cyrus-sasl-devel
 %if ! %{rhel_4}
 BuildRequires: cyrus-sasl-lib
@@ -804,6 +805,20 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 
 %endif
 
+# === Package: perl-qpid ===
+
+%package -n perl-qpid
+Summary:   Perl bindings for Apache Qpid Messaging
+Group:     System Environment/Tools
+
+%description -n perl-qpid
+%{summary}.
+
+%files -n perl-qpid
+%defattr(-,root,root,-)
+%doc cpp/bindings/qpid/examples/perl/*
+%{perl_vendorarch}/*
+
 # ===
 
 
@@ -1101,6 +1116,13 @@ rm -f  %{buildroot}%_libexecdir/qpid/resize
 rm -f  %{buildroot}%_libexecdir/qpid/store_chk
 %endif
 
+# Perl bindings
+pushd %{_builddir}/qpid-%{version}
+install -d -m 755 %{buildroot}%{perl_vendorarch}/
+install -p -m 644 cpp/bindings/qpid/perl/cqpid_perl.pm %{buildroot}%{perl_vendorarch}/
+install -p -m 755 cpp/bindings/qpid/perl/.libs/libcqpid_perl.so %{buildroot}%{perl_vendorarch}/
+popd
+
 %clean
 rm -rf %{buildroot}
 
@@ -1125,6 +1147,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Jun 14 2011 Nuno Santos <nsantos@redhat.com> - 0.10-3
+- BZ709948 - package the perl bindings (patch from jpo@di.uminho.pt)
+
 * Mon May  2 2011 Nuno Santos <nsantos@redhat.com> - 0.10-1
 - Rebased to sync with upstream's official 0.10 release
 
