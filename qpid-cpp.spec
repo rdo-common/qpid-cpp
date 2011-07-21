@@ -26,7 +26,7 @@
 %global qpid_svnrev  1091571
 %global store_svnrev 4446
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  3
+%global release_num  4
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -1147,6 +1147,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Jul 21 2011 Jaroslav Reznik <jreznik@redhat.com> - 0.10-4
+- Rebuilt for boost 1.47.0
+
 * Tue Jun 14 2011 Nuno Santos <nsantos@redhat.com> - 0.10-3
 - BZ709948 - package the perl bindings (patch from jpo@di.uminho.pt)
 
