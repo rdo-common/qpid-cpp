@@ -95,7 +95,7 @@
 
 Name:           %{name}
 Version:        %{qpid_release}
-Release:        %{release_num}%{?dist}
+Release:        %{release_num}%{?dist}.1
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
@@ -1147,6 +1147,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Sun Aug 14 2011 Rex Dieter <rdieter@fedoraproject.org> - 0.10-4.1
+- Rebuilt for rpm (#728707)
+
 * Thu Jul 21 2011 Jaroslav Reznik <jreznik@redhat.com> - 0.10-4
 - Rebuilt for boost 1.47.0
 
