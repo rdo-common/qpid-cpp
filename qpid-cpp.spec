@@ -479,15 +479,15 @@ for python.
 
 %files -n python-qpid-qmf
 %defattr(-,root,root,-)
-%{python_sitelib}/qmf
+%{python_sitearch}/qmf
 %{python_sitearch}/cqpid.py*
-%{python_sitelib}/_cqpid.so
+%{python_sitearch}/_cqpid.so
 %{python_sitearch}/qmf.py*
 %{python_sitearch}/qmfengine.py*
-%{python_sitelib}/_qmfengine.so
+%{python_sitearch}/_qmfengine.so
 %{python_sitearch}/qmf2.py*
 %{python_sitearch}/cqmf2.py*
-%{python_sitelib}/_cqmf2.so
+%{python_sitearch}/_cqmf2.so
 %{_bindir}/qpid-python-test
 %exclude %{python_sitelib}/mllib
 %exclude %{python_sitelib}/qpid
@@ -992,13 +992,13 @@ rm -rf %{buildroot}%_datadir/qpidc/examples/xml-exchange
 %if ! %{rhel_4}
 
 %if %{python_qmf}
-install -d %{buildroot}%{python_sitelib}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitelib}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/.libs/_cqpid.so %{buildroot}%{python_sitelib}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/*.py %{buildroot}%{python_sitelib}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_qmfengine.so %{buildroot}%{python_sitelib}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/*.py %{buildroot}%{python_sitelib}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/.libs/_cqmf2.so %{buildroot}%{python_sitelib}
+install -d %{buildroot}%{python_sitearch}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitearch}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/.libs/_cqpid.so %{buildroot}%{python_sitearch}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/*.py %{buildroot}%{python_sitearch}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_qmfengine.so %{buildroot}%{python_sitearch}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/*.py %{buildroot}%{python_sitearch}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/.libs/_cqmf2.so %{buildroot}%{python_sitearch}
 %endif
 
 %if %{ruby_qmf}
