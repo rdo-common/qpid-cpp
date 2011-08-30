@@ -22,11 +22,11 @@
 %global MRG_non_core 1
 
 # Release numbers
-%global qpid_release 0.10
-%global qpid_svnrev  1091571
-%global store_svnrev 4446
+%global qpid_release 0.12
+%global qpid_svnrev  1154981
+%global store_svnrev 4463
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  4
+%global release_num  1
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -106,9 +106,9 @@ Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 Patch1:         store-4411.patch
 
 %if %{fedora}
-Patch2:         qpid-3159.patch
+#Patch2:         qpid-3159.patch
 Patch6:         boost_filesystem_v2.patch
-Patch7:         mutable.patch
+#Patch7:         mutable.patch
 %endif
 
 %if %{rhel_4}
@@ -842,9 +842,9 @@ popd
 %endif
 
 %if %{fedora}
-%patch2 -p2
+#%patch2 -p2
 ###%patch6
-%patch7
+#%patch7
 %endif
 
 # apply store patch
@@ -1147,6 +1147,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Aug 30 2011 Nuno Santos <nsantos@redhat.com> - 0.12-1.1
+- Rebased to sync with upstream's official 0.12 release
+
 * Sun Aug 14 2011 Rex Dieter <rdieter@fedoraproject.org> - 0.10-4.1
 - Rebuilt for rpm (#728707)
 
