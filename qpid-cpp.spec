@@ -479,7 +479,7 @@ for python.
 
 %files -n python-qpid-qmf
 %defattr(-,root,root,-)
-%{python_sitearch}/qmf
+%{python_sitelib}/qmf
 %{python_sitearch}/cqpid.py*
 %{python_sitearch}/_cqpid.so
 %{python_sitearch}/qmf.py*
