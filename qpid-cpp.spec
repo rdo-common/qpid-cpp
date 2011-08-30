@@ -4,6 +4,7 @@
 #
 
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 %{!?ruby_sitelib: %global ruby_sitelib %(/usr/bin/ruby -rrbconfig  -e 'puts Config::CONFIG["sitelibdir"] ')}
 %{!?ruby_sitearch: %global ruby_sitearch %(/usr/bin/ruby -rrbconfig -e 'puts Config::CONFIG["sitearchdir"] ')}
 
@@ -451,7 +452,7 @@ components.
 %_libdir/libqmfengine.so
 %_libdir/libqmfconsole.so
 %_bindir/qmf-gen
-%{python_sitelib}/qmfgen
+%{python_sitearch}/qmfgen
 
 %post -n qpid-qmf-devel
 /sbin/ldconfig
@@ -1062,7 +1063,7 @@ rm -f  %{buildroot}%_localstatedir/lib/qpidd/qpidd.sasldb
 rm -rf %{buildroot}%_includedir/qmf
 rm -rf %{buildroot}%_includedir/qpid
 rm -rf %{buildroot}%_datadir/qpidc/examples/messaging
-rm -rf %{buildroot}%{python_sitelib}/qmfgen
+rm -rf %{buildroot}%{python_sitearch}/qmfgen
 rm -f  %{buildroot}%_bindir/qpid-perftest
 rm -f  %{buildroot}%_bindir/qpid-topic-listener
 rm -f  %{buildroot}%_bindir/qpid-topic-publisher
@@ -1084,7 +1085,7 @@ rm -f  %{buildroot}%_libdir/libqpidcommon.so
 #rm -rf %{buildroot}%_includedir/qmf
 #rm -rf %{buildroot}%_includedir/qpid
 #rm -rf %{buildroot}%_datadir/qpidc/examples/messaging
-#rm -rf %{buildroot}%{python_sitelib}/qmfgen
+#rm -rf %{buildroot}%{python_sitearch}/qmfgen
 #rm -f  %{buildroot}%_bindir/perftest
 #rm -f  %{buildroot}%_bindir/topic_listener
 #rm -f  %{buildroot}%_bindir/topic_publisher
