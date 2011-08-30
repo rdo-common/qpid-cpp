@@ -865,7 +865,7 @@ pushd cpp
 CXXFLAGS="%{optflags} -DNDEBUG -O3" \
 %configure --disable-static --without-cpg --without-graphviz --without-help2man --without-rdma
 %else
-CXXFLAGS="%{optflags} -DNDEBUG -O3" \
+CXXFLAGS="%{optflags} -DNDEBUG -O3 -Wno-unused-result" \
 %configure --disable-static --with-cpg --without-graphviz --without-help2man --with-swig
 %endif
 ECHO=echo make %{LIB_VERSION_MAKE_PARAMS} %{?_smp_mflags}
