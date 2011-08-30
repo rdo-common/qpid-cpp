@@ -480,13 +480,13 @@ for python.
 %files -n python-qpid-qmf
 %defattr(-,root,root,-)
 %{python_sitelib}/qmf
-%{python_sitelib}/cqpid.py*
+%{python_sitearch}/cqpid.py*
 %{python_sitelib}/_cqpid.so
-%{python_sitelib}/qmf.py*
-%{python_sitelib}/qmfengine.py*
+%{python_sitearch}/qmf.py*
+%{python_sitearch}/qmfengine.py*
 %{python_sitelib}/_qmfengine.so
-%{python_sitelib}/qmf2.py*
-%{python_sitelib}/cqmf2.py*
+%{python_sitearch}/qmf2.py*
+%{python_sitearch}/cqmf2.py*
 %{python_sitelib}/_cqmf2.so
 %{_bindir}/qpid-python-test
 %exclude %{python_sitelib}/mllib
