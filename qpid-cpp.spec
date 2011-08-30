@@ -734,9 +734,10 @@ with Berkeley DB.
 %defattr(-,root,root,-)
 %doc ../store-%{qpid_release}.%{store_svnrev}/README 
 %_libdir/qpid/daemon/msgstore.so*
-%_libexecdir/qpid/jerr.py*
-%_libexecdir/qpid/jrnl.py*
-%_libexecdir/qpid/janal.py*
+%{python_sitelib}/qpidstore/__init__.py*
+%{python_sitelib}/qpidstore/jerr.py*
+%{python_sitelib}/qpidstore/jrnl.py*
+%{python_sitelib}/qpidstore/janal.py*
 %_libexecdir/qpid/resize
 %_libexecdir/qpid/store_chk
 %attr(0775,qpidd,qpidd) %dir %_localstatedir/rhm
@@ -1109,9 +1110,10 @@ rm -f  %{buildroot}%_libdir/qpid/daemon/cluster.so
 rm -f  %{buildroot}%_libdir/qpid/daemon/msgstore.so
 rm -f  %{buildroot}%_libdir/qpid/daemon/ssl.so
 rm -f  %{buildroot}%_libdir/qpid/daemon/xml.so
-rm -f  %{buildroot}%_libexecdir/qpid/jerr.py
-rm -f  %{buildroot}%_libexecdir/qpid/jrnl.py
-rm -f  %{buildroot}%_libexecdir/qpid/janal.py
+rm -f  %{buildroot}%{python_sitelib}/qpidstore/__init__.py*
+rm -f  %{buildroot}%{python_sitelib}/qpidstore/jerr.py
+rm -f  %{buildroot}%{python_sitelib}/qpidstore/jrnl.py
+rm -f  %{buildroot}%{python_sitelib}/qpidstore/janal.py
 rm -f  %{buildroot}%_libexecdir/qpid/resize
 rm -f  %{buildroot}%_libexecdir/qpid/store_chk
 %endif
