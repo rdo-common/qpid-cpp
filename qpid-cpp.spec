@@ -105,6 +105,7 @@ Source0:        qpid-%{version}.tar.gz
 Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 
 %if %{fedora}
+Patch0:         configure.patch
 Patch1:         fedora.patch
 %endif
 
@@ -840,6 +841,7 @@ popd
 %endif
 
 %if %{fedora}
+%patch0 -p0
 %patch1 -p2
 %endif
 
