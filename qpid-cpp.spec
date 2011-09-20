@@ -27,7 +27,7 @@
 %global qpid_svnrev  1154981
 %global store_svnrev 4463
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  1
+%global release_num  2
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -104,12 +104,8 @@ URL:            http://qpid.apache.org
 Source0:        qpid-%{version}.tar.gz
 Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 
-Patch1:         store-4411.patch
-
 %if %{fedora}
-#Patch2:         qpid-3159.patch
-Patch6:         boost_filesystem_v2.patch
-#Patch7:         mutable.patch
+Patch1:         fedora.patch
 %endif
 
 %if %{rhel_4}
@@ -844,15 +840,8 @@ popd
 %endif
 
 %if %{fedora}
-#%patch2 -p2
-###%patch6
-#%patch7
+%patch1 -p2
 %endif
-
-# apply store patch
-pushd ../store-%{qpid_release}.%{store_svnrev}
-###%patch1
-popd
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -1150,6 +1139,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Sep 20 2011 Nuno Santos <nsantos@nsantos-laptop> - 0.12-2.1
+- Updated patch for qmf-related issues fixed post-0.12
+
 * Tue Aug 30 2011 Nuno Santos <nsantos@redhat.com> - 0.12-1.1
 - Rebased to sync with upstream's official 0.12 release
 
