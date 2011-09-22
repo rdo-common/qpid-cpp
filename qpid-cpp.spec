@@ -27,7 +27,7 @@
 %global qpid_svnrev  1154981
 %global store_svnrev 4463
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  2
+%global release_num  3
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -202,6 +202,7 @@ the AMQP protocol.
 %dir %_libdir/qpid/client
 %dir %_sysconfdir/qpid
 %config(noreplace) %_sysconfdir/qpid/qpidc.conf
+%_libdir/pkgconfig/qpid.pc
 
 %post -n %{pkg_name}-client
 /sbin/ldconfig
@@ -1005,7 +1006,7 @@ install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/.libs/cqmf2.
 %endif
 
 rm -f %{buildroot}%_libdir/_*
-rm -f %{buildroot}%_libdir/pkgconfig/qpid.pc
+#rm -f %{buildroot}%_libdir/pkgconfig/qpid.pc
 rm -fr %{buildroot}%_libdir/qpid/tests
 rm -fr %{buildroot}%_libexecdir/qpid/tests
 %if ! %{rhel_4}
@@ -1141,7 +1142,10 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
-* Tue Sep 20 2011 Nuno Santos <nsantos@nsantos-laptop> - 0.12-2.1
+* Thu Sep 22 2011 Nuno Santos <nsantos@redhat.com> - 0.12-3.1
+- BZ705208 - [RFE] qpid needs package config files for dependency usage by autotools
+
+* Tue Sep 20 2011 Nuno Santos <nsantos@redhat.com> - 0.12-2.1
 - Updated patch for qmf-related issues fixed post-0.12
 
 * Tue Aug 30 2011 Nuno Santos <nsantos@redhat.com> - 0.12-1.1
