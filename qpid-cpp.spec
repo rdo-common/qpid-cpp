@@ -27,7 +27,7 @@
 %global qpid_svnrev  1154981
 %global store_svnrev 4463
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  3
+%global release_num  4
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -477,7 +477,7 @@ for python.
 
 %files -n python-qpid-qmf
 %defattr(-,root,root,-)
-%{python_sitelib}/qmf
+%{python_sitearch}/qmf
 %{python_sitearch}/cqpid.py*
 %{python_sitearch}/_cqpid.so
 %{python_sitearch}/qmf.py*
@@ -487,9 +487,9 @@ for python.
 %{python_sitearch}/cqmf2.py*
 %{python_sitearch}/_cqmf2.so
 %{_bindir}/qpid-python-test
-%exclude %{python_sitelib}/mllib
-%exclude %{python_sitelib}/qpid
-%exclude %{python_sitelib}/*.egg-info
+%exclude %{python_sitearch}/mllib
+%exclude %{python_sitearch}/qpid
+%exclude %{python_sitearch}/*.egg-info
 
 %post -n python-qpid-qmf
 /sbin/ldconfig
@@ -915,8 +915,8 @@ popd
 rm -rf %{buildroot}
 mkdir -p -m0755 %{buildroot}/%_bindir
 
-(cd python; %{__python} setup.py install --skip-build --root %{buildroot})
-(cd extras/qmf; %{__python} setup.py install --skip-build --root %{buildroot})
+(cd python; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
+(cd extras/qmf; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
 
 pushd %{_builddir}/qpid-%{version}/cpp
 make install DESTDIR=%{buildroot}
@@ -1142,6 +1142,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Oct 20 2011 Nuno Santos <nsantos@redhat.com> - 0.12-4.1
+- BZ747351 - python-qpid-qmf has namespace collision
+
 * Thu Sep 22 2011 Nuno Santos <nsantos@redhat.com> - 0.12-3.1
 - BZ705208 - [RFE] qpid needs package config files for dependency usage by autotools
 
