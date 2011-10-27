@@ -96,7 +96,7 @@
 
 Name:           %{name}
 Version:        %{qpid_release}
-Release:        %{release_num}%{?dist}.1
+Release:        %{release_num}%{?dist}.2
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
@@ -1142,6 +1142,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Oct 26 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-4.2
+- Rebuilt for glibc bug#747377
+
 * Thu Oct 20 2011 Nuno Santos <nsantos@redhat.com> - 0.12-4.1
 - BZ747351 - python-qpid-qmf has namespace collision
 
