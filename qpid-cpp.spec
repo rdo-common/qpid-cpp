@@ -27,7 +27,7 @@
 %global qpid_svnrev  1154981
 %global store_svnrev 4463
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  4
+%global release_num  5
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -1142,6 +1142,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Dec 07 2011 Denis Arnaud <denis.arnaud_fedora@m4x.org> - 0.12-5.2
+- Rebuilt for Boost-1.48
+
 * Wed Oct 26 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-4.2
 - Rebuilt for glibc bug#747377
 
