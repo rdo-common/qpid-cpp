@@ -107,6 +107,11 @@ Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 %if %{fedora}
 Patch0:         configure.patch
 Patch1:         fedora.patch
+# Patch fixing a compilation issue related to the usage of a "Boost Singleton"
+# (which is not part of the Boost API, but available as a side effect of
+# Boost.Serialization).
+# Upstream ticket (Apache JIRA): https://issues.apache.org/jira/browse/QPID-3638
+# Fedora ticket: https://bugzilla.redhat.com/show_bug.cgi?id=761045
 Patch6:         qpid-cpp-singleton.patch
 %endif
 
