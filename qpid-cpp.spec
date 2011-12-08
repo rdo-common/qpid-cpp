@@ -27,7 +27,7 @@
 %global qpid_svnrev  1154981
 %global store_svnrev 4463
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  5
+%global release_num  6
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -107,6 +107,7 @@ Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 %if %{fedora}
 Patch0:         configure.patch
 Patch1:         fedora.patch
+Patch6:         qpid-cpp-singleton.patch
 %endif
 
 %if %{rhel_4}
@@ -844,6 +845,7 @@ popd
 %if %{fedora}
 %patch0 -p0
 %patch1 -p2
+%patch6 -p1
 %endif
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
@@ -1142,6 +1144,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Dec 08 2011 Denis Arnaud <denis.arnaud_fedora@m4x.org> - 0.12-6.2
+- Fixed the Boost.Singleton issue (thanks to Petr Machata's patch: #761045)
+
 * Wed Dec 07 2011 Denis Arnaud <denis.arnaud_fedora@m4x.org> - 0.12-5.2
 - Rebuilt for Boost-1.48
 
