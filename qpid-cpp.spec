@@ -96,7 +96,7 @@
 
 Name:           %{name}
 Version:        %{qpid_release}
-Release:        %{release_num}%{?dist}.2
+Release:        %{release_num}%{?dist}.3
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
@@ -1149,6 +1149,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-6.3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Thu Dec 08 2011 Denis Arnaud <denis.arnaud_fedora@m4x.org> - 0.12-6.2
 - Fixed the Boost.Singleton issue (thanks to Petr Machata's patch: #761045)
 
