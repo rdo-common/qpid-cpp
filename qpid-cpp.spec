@@ -27,7 +27,7 @@
 %global qpid_svnrev  1154981
 %global store_svnrev 4463
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  6
+%global release_num  7
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -96,7 +96,7 @@
 
 Name:           %{name}
 Version:        %{qpid_release}
-Release:        %{release_num}%{?dist}.3
+Release:        %{release_num}%{?dist}.1
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
@@ -412,6 +412,7 @@ Qpid broker daemon.
 Summary: The QPID Management Framework
 Group: System Environment/Daemons
 Requires: %{pkg_name}-client = %version-%release
+Requires: python-qpid >= %version
 Provides: qmf = %version-%release
 Obsoletes: qmf < %version-%release
 
@@ -1149,6 +1150,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Jan 18 2012 Nuno Santos <nsantos@redhat.com> - 0.12-7.1
+- Added missing subpackage dependency
+
 * Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-6.3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
