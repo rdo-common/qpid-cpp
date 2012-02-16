@@ -78,15 +78,15 @@
 %global client_ssl        %{MRG_non_core}
 %global server_ssl        %{MRG_non_core}
 %global server_xml        %{MRG_non_core}
+%if 0%{?fedora} >= 17
+%global server_cluster    0
+%else
 %global server_cluster    %{MRG_non_core}
+%endif
 %global server_store      %{MRG_non_core}
 %if %{fedora}
 %global rh_tests          0
 %global qpid_tools        1
-%if 0%{?fedora} >= 17
-%global server_cluster    0
-%global client_cluster    0
-%endif
 %else
 %global rh_tests          %{MRG_non_core}
 %global qpid_tools        0
@@ -869,12 +869,28 @@ popd
 %build
 pushd cpp
 ./bootstrap
-%if %{rhel_4}
-CXXFLAGS="%{optflags} -DNDEBUG -O3" \
-%configure --disable-static --without-cpg --without-graphviz --without-help2man --without-rdma
-%else
+
 CXXFLAGS="%{optflags} -DNDEBUG -O3 -Wno-unused-result" \
-%configure --disable-static --with-cpg --without-graphviz --without-help2man --with-swig
+%configure --disable-static --with-swig --with-sasl --with-ssl --without-help2man -without-graphviz \
+%if %{rhel_4}
+--without-swig \
+%else
+--with-swig \
+%endif
+%if %{server_rdma}
+--with-rdma \
+%else
+--without-rdma \
+%endif
+%if %{server_cluster}
+--with-cpg \
+%else
+--without-cpg \
+%endif
+%if %{server_xml}
+--with-xml
+%else
+--without-xml
 %endif
 ECHO=echo make %{LIB_VERSION_MAKE_PARAMS} %{?_smp_mflags}
 
