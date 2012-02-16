@@ -855,7 +855,7 @@ popd
 %endif
 
 %if %{fedora}
-#%patch0 -p0
+%patch0 -p0
 #%patch1 -p2
 #%patch6 -p1
 %endif
@@ -871,7 +871,7 @@ pushd cpp
 ./bootstrap
 
 CXXFLAGS="%{optflags} -DNDEBUG -O3 -Wno-unused-result" \
-%configure --disable-static --with-swig --with-sasl --with-ssl --without-help2man -without-graphviz \
+%configure --disable-static --with-swig --with-sasl --with-ssl --without-help2man \
 %if %{rhel_4}
 --without-swig \
 %else
