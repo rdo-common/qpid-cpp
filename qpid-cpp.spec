@@ -83,6 +83,10 @@
 %if %{fedora}
 %global rh_tests          0
 %global qpid_tools        1
+%if 0%{?fedora} >= 17
+%global server_cluster    0
+%global client_cluster    0
+%endif
 %else
 %global rh_tests          %{MRG_non_core}
 %global qpid_tools        0
