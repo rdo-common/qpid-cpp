@@ -1,3 +1,15 @@
+Index: qpid/cpp/src/qpid/sys/Shlib.h
+===================================================================
+--- a/qpid/cpp/src/qpid/sys/Shlib.h	(revision 1245201)
++++ b/qpid/cpp/src/qpid/sys/Shlib.h	(working copy)
+@@ -23,6 +23,7 @@
+  */
+ 
+ #include "qpid/CommonImportExport.h" 
++#include "qpid/sys/IntegerTypes.h" 
+ #include <boost/noncopyable.hpp>
+ #include <iostream>
+ 
 Index: qpid/cpp/src/qpid/sys/posix/SocketAddress.cpp
 ===================================================================
 --- a/qpid/cpp/src/qpid/sys/posix/SocketAddress.cpp	2011-08-17 18:07:36.000000000 -0400
