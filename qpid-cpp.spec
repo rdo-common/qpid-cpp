@@ -110,7 +110,7 @@ Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 
 %if %{fedora}
 Patch0:         configure.patch
-Patch1:         fedora.patch
+Patch1:         unistd.patch
 # Patch fixing a compilation issue related to the usage of a "Boost Singleton"
 # (which is not part of the Boost API, but available as a side effect of
 # Boost.Serialization).
@@ -856,7 +856,7 @@ popd
 
 %if %{fedora}
 %patch0 -p0
-#%patch1 -p2
+%patch1 -p2
 #%patch6 -p1
 %endif
 

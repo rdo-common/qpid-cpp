@@ -1,0 +1,12 @@
+Index: qpid/cpp/src/qpid/sys/posix/Socket.cpp
+===================================================================
+--- a/qpid/cpp/src/qpid/sys/posix/Socket.cpp	(revision 1245117)
++++ b/qpid/cpp/src/qpid/sys/posix/Socket.cpp	(working copy)
+@@ -29,6 +29,7 @@
+ #include <sys/types.h>
+ #include <sys/socket.h>
+ #include <sys/errno.h>
++#include <unistd.h>
+ #include <netinet/in.h>
+ #include <netinet/tcp.h>
+ #include <netdb.h>
