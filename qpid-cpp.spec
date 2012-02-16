@@ -23,11 +23,11 @@
 %global MRG_non_core 1
 
 # Release numbers
-%global qpid_release 0.12
-%global qpid_svnrev  1154981
-%global store_svnrev 4463
+%global qpid_release 0.14
+%global qpid_svnrev  1209041
+%global store_svnrev 4490
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  7
+%global release_num  1
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -849,9 +849,9 @@ popd
 %endif
 
 %if %{fedora}
-%patch0 -p0
-%patch1 -p2
-%patch6 -p1
+#%patch0 -p0
+#%patch1 -p2
+#%patch6 -p1
 %endif
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
@@ -1150,6 +1150,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Feb 16 2012 Nuno Santos <nsantos@redhat.com> - 0.14-1.1
+- Rebased to sync with upstream's official 0.14 release
+
 * Wed Jan 18 2012 Nuno Santos <nsantos@redhat.com> - 0.12-7.1
 - Added missing subpackage dependency
 
