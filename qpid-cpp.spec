@@ -857,7 +857,7 @@ popd
 %if %{fedora}
 %patch0 -p0
 %patch1 -p2
-#%patch6 -p1
+%patch6 -p1
 %endif
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
