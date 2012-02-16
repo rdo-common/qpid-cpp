@@ -130,46 +130,48 @@ ExclusiveArch:  i386 i686 x86_64
 #Vendor:         Red Hat, Inc.
 
 BuildRequires: boost-devel
-BuildRequires: doxygen
 BuildRequires: libtool
 BuildRequires: pkgconfig
 BuildRequires: ruby
 BuildRequires: ruby-devel
 BuildRequires: python
 BuildRequires: python-devel
-BuildRequires: perl-devel
-BuildRequires: cyrus-sasl-devel
-%if ! %{rhel_4}
-BuildRequires: cyrus-sasl-lib
-%endif
-BuildRequires: cyrus-sasl
-%if %{client_rdma} || %{server_rdma}
-BuildRequires: libibverbs-devel
-%if ! %{rhel_4}
-BuildRequires: librdmacm-devel
-%endif
-%endif
-BuildRequires: nss-devel
-BuildRequires: nspr-devel
-BuildRequires: xqilla-devel
-BuildRequires: xerces-c-devel
 BuildRequires: swig
-BuildRequires: db4-devel
-BuildRequires: libaio-devel
-%if %{rhel_4} || %{rhel_5}
-BuildRequires: e2fsprogs-devel
+BuildRequires: cyrus-sasl-devel
+BuildRequires: cyrus-sasl-lib
+BuildRequires: cyrus-sasl
 %if %{rhel_5}
-BuildRequires: openais-devel
-BuildRequires: cman-devel
-%endif
+BuildRequires: e2fsprogs-devel
 %else
 BuildRequires: boost-program-options
 BuildRequires: boost-filesystem
 BuildRequires: libuuid-devel
-BuildRequires: corosynclib-devel >= 1.0.0-1
-BuildRequires: clusterlib-devel >= 3.0.0-20
 %endif
 
+%if %{with_rdma}
+BuildRequires: libibverbs-devel
+BuildRequires: librdmacm-devel
+%endif
+
+BuildRequires: nss-devel
+BuildRequires: nspr-devel
+
+%if %{with_xml}
+BuildRequires: xqilla-devel
+BuildRequires: xerces-c-devel
+%endif
+
+BuildRequires: db4-devel
+BuildRequires: libaio-devel
+%if %{rhel_5}
+BuildRequires: openais-devel
+BuildRequires: cman-devel
+%else
+%if %{with_cluster}
+BuildRequires: corosynclib-devel
+BuildRequires: clusterlib-devel
+%endif
+%endif
 
 %description
 
