@@ -78,7 +78,7 @@
 %global client_ssl        %{MRG_non_core}
 %global server_ssl        %{MRG_non_core}
 %global server_xml        %{MRG_non_core}
-%if 0%{?fedora} >= 17
+%if %{fedora}
 %global server_cluster    0
 %else
 %global server_cluster    %{MRG_non_core}
