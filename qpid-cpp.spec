@@ -148,7 +148,7 @@ BuildRequires: boost-filesystem
 BuildRequires: libuuid-devel
 %endif
 
-%if %{with_rdma}
+%if %{client_rdma}
 BuildRequires: libibverbs-devel
 BuildRequires: librdmacm-devel
 %endif
@@ -156,7 +156,7 @@ BuildRequires: librdmacm-devel
 BuildRequires: nss-devel
 BuildRequires: nspr-devel
 
-%if %{with_xml}
+%if %{server_xml}
 BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
 %endif
@@ -167,7 +167,7 @@ BuildRequires: libaio-devel
 BuildRequires: openais-devel
 BuildRequires: cman-devel
 %else
-%if %{with_cluster}
+%if %{server_cluster}
 BuildRequires: corosynclib-devel
 BuildRequires: clusterlib-devel
 %endif
