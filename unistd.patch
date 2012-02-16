@@ -1,15 +1,15 @@
 Index: qpid/cpp/src/qpid/sys/posix/SocketAddress.cpp
 ===================================================================
---- a/qpid/cpp/src/qpid/sys/posix/SocketAddress.cpp	(revision 1245117)
-+++ b/qpid/cpp/src/qpid/sys/posix/SocketAddress.cpp	(working copy)
+--- a/qpid/cpp/src/qpid/sys/posix/SocketAddress.cpp	2011-08-17 18:07:36.000000000 -0400
++++ b/qpid/cpp/src/qpid/sys/posix/SocketAddress.cpp	2012-02-16 16:30:15.311869726 -0500
 @@ -84,8 +84,8 @@
  uint16_t SocketAddress::getPort(::sockaddr const * const addr)
  {
      switch (addr->sa_family) {
--        case AF_INET: return ntohs(((::sockaddr_in*)(void*)addr)->sin_port);
--        case AF_INET6: return ntohs(((::sockaddr_in6*)(void*)addr)->sin6_port);
-+        case AF_INET: return ntohs(((const ::sockaddr_in*)(const void*)addr)->sin_port);
-+        case AF_INET6: return ntohs(((const ::sockaddr_in6*)(const void*)addr)->sin6_port);
+-        case AF_INET: return ntohs(((::sockaddr_in*)addr)->sin_port);
+-        case AF_INET6: return ntohs(((::sockaddr_in6*)addr)->sin6_port);
++        case AF_INET: return ntohs(((const ::sockaddr_in*)addr)->sin_port);
++        case AF_INET6: return ntohs(((const ::sockaddr_in6*)addr)->sin6_port);
          default:throw Exception(QPID_MSG("Unexpected socket type"));
      }
  }
