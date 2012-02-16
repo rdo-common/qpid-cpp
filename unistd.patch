@@ -37,3 +37,15 @@ Index: qpid/cpp/src/qpid/sys/posix/Socket.cpp
  #include <netinet/in.h>
  #include <netinet/tcp.h>
  #include <netdb.h>
+Index: qpid/cpp/src/qpid/sys/posix/SystemInfo.cpp
+===================================================================
+--- a/qpid/cpp/src/qpid/sys/posix/SystemInfo.cpp	(revision 1245201)
++++ b/qpid/cpp/src/qpid/sys/posix/SystemInfo.cpp	(working copy)
+@@ -28,6 +28,7 @@
+ #include <sys/socket.h> // For FreeBSD
+ #include <netinet/in.h> // For FreeBSD
+ #include <ifaddrs.h>
++#include <unistd.h>
+ #include <iostream>
+ #include <fstream>
+ #include <sstream>
