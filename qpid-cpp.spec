@@ -1004,7 +1004,7 @@ rm -f %{buildroot}%_libdir/librdmawrap.so
 rm -f %{buildroot}%_libdir/libsslcommon.so
 rm -f %{buildroot}%_libdir/qpid/client/*.la
 rm -f %{buildroot}%_libdir/qpid/daemon/*.la
-#rm -f %{buildroot}%_libdir/libcqpid_perl.so
+rm -f %{buildroot}%_libdir/libcqpid_perl.so
 
 # this should be fixed in the examples Makefile (make install)
 rm -f %{buildroot}%_datadir/qpidc/examples/Makefile
