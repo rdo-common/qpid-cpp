@@ -25,7 +25,7 @@
 # Release numbers
 %global qpid_release 0.14
 %global qpid_svnrev  1209041
-%global store_svnrev 4490
+%global store_svnrev 4494
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
 %global release_num  1
 
