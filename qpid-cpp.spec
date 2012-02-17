@@ -117,6 +117,7 @@ Patch1:         unistd.patch
 # Upstream ticket (Apache JIRA): https://issues.apache.org/jira/browse/QPID-3638
 # Fedora ticket: https://bugzilla.redhat.com/show_bug.cgi?id=761045
 Patch6:         qpid-cpp-singleton.patch
+Patch7:         store.patch
 %endif
 
 %if %{rhel_4}
@@ -858,6 +859,9 @@ popd
 %patch0 -p0
 %patch1 -p2
 %patch6 -p1
+pushd ../store-%{qpid_release}.%{store_svnrev}
+%patch7 -p1
+popd
 %endif
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
