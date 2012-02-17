@@ -136,6 +136,7 @@ ExclusiveArch:  i386 i686 x86_64
 
 BuildRequires: boost-devel
 BuildRequires: libtool
+BuildRequires: doxygen
 BuildRequires: pkgconfig
 BuildRequires: ruby
 BuildRequires: ruby-devel
