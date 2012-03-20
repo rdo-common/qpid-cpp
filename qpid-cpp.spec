@@ -27,7 +27,7 @@
 %global qpid_svnrev  1209041
 %global store_svnrev 4494
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  2
+%global release_num  3
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -269,7 +269,6 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %if %{rhel_4}
 %_includedir/qpid-boost
 %endif
-%_includedir/qmf
 %_libdir/libqpidcommon.so
 %_libdir/libqpidclient.so
 %_libdir/libqpidtypes.so
@@ -468,6 +467,7 @@ components.
 %_libdir/libqmf2.so
 %_libdir/libqmfengine.so
 %_libdir/libqmfconsole.so
+%_includedir/qmf
 %_bindir/qmf-gen
 %{python_sitearch}/qmfgen
 
@@ -1181,6 +1181,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Mar 20 2012 Nuno Santos <nsantos@redhat.com> - 0.14-3.1
+- BZ692583 - QMF header files are in the wrong RPM
+
 * Tue Mar 20 2012 Nuno Santos <nsantos@redhat.com> - 0.14-2.1
 - BZ756927 - Spec file fixes for qpid-cpp
 
