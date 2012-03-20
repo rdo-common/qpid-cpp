@@ -27,7 +27,7 @@
 %global qpid_svnrev  1209041
 %global store_svnrev 4494
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  1
+%global release_num  2
 
 # NOTE: these flags should not both be set at the same time!
 # RHEL-6 builds should have all flags set to 0.
@@ -105,7 +105,7 @@ Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
 URL:            http://qpid.apache.org
-Source0:        qpid-%{version}.tar.gz
+Source0:        https://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
 Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 
 %if %{fedora}
@@ -275,6 +275,8 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %_libdir/libqpidtypes.so
 %_libdir/libqpidmessaging.so
 %if ! %{rhel_4}
+%_datadir/qpidc
+%_datadir/qpidc/examples
 %_datadir/qpidc/examples/messaging
 %_datadir/qpidc/examples/old_api
 %endif
@@ -1179,6 +1181,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Mar 20 2012 Nuno Santos <nsantos@redhat.com> - 0.14-2.1
+- BZ756927 - Spec file fixes for qpid-cpp
+
 * Thu Feb 16 2012 Nuno Santos <nsantos@redhat.com> - 0.14-1.1
 - Rebased to sync with upstream's official 0.14 release
 
