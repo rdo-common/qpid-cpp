@@ -100,7 +100,7 @@
 
 Name:           %{name}
 Version:        %{qpid_release}
-Release:        %{release_num}%{?dist}.1
+Release:        %{release_num}%{?dist}.2
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
@@ -118,6 +118,9 @@ Patch1:         unistd.patch
 # Fedora ticket: https://bugzilla.redhat.com/show_bug.cgi?id=761045
 Patch6:         qpid-cpp-singleton.patch
 Patch7:         store.patch
+# fix build when size_t != unsigned int
+# Upstream ticket (Apache JIRA): https://issues.apache.org/jira/browse/QPID-3952
+Patch8:         qpid-0.14-size_t.patch
 %endif
 
 %if %{rhel_4}
@@ -867,6 +870,7 @@ popd
 pushd ../store-%{qpid_release}.%{store_svnrev}
 %patch7 -p1
 popd
+%patch8 -p1 -b .size_t
 %endif
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
@@ -1181,6 +1185,9 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Apr 17 2012 Dan Horák <dan[at]danny.cz> - 0.14-3.2
+- fix build when size_t != unsigned int
+
 * Tue Mar 20 2012 Nuno Santos <nsantos@redhat.com> - 0.14-3.1
 - BZ692583 - QMF header files are in the wrong RPM
 
