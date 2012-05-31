@@ -23,9 +23,9 @@
 %global MRG_non_core 1
 
 # Release numbers
-%global qpid_release 0.14
-%global qpid_svnrev  1209041
-%global store_svnrev 4494
+%global qpid_release 0.16
+%global qpid_svnrev  1336378
+%global store_svnrev 4509
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
 %global release_num  3
 
@@ -100,28 +100,13 @@
 
 Name:           %{name}
 Version:        %{qpid_release}
-Release:        %{release_num}%{?dist}.2
+Release:        %{release_num}%{?dist}.1
 Summary:        Libraries for Qpid C++ client applications
 Group:          System Environment/Libraries
 License:        ASL 2.0
 URL:            http://qpid.apache.org
 Source0:        https://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
 Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
-
-%if %{fedora}
-Patch0:         configure.patch
-Patch1:         unistd.patch
-# Patch fixing a compilation issue related to the usage of a "Boost Singleton"
-# (which is not part of the Boost API, but available as a side effect of
-# Boost.Serialization).
-# Upstream ticket (Apache JIRA): https://issues.apache.org/jira/browse/QPID-3638
-# Fedora ticket: https://bugzilla.redhat.com/show_bug.cgi?id=761045
-Patch6:         qpid-cpp-singleton.patch
-Patch7:         store.patch
-# fix build when size_t != unsigned int
-# Upstream ticket (Apache JIRA): https://issues.apache.org/jira/browse/QPID-3952
-Patch8:         qpid-0.14-size_t.patch
-%endif
 
 %if %{rhel_4}
 Patch3:         RHEL4_SASL_Conf.patch
@@ -439,6 +424,7 @@ An extensible management framework layered on QPID messaging.
 %_libdir/libqmf2.so.*
 %_libdir/libqmfengine.so.*
 %_libdir/libqmfconsole.so.*
+%_libdir/pkgconfig/qmf2.pc
 
 %post -n qpid-qmf
 /sbin/ldconfig
@@ -472,7 +458,7 @@ components.
 %_libdir/libqmfconsole.so
 %_includedir/qmf
 %_bindir/qmf-gen
-%{python_sitearch}/qmfgen
+%{python_sitelib}/qmfgen
 
 %post -n qpid-qmf-devel
 /sbin/ldconfig
@@ -499,6 +485,7 @@ for python.
 
 %files -n python-qpid-qmf
 %defattr(-,root,root,-)
+%{python_sitelib}/qpidtoollibs
 %{python_sitearch}/qmf
 %{python_sitearch}/cqpid.py*
 %{python_sitearch}/_cqpid.so
@@ -863,16 +850,6 @@ popd
 %patch5
 %endif
 
-%if %{fedora}
-%patch0 -p0
-%patch1 -p2
-%patch6 -p1
-pushd ../store-%{qpid_release}.%{store_svnrev}
-%patch7 -p1
-popd
-%patch8 -p1 -b .size_t
-%endif
-
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
 %global rh_qpid_tests_failover "failover_soak run_failover_soak"
@@ -960,7 +937,6 @@ mkdir -p -m0755 %{buildroot}/%_bindir
 
 (cd python; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
 (cd extras/qmf; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
-
 pushd %{_builddir}/qpid-%{version}/cpp
 make install DESTDIR=%{buildroot}
 
@@ -1024,6 +1000,10 @@ rm -rf %{buildroot}%_datadir/qpidc/examples/request-response
 rm -rf %{buildroot}%_datadir/qpidc/examples/tradedemo
 rm -rf %{buildroot}%_datadir/qpidc/examples/xml-exchange
 
+# remove HA files
+rm -rf %{buildroot}%_libdir/qpid/daemon/ha.so
+rm -rf %{buildroot}%_bindir/qpid-ha
+
 %if ! %{rhel_4}
 
 %if %{python_qmf}
@@ -1034,6 +1014,18 @@ install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/*.py %{buil
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_qmfengine.so %{buildroot}%{python_sitearch}
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/*.py %{buildroot}%{python_sitearch}
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/.libs/_cqmf2.so %{buildroot}%{python_sitearch}
+
+%ifarch x86_64
+rm -rf %{buildroot}%{python_sitelib}/cqmf2.py*
+rm -rf %{buildroot}%{python_sitelib}/cqpid.py*
+rm -rf %{buildroot}%{python_sitelib}/qmf.py*
+rm -rf %{buildroot}%{python_sitelib}/qmf2.py*
+rm -rf %{buildroot}%{python_sitelib}/qmfengine.py*
+%endif
+rm -rf %{buildroot}%{python_sitearch}/_cqmf2.la
+rm -rf %{buildroot}%{python_sitearch}/_cqpid.la
+rm -rf %{buildroot}%{python_sitearch}/_qmfengine.la
+
 %endif
 
 %if %{ruby_qmf}
@@ -1098,7 +1090,7 @@ rm -f  %{buildroot}%_localstatedir/lib/qpidd/qpidd.sasldb
 rm -rf %{buildroot}%_includedir/qmf
 rm -rf %{buildroot}%_includedir/qpid
 rm -rf %{buildroot}%_datadir/qpidc/examples/messaging
-rm -rf %{buildroot}%{python_sitearch}/qmfgen
+rm -rf %{buildroot}%{python_sitelib}/qmfgen
 rm -f  %{buildroot}%_bindir/qpid-perftest
 rm -f  %{buildroot}%_bindir/qpid-topic-listener
 rm -f  %{buildroot}%_bindir/qpid-topic-publisher
@@ -1158,7 +1150,7 @@ rm -f  %{buildroot}%_libexecdir/qpid/store_chk
 pushd %{_builddir}/qpid-%{version}
 install -d -m 755 %{buildroot}%{perl_vendorarch}/
 install -p -m 644 cpp/bindings/qpid/perl/cqpid_perl.pm %{buildroot}%{perl_vendorarch}/
-install -p -m 755 cpp/bindings/qpid/perl/.libs/libcqpid_perl.so %{buildroot}%{perl_vendorarch}/
+install -p -m 755 cpp/bindings/qpid/perl/blib/arch/auto/cqpid_perl/cqpid_perl.so %{buildroot}%{perl_vendorarch}/
 popd
 
 %clean
@@ -1185,7 +1177,12 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
-* Tue Apr 17 2012 Dan Horák <dan[at]danny.cz> - 0.14-3.2
+* Tue May 29 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.1
+- Release 0.16 of Qpid upstream.
+- Removed non-Fedora conditional areas of the specfile.
+- Changed the location of qmfgen to the python sitelib directory.
+
+* Tue Apr 17 2012 Dan Horák <dan[at]danny.cz> - 0.14-1.3
 - fix build when size_t != unsigned int
 
 * Tue Mar 20 2012 Nuno Santos <nsantos@redhat.com> - 0.14-3.1
