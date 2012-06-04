@@ -6,11 +6,9 @@
 %{!?ruby_sitearch: %global ruby_sitearch %(/usr/bin/ruby -rrbconfig -e 'puts Config::CONFIG["sitearchdir"] ')}
 
 # Release numbers
-%global qpid_release 0.16
 %global qpid_svnrev  1336378
 %global store_svnrev 4509
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-%global release_num  1
 
 # LIBRARY VERSIONS
 %global QPIDCOMMON_VERSION_INFO             5:0:0
@@ -28,23 +26,15 @@
 # Single var with all lib version params (except store) for make
 %global LIB_VERSION_MAKE_PARAMS QPIDCOMMON_VERSION_INFO=%{QPIDCOMMON_VERSION_INFO} QPIDBROKER_VERSION_INFO=%{QPIDBROKER_VERSION_INFO} QPIDCLIENT_VERSION_INFO=%{QPIDCLIENT_VERSION_INFO} QPIDMESSAGING_VERSION_INFO=%{QPIDMESSAGING_VERSION_INFO} QMF_VERSION_INFO=%{QMF_VERSION_INFO} QMFENGINE_VERSION_INFO=%{QMFENGINE_VERSION_INFO} QMFCONSOLE_VERSION_INFO=%{QMFCONSOLE_VERSION_INFO} RDMAWRAP_VERSION_INFO=%{RDMAWRAP_VERSION_INFO} SSLCOMMON_VERSION_INFO=%{SSLCOMMON_VERSION_INFO}
 
-%global name     qpid-cpp
-# This overrides the package name - do not change this! It keeps all package
-# names consistent, irrespective of the {name} variable - which changes for
-# core and non-core builds.
-%global pkg_name qpid-cpp
-
-Name:           %{name}
-Version:        %{qpid_release}
-Release:        %{release_num}%{?dist}.1
+Name:           qpid-cpp
+Version:        0.16
+Release:        1%{?dist}.2
 Summary:        Libraries for Qpid C++ client applications
-Group:          System Environment/Libraries
 License:        ASL 2.0
 URL:            http://qpid.apache.org
-Source0:        qpid-%{version}.tar.gz
-Source1:        store-%{qpid_release}.%{store_svnrev}.tar.gz
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source0:        qpid-%{version}.tar.gz
+Source1:        store-%{version}.%{store_svnrev}.tar.gz
 
 BuildRequires: boost-devel
 BuildRequires: libtool
@@ -79,210 +69,195 @@ C++. Clients exchange messages with an AMQP message broker using
 the AMQP protocol.
 
 
-# === Package: qpid-cpp-client ===
 
-%package -n %{pkg_name}-client
+%package -n qpid-cpp-client
 Summary:   Libraries for Qpid C++ client applications
-Group:     System Environment/Libraries
+
 Requires:  boost
-Obsoletes: qpidc
+Requires(pre):  /usr/sbin/chkconfig
+Requires(post): /usr/sbin/chkconfig
+Requires(pre):  /sbin/service
+Requires(post): /sbin/service
 
-Requires(post):/sbin/chkconfig
-Requires(preun):/sbin/chkconfig
-Requires(preun):/sbin/service
-Requires(postun):/sbin/service
-
-%description -n %{pkg_name}-client
+%description -n qpid-cpp-client
 Run-time libraries for AMQP client applications developed using Qpid
 C++. Clients exchange messages with an AMQP message broker using
 the AMQP protocol.
 
-%files -n %{pkg_name}-client
+%files -n qpid-cpp-client
 %defattr(-,root,root,-)
-%doc cpp/LICENSE cpp/NOTICE cpp/README.txt cpp/INSTALL cpp/RELEASE_NOTES cpp/DESIGN
+%doc cpp/DESIGN
+# %doc cpp/INSTALL
+%doc cpp/LICENSE
+%doc cpp/NOTICE
+%doc cpp/README.txt
+%doc cpp/RELEASE_NOTES
 %{_libdir}/libqpidcommon.so.*
 %{_libdir}/libqpidclient.so.*
 %{_libdir}/libqpidtypes.so.*
 %{_libdir}/libqpidmessaging.so.*
 %dir %{_libdir}/qpid
 %dir %{_libdir}/qpid/client
-%dir %_sysconfdir/qpid
-%config(noreplace) %_sysconfdir/qpid/qpidc.conf
-%{_libdir}/pkgconfig/qpid.pc
+%dir %{_sysconfdir}/qpid
+%config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%post -n %{pkg_name}-client
-/sbin/ldconfig
+%post -n qpid-cpp-client -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-client
-/sbin/ldconfig
+%postun -n qpid-cpp-client -p /sbin/ldconfig
 
 
-# === Package: qpid-cpp-client-devel ===
 
-%package -n %{pkg_name}-client-devel
+%package -n qpid-cpp-client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
-Group:     Development/System
-Requires:  %{pkg_name}-client = %version-%release
+
+Requires:  qpid-cpp-client = %{version}-%{release}
 Requires:  boost-devel
 Requires:  boost-filesystem
 Requires:  boost-program-options
 Requires:  libuuid-devel
 Requires:  python
-Obsoletes: qpidc-devel
-Obsoletes: qpidc-perftest
 
-%description -n %{pkg_name}-client-devel
+%description -n qpid-cpp-client-devel
 Libraries, header files and documentation for developing AMQP clients
 in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 
-%files -n %{pkg_name}-client-devel
+%files -n qpid-cpp-client-devel
 %defattr(-,root,root,-)
-%dir %_includedir/qpid
-%_includedir/qpid/*.h
-%_includedir/qpid/amqp_0_10
-%_includedir/qpid/client
-%_includedir/qpid/console
-%_includedir/qpid/framing
-%_includedir/qpid/sys
-%_includedir/qpid/log
-%_includedir/qpid/management
-%_includedir/qpid/messaging
-%_includedir/qpid/agent
-%_includedir/qpid/types
-%_includedir/qmf
+%dir %{_includedir}/qpid
+%{_includedir}/qpid/*.h
+%{_includedir}/qpid/amqp_0_10
+%{_includedir}/qpid/client
+%{_includedir}/qpid/console
+%{_includedir}/qpid/framing
+%{_includedir}/qpid/sys
+%{_includedir}/qpid/log
+%{_includedir}/qpid/management
+%{_includedir}/qpid/messaging
+%{_includedir}/qpid/agent
+%{_includedir}/qpid/types
+%{_includedir}/qmf
 %{_libdir}/libqpidcommon.so
 %{_libdir}/libqpidclient.so
 %{_libdir}/libqpidtypes.so
 %{_libdir}/libqpidmessaging.so
-%_datadir/qpidc/examples/messaging
-%_datadir/qpidc/examples/old_api
+%{_libdir}/pkgconfig/qpid.pc
+%{_datadir}/qpidc/examples/messaging
+%{_datadir}/qpidc/examples/old_api
 %defattr(755,root,root,-)
-%_bindir/qpid-perftest
-%_bindir/qpid-topic-listener
-%_bindir/qpid-topic-publisher
-%_bindir/qpid-latency-test
-%_bindir/qpid-client-test
-%_bindir/qpid-txtest
+%{_bindir}/qpid-perftest
+%{_bindir}/qpid-topic-listener
+%{_bindir}/qpid-topic-publisher
+%{_bindir}/qpid-latency-test
+%{_bindir}/qpid-client-test
+%{_bindir}/qpid-txtest
 
-%post -n %{pkg_name}-client-devel
-/sbin/ldconfig
+%post -n qpid-cpp-client-devel -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-client-devel
-/sbin/ldconfig
+%postun -n qpid-cpp-client-devel -p /sbin/ldconfig
 
 
-# === Package: qpid-cpp-client-devel-docs ===
 
-%package -n %{pkg_name}-client-devel-docs
+%package -n qpid-cpp-client-devel-docs
 Summary:   AMQP client development documentation
-Group:     Documentation
+
 BuildArch: noarch
-Obsoletes: qpidc-devel-docs
 
-
-%description -n %{pkg_name}-client-devel-docs
+%description -n qpid-cpp-client-devel-docs
 This package includes the AMQP clients development documentation in HTML
 format for easy browsing.
 
-%files -n %{pkg_name}-client-devel-docs
+%files -n qpid-cpp-client-devel-docs
 %defattr(-,root,root,-)
 %doc cpp/docs/api/html
 
 
-# === Package: qpid-cpp-server ===
 
-%package -n %{pkg_name}-server
+%package -n qpid-cpp-server
 Summary:   An AMQP message broker daemon
-Group:     System Environment/Daemons
-Requires:  %{pkg_name}-client = %version-%release
-Requires:  cyrus-sasl
-Obsoletes: qpidd
-Obsoletes: qpidd-acl
 
-%description -n %{pkg_name}-server
+Requires:  qpid-cpp-client = %{version}-%{release}
+Requires:  cyrus-sasl
+
+%description -n qpid-cpp-server
 A message broker daemon that receives stores and routes messages using
 the open AMQP messaging protocol.
 
-%files -n %{pkg_name}-server
+%files -n qpid-cpp-server
 %defattr(-,root,root,-)
 %{_libdir}/libqpidbroker.so.*
 %{_libdir}/qpid/daemon/replicating_listener.so
 %{_libdir}/qpid/daemon/replication_exchange.so
-%_sbindir/qpidd
-%config(noreplace) %_sysconfdir/qpidd.conf
-%config(noreplace) %_sysconfdir/sasl2/qpidd.conf
+%{_sbindir}/qpidd
+%config(noreplace) %{_sysconfdir}/qpidd.conf
+%config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
 %{_initrddir}/qpidd
 %dir %{_libdir}/qpid/daemon
 %{_libdir}/qpid/daemon/acl.so
-%attr(755, qpidd, qpidd) %_localstatedir/lib/qpidd
+%attr(755, qpidd, qpidd) %{_localstatedir}/lib/qpidd
 %ghost %attr(755, qpidd, qpidd) /var/run/qpidd
-#%attr(600, qpidd, qpidd) %config(noreplace) %_localstatedir/lib/qpidd/qpidd.sasldb
-%doc %_mandir/man1/qpidd.*
+#%attr(600, qpidd, qpidd) %config(noreplace) %{_localstatedir}/lib/qpidd/qpidd.sasldb
+%doc %{_mandir}/man1/qpidd.*
 
-%pre -n %{pkg_name}-server
+%pre -n qpid-cpp-server
 getent group qpidd >/dev/null || groupadd -r qpidd
 getent passwd qpidd >/dev/null || \
   useradd -r -M -g qpidd -d %{_localstatedir}/lib/qpidd -s /sbin/nologin \
     -c "Owner of Qpidd Daemons" qpidd
 exit 0
 
-%post -n %{pkg_name}-server
+%post -n qpid-cpp-server
 # This adds the proper /etc/rc*.d links for the script
 /sbin/chkconfig --add qpidd
 /sbin/ldconfig
 
-%preun -n %{pkg_name}-server
+%preun -n qpid-cpp-server
 # Check that this is actual deinstallation, not just removing for upgrade.
 if [ $1 = 0 ]; then
         /sbin/service qpidd stop >/dev/null 2>&1 || :
         /sbin/chkconfig --del qpidd
 fi
 
-%postun -n %{pkg_name}-server
+%postun -n qpid-cpp-server
 if [ $1 -ge 1 ]; then
         /sbin/service qpidd condrestart >/dev/null 2>&1 || :
 fi
 /sbin/ldconfig
 
 
-# === Package: qpid-cpp-server-devel ===
 
-%package -n %{pkg_name}-server-devel
+%package -n qpid-cpp-server-devel
 Summary:   Libraries and header files for developing Qpid broker extensions
-Group:     Development/System
-Requires:  %{pkg_name}-client-devel = %version-%release
-Requires:  %{pkg_name}-server = %version-%release
+
+Requires:  qpid-cpp-client-devel = %{version}-%{release}
+Requires:  qpid-cpp-server = %{version}-%{release}
 Requires:  boost-devel
 Requires:  boost-filesystem
 Requires:  boost-program-options
-Obsoletes: qpidd-devel
 
-%description -n %{pkg_name}-server-devel
+%description -n qpid-cpp-server-devel
 Libraries and header files for developing extensions to the
 Qpid broker daemon.
 
-%files -n %{pkg_name}-server-devel
+%files -n qpid-cpp-server-devel
 %defattr(-,root,root,-)
 %defattr(-,root,root,-)
 %{_libdir}/libqpidbroker.so
-%_includedir/qpid/broker
+%{_includedir}/qpid/broker
 
-%post -n %{pkg_name}-server-devel
-/sbin/ldconfig
+%post -n qpid-cpp-server-devel -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-server-devel
-/sbin/ldconfig
+%postun -n qpid-cpp-server-devel -p /sbin/ldconfig
 
 
-# === Package: qpid-qmf ===
 
 %package -n qpid-qmf
 Summary:   The QPID Management Framework
-Group:     System Environment/Daemons
-Requires:  %{pkg_name}-client = %version-%release
-Requires:  python-qpid >= %version
-Provides:  qmf = %version-%release
-Obsoletes: qmf < %version-%release
+
+Provides:  qmf = %{version}-%{release}
+Obsoletes: qmf < %{version}-%{release}
+
+Requires:  qpid-cpp-client = %{version}-%{release}
+Requires:  python-qpid >= %{version}
 
 %description -n qpid-qmf
 An extensible management framework layered on QPID messaging.
@@ -295,22 +270,20 @@ An extensible management framework layered on QPID messaging.
 %{_libdir}/libqmfconsole.so.*
 %{_libdir}/pkgconfig/qmf2.pc
 
-%post -n qpid-qmf
-/sbin/ldconfig
+%post -n qpid-qmf -p /sbin/ldconfig
 
-%postun -n qpid-qmf
-/sbin/ldconfig
+%postun -n qpid-qmf -p /sbin/ldconfig
 
 
-# === Package: qpid-qmf-devel ===
 
 %package -n qpid-qmf-devel
 Summary:   Header files and tools for developing QMF extensions
-Group:     Development/System
-Requires:  qpid-qmf = %version-%release
-Requires:  %{pkg_name}-client-devel = %version-%release
-Provides:  qmf-devel = %version-%release
-Obsoletes: qmf-devel < %version-%release
+
+Provides:  qmf-devel = %{version}-%{release}
+Obsoletes: qmf-devel < %{version}-%{release}
+
+Requires:  qpid-qmf = %{version}-%{release}
+Requires:  qpid-cpp-client-devel = %{version}-%{release}
 
 %description -n qpid-qmf-devel
 Header files and code-generation tools needed for developers of QMF-managed
@@ -322,24 +295,22 @@ components.
 %{_libdir}/libqmf2.so
 %{_libdir}/libqmfengine.so
 %{_libdir}/libqmfconsole.so
-%_bindir/qmf-gen
+%{_bindir}/qmf-gen
 %{python_sitelib}/qmfgen
 
-%post -n qpid-qmf-devel
-/sbin/ldconfig
+%post -n qpid-qmf-devel -p /sbin/ldconfig
 
-%postun -n qpid-qmf-devel
-/sbin/ldconfig
+%postun -n qpid-qmf-devel -p /sbin/ldconfig
 
 
-# === Package: python-qpid-qmf ===
 
 %package -n python-qpid-qmf
 Summary:   The QPID Management Framework bindings for python
-Group:     System Environment/Libraries
-Requires:  qpid-qmf = %version-%release
-Provides:  python-qmf = %version-%release
-Obsoletes: python-qmf < %version-%release
+
+Provides:  python-qmf = %{version}-%{release}
+Obsoletes: python-qmf < %{version}-%{release}
+
+Requires:  qpid-qmf = %{version}-%{release}
 
 %description -n python-qpid-qmf
 An extensible management framework layered on QPID messaging, bindings
@@ -362,21 +333,20 @@ for python.
 %exclude %{python_sitearch}/qpid
 %exclude %{python_sitearch}/*.egg-info
 
-%post -n python-qpid-qmf
-/sbin/ldconfig
+%post -n python-qpid-qmf -p /sbin/ldconfig
 
-%postun -n python-qpid-qmf
-/sbin/ldconfig
+%postun -n python-qpid-qmf -p /sbin/ldconfig
 
 
-# === Package: ruby-qpid-qmf ===
 
 %package -n ruby-qpid-qmf
 Summary:   The QPID Management Framework bindings for ruby
-Group:     System Environment/Libraries
-Requires:  qpid-qmf = %version-%release
-Provides:  ruby-qmf = %version-%release
-Obsoletes: ruby-qmf < %version-%release
+
+Provides:  ruby-qmf = %{version}-%{release}
+Obsoletes: ruby-qmf < %{version}-%{release}
+
+Requires:  qpid-qmf = %{version}-%{release}
+
 
 %description -n ruby-qpid-qmf
 An extensible management framework layered on QPID messaging, bindings
@@ -390,178 +360,153 @@ for ruby.
 %{ruby_sitearch}/cqpid.so
 %{ruby_sitearch}/cqmf2.so
 
-%post -n ruby-qpid-qmf
-/sbin/ldconfig
+%post -n ruby-qpid-qmf -p /sbin/ldconfig
 
-%postun -n ruby-qpid-qmf
-/sbin/ldconfig
+%postun -n ruby-qpid-qmf -p /sbin/ldconfig
 
 
-# === Package: qpid-cpp-client-rdma ===
 
-%package -n %{pkg_name}-client-rdma
+%package -n qpid-cpp-client-rdma
 Summary:   RDMA Protocol support (including Infiniband) for Qpid clients
-Group:     System Environment/Libraries
-Requires:  %{pkg_name}-client = %version-%release
-Obsoletes: qpidc-rdma
 
-%description -n %{pkg_name}-client-rdma
+Requires:  qpid-cpp-client = %{version}-%{release}
+
+%description -n qpid-cpp-client-rdma
 A client plugin and support library to support RDMA protocols (including
 Infiniband) as the transport for Qpid messaging.
 
-%files -n %{pkg_name}-client-rdma
+%files -n qpid-cpp-client-rdma
 %defattr(-,root,root,-)
 %{_libdir}/librdmawrap.so*
-%{_libdir}/qpid/client/rdmaconnector.so
-%config(noreplace) %_sysconfdir/qpid/qpidc.conf
+%{_libdir}/qpid/client/rdmaconnector.so*
+%config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%post -n %{pkg_name}-client-rdma
-/sbin/ldconfig
+%post -n qpid-cpp-client-rdma -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-client-rdma
-/sbin/ldconfig
+%postun -n qpid-cpp-client-rdma -p /sbin/ldconfig
 
 
-# === Package: qpid-cpp-server-rdma ===
 
-%package -n %{pkg_name}-server-rdma
+%package -n qpid-cpp-server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
-Group:     System Environment/Libraries
-Requires:  %{pkg_name}-server = %version-%release
-Requires:  %{pkg_name}-client-rdma = %version-%release
-Obsoletes: qpidd-rdma
 
-%description -n %{pkg_name}-server-rdma
+Requires:  qpid-cpp-server = %{version}-%{release}
+Requires:  qpid-cpp-client-rdma = %{version}-%{release}
+
+%description -n qpid-cpp-server-rdma
 A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
 transport for AMQP messaging.
 
-%files -n %{pkg_name}-server-rdma
+%files -n qpid-cpp-server-rdma
 %defattr(-,root,root,-)
 %{_libdir}/qpid/daemon/rdma.so
 
-%post -n %{pkg_name}-server-rdma
-/sbin/ldconfig
+%post -n qpid-cpp-server-rdma -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-server-rdma
-/sbin/ldconfig
+%postun -n qpid-cpp-server-rdma -p /sbin/ldconfig
 
 
-# === Package: qpid-cpp-client-ssl ===
 
-%package -n %{pkg_name}-client-ssl
+%package -n qpid-cpp-client-ssl
 Summary:   SSL support for Qpid clients
-Group:     System Environment/Libraries
-Requires:  %{pkg_name}-client = %version-%release
-Obsoletes: qpidc-ssl
 
-%description -n %{pkg_name}-client-ssl
+Requires:  qpid-cpp-client = %{version}-%{release}
+
+%description -n qpid-cpp-client-ssl
 A client plugin and support library to support SSL as the transport
 for Qpid messaging.
 
-%files -n %{pkg_name}-client-ssl
+%files -n qpid-cpp-client-ssl
 %defattr(-,root,root,-)
 %{_libdir}/libsslcommon.so.*
 %{_libdir}/qpid/client/sslconnector.so
 
-%post -n %{pkg_name}-client-ssl
-/sbin/ldconfig
+%post -n qpid-cpp-client-ssl -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-client-ssl
-/sbin/ldconfig
+%postun -n qpid-cpp-client-ssl -p /sbin/ldconfig
 
 
-# === Package: qpid-cpp-server-ssl ===
 
-%package -n %{pkg_name}-server-ssl
+%package -n qpid-cpp-server-ssl
 Summary:   SSL support for the Qpid daemon
-Group:     System Environment/Libraries
-Requires:  %{pkg_name}-server = %version-%release
-Requires:  %{pkg_name}-client-ssl = %version-%release
-Obsoletes: qpidd-ssl
 
-%description -n %{pkg_name}-server-ssl
+Requires:  qpid-cpp-server = %{version}-%{release}
+Requires:  qpid-cpp-client-ssl = %{version}-%{release}
+
+%description -n qpid-cpp-server-ssl
 A Qpid daemon plugin to support SSL as the transport for AMQP
 messaging.
 
-%files -n %{pkg_name}-server-ssl
+%files -n qpid-cpp-server-ssl
 %defattr(-,root,root,-)
 %{_libdir}/qpid/daemon/ssl.so
 
-%post -n %{pkg_name}-server-ssl
-/sbin/ldconfig
+%post -n qpid-cpp-server-ssl -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-server-ssl
-/sbin/ldconfig
+%postun -n qpid-cpp-server-ssl -p /sbin/ldconfig
 
 
-# === Package: qpid-cpp-server-xml ===
 
-%package -n %{pkg_name}-server-xml
+%package -n qpid-cpp-server-xml
 Summary:   XML extensions for the Qpid daemon
-Group:     System Environment/Libraries
-Requires:  %{pkg_name}-server = %version-%release
+
+Requires:  qpid-cpp-server = %{version}-%{release}
 Requires:  xqilla
 Requires:  xerces-c
-Obsoletes: qpidd-xml
 
-%description -n %{pkg_name}-server-xml
+%description -n qpid-cpp-server-xml
 A Qpid daemon plugin to support extended XML-based routing of AMQP
 messages.
 
-%files -n %{pkg_name}-server-xml
+%files -n qpid-cpp-server-xml
 %defattr(-,root,root,-)
 %{_libdir}/qpid/daemon/xml.so
 
-%post -n %{pkg_name}-server-xml
-/sbin/ldconfig
+%post -n qpid-cpp-server-xml -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-server-xml
-/sbin/ldconfig
+%postun -n qpid-cpp-server-xml -p /sbin/ldconfig
 
 
-# === Package: qpid-cpp-server-store ===
 
-%package -n %{pkg_name}-server-store
+%package -n qpid-cpp-server-store
 Summary:   Red Hat persistence extension to the Qpid messaging system
-Group:     System Environment/Libraries
-License:   LGPL 2.1+
-Requires:  %{pkg_name}-server = %{qpid_release}
-Requires:  db4
-Requires:  libaio
+License:   LGPLv2+
+
 Obsoletes: rhm
 
-%description -n %{pkg_name}-server-store
+Requires:  qpid-cpp-server = %{version}
+Requires:  db4
+Requires:  libaio
+
+%description -n qpid-cpp-server-store
 Red Hat persistence extension to the Qpid AMQP broker: persistent message
 storage using either a libaio-based asynchronous journal, or synchronously
 with Berkeley DB.
 
-%files -n %{pkg_name}-server-store
+%files -n qpid-cpp-server-store
 %defattr(-,root,root,-)
-%doc ../store-%{qpid_release}.%{store_svnrev}/README
+%doc ../store-%{version}.%{store_svnrev}/README
 %{_libdir}/qpid/daemon/msgstore.so*
 %{python_sitearch}/qpidstore/__init__.py*
 %{python_sitearch}/qpidstore/jerr.py*
 %{python_sitearch}/qpidstore/jrnl.py*
 %{python_sitearch}/qpidstore/janal.py*
-%_libexecdir/qpid/resize
-%_libexecdir/qpid/store_chk
-%attr(0775,qpidd,qpidd) %dir %_localstatedir/rhm
+%{_libexecdir}/qpid/resize
+%{_libexecdir}/qpid/store_chk
+%attr(0775,qpidd,qpidd) %dir %{_localstatedir}/rhm
 
-%post -n %{pkg_name}-server-store
-/sbin/ldconfig
+%post -n qpid-cpp-server-store -p /sbin/ldconfig
 
-%postun -n %{pkg_name}-server-store
-/sbin/ldconfig
+%postun -n qpid-cpp-server-store -p /sbin/ldconfig
 
-
-# === Package: qpid-tools ===
 
 %package -n qpid-tools
 Summary:   Management and diagnostic tools for Apache Qpid
-Group:     System Environment/Tools
+
+BuildArch: noarch
+
 Requires:  python-qpid >= 0.8
 Requires:  python-qmf = %{version}
-BuildArch: noarch
 
 %description -n qpid-tools
 Management and diagnostic tools for Apache Qpid brokers and clients.
@@ -583,11 +528,12 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %endif
 
 
-# === Package: perl-qpid ===
 
 %package -n perl-qpid
 Summary: Perl bindings for Apache Qpid Messaging
-Group:   System Environment/Tools
+
+# turns off rpmlint warning: private-shared-object-provides
+%{?perl_default_filter}
 
 %description -n perl-qpid
 %{summary}.
@@ -596,6 +542,7 @@ Group:   System Environment/Tools
 %defattr(-,root,root,-)
 %doc cpp/bindings/qpid/examples/perl/*
 %{perl_vendorarch}/*
+
 
 
 %prep
@@ -639,7 +586,7 @@ pushd ../extras/qmf
 popd
 
 # Store
-pushd ../../store-%{qpid_release}.%{store_svnrev}
+pushd ../../store-%{version}.%{store_svnrev}
 export CXXFLAGS="%{optflags} -DNDEBUG"
 ./bootstrap
 %configure --disable-static --disable-rpath --disable-dependency-tracking --with-qpid-checkout=%{_builddir}/qpid-%{version}
@@ -648,7 +595,7 @@ popd
 
 %install
 rm -rf %{buildroot}
-mkdir -p -m0755 %{buildroot}/%_bindir
+mkdir -p -m0755 %{buildroot}/%{_bindir}
 
 (cd python; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
 (cd extras/qmf; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
@@ -662,7 +609,7 @@ install -d -m0755 %{buildroot}/var/run/qpidd
 # Install perftest utilities
 pushd src/tests/
 for ptest in %{perftests}; do
-  libtool --mode=install install -m755 $ptest %{buildroot}/%_bindir
+  libtool --mode=install install -m755 $ptest %{buildroot}/%{_bindir}
 done
 
 popd
@@ -685,20 +632,20 @@ rm -f %{buildroot}%{_libdir}/libcqpid_perl.so
 rm -f %{buildroot}%{ruby_sitearchdir}/*.la
 
 # this should be fixed in the examples Makefile (make install)
-rm -f %{buildroot}%_datadir/qpidc/examples/Makefile
-rm -f %{buildroot}%_datadir/qpidc/examples/README.txt
-rm -rf %{buildroot}%_datadir/qpidc/examples/direct
-rm -rf %{buildroot}%_datadir/qpidc/examples/failover
-rm -rf %{buildroot}%_datadir/qpidc/examples/fanout
-rm -rf %{buildroot}%_datadir/qpidc/examples/pub-sub
-rm -rf %{buildroot}%_datadir/qpidc/examples/qmf-console
-rm -rf %{buildroot}%_datadir/qpidc/examples/request-response
-rm -rf %{buildroot}%_datadir/qpidc/examples/tradedemo
-rm -rf %{buildroot}%_datadir/qpidc/examples/xml-exchange
+rm -f %{buildroot}%{_datadir}/qpidc/examples/Makefile
+rm -f %{buildroot}%{_datadir}/qpidc/examples/README.txt
+rm -rf %{buildroot}%{_datadir}/qpidc/examples/direct
+rm -rf %{buildroot}%{_datadir}/qpidc/examples/failover
+rm -rf %{buildroot}%{_datadir}/qpidc/examples/fanout
+rm -rf %{buildroot}%{_datadir}/qpidc/examples/pub-sub
+rm -rf %{buildroot}%{_datadir}/qpidc/examples/qmf-console
+rm -rf %{buildroot}%{_datadir}/qpidc/examples/request-response
+rm -rf %{buildroot}%{_datadir}/qpidc/examples/tradedemo
+rm -rf %{buildroot}%{_datadir}/qpidc/examples/xml-exchange
 
 # remove HA files
 rm -rf %{buildroot}%{_libdir}/qpid/daemon/ha.so
-rm -rf %{buildroot}%_bindir/qpid-ha
+rm -rf %{buildroot}%{_bindir}/qpid-ha
 
 install -d %{buildroot}%{python_sitearch}
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitearch}
@@ -718,6 +665,7 @@ rm -rf %{buildroot}%{python_sitelib}/qmfengine.py*
 rm -rf %{buildroot}%{python_sitearch}/_cqmf2.la
 rm -rf %{buildroot}%{python_sitearch}/_cqpid.la
 rm -rf %{buildroot}%{python_sitearch}/_qmfengine.la
+rm -rf %{buildroot}%{python_sitearch}/.libs
 
 install -d %{buildroot}%{ruby_sitelib}
 install -d %{buildroot}%{ruby_sitearch}
@@ -728,13 +676,12 @@ install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengi
 install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/.libs/cqmf2.so %{buildroot}%{ruby_sitearch}
 
 rm -f %{buildroot}%{_libdir}/_*
-#rm -f %{buildroot}%{_libdir}/pkgconfig/qpid.pc
-rm -fr %{buildroot}%{_libdir}/qpid/tests
-rm -fr %{buildroot}%_libexecdir/qpid/tests
+rm -rf %{buildroot}%{_libdir}/qpid/tests
+rm -rf %{buildroot}%{_libexecdir}/qpid/tests
 popd
 
 #Store
-pushd %{_builddir}/store-%{qpid_release}.%{store_svnrev}
+pushd %{_builddir}/store-%{version}.%{store_svnrev}
 make install DESTDIR=%{buildroot}
 install -d -m0775 %{buildroot}%{_localstatedir}/rhm
 install -d -m0755 %{buildroot}%{_libdir}/qpid/daemon
@@ -742,7 +689,7 @@ rm -f %{buildroot}%{_libdir}/qpid/daemon/*.a
 rm -f %{buildroot}%{_libdir}/qpid/daemon/*.la
 rm -f %{buildroot}%{_libdir}/*.a
 rm -f %{buildroot}%{_libdir}/*.la
-rm -f %{buildroot}%_sysconfdir/rhmd.conf
+rm -f %{buildroot}%{_sysconfdir}/rhmd.conf
 popd
 
 # Perl bindings
@@ -767,7 +714,10 @@ rm -rf %{buildroot}
 
 %changelog
 * Mon Jun 04 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.2
-- Removed all non-Fedora related aspects of the specfile.
+- Removed macros that were defined for a shared specfile.
+- Cleaned up the use of other macros.
+- Cleaned up the package macros to be more consistent
+- Fixed many rpmlint warnings and errors.
 
 * Tue May 29 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.1
 - Release 0.16 of Qpid upstream.
