@@ -174,6 +174,7 @@ format for easy browsing.
 
 %package -n qpid-cpp-server
 Summary:   An AMQP message broker daemon
+Obsoletes: qpid-cpp-server <= %{version}-%{release}
 
 Requires:  qpid-cpp-client = %{version}-%{release}
 Requires:  cyrus-sasl
@@ -222,31 +223,6 @@ if [ $1 -ge 1 ]; then
         /sbin/service qpidd condrestart >/dev/null 2>&1 || :
 fi
 /sbin/ldconfig
-
-
-
-%package -n qpid-cpp-server-devel
-Summary:   Libraries and header files for developing Qpid broker extensions
-
-Requires:  qpid-cpp-client-devel = %{version}-%{release}
-Requires:  qpid-cpp-server = %{version}-%{release}
-Requires:  boost-devel
-Requires:  boost-filesystem
-Requires:  boost-program-options
-
-%description -n qpid-cpp-server-devel
-Libraries and header files for developing extensions to the
-Qpid broker daemon.
-
-%files -n qpid-cpp-server-devel
-%defattr(-,root,root,-)
-%defattr(-,root,root,-)
-%{_libdir}/libqpidbroker.so
-%{_includedir}/qpid/broker
-
-%post -n qpid-cpp-server-devel -p /sbin/ldconfig
-
-%postun -n qpid-cpp-server-devel -p /sbin/ldconfig
 
 
 
@@ -625,6 +601,7 @@ popd
 rm -f %{buildroot}%{_libdir}/*.a
 rm -f %{buildroot}%{_libdir}/*.l
 rm -f %{buildroot}%{_libdir}/*.la
+rm -f %{buildroot}%{_libdir}/libqpidbroker.so
 rm -f %{buildroot}%{_libdir}/libsslcommon.so
 rm -f %{buildroot}%{_libdir}/qpid/client/*.la
 rm -f %{buildroot}%{_libdir}/qpid/daemon/*.la
@@ -714,6 +691,8 @@ rm -rf %{buildroot}
 
 %changelog
 * Mon Jun 04 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.2
+- Removed the qpid-cpp-server-devel subpackage.
+  * qpid-cpp-server now obsoletes this as well.
 - Removed macros that were defined for a shared specfile.
 - Cleaned up the use of other macros.
 - Cleaned up the package macros to be more consistent
