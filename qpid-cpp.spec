@@ -288,6 +288,12 @@ Obsoletes: python-qmf < %{version}-%{release}
 
 Requires:  qpid-qmf = %{version}-%{release}
 
+# removes private-shared-object-provides warning
+%{?filter_setup:
+%filter_provides_in %{python_sitearch}/.*\.so$
+%filter_setup
+}
+
 %description -n python-qpid-qmf
 An extensible management framework layered on QPID messaging, bindings
 for python.
@@ -632,6 +638,9 @@ install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_qmfe
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/*.py %{buildroot}%{python_sitearch}
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/.libs/_cqmf2.so %{buildroot}%{python_sitearch}
 
+chmod +x %{buildroot}%{python_sitelib}/qpidtoollibs/disp.py
+chmod +x %{buildroot}%{python_sitearch}/*.so
+
 %ifarch x86_64
 rm -rf %{buildroot}%{python_sitelib}/cqmf2.py*
 rm -rf %{buildroot}%{python_sitelib}/cqpid.py*
@@ -690,7 +699,7 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Mon Jun 04 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.2
+* Wed Jun 06 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.2
 - Removed the qpid-cpp-server-devel subpackage.
   * qpid-cpp-server now obsoletes this as well.
 - Removed macros that were defined for a shared specfile.
