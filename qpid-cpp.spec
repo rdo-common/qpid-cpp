@@ -2,6 +2,8 @@
 
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+
+# The following macros are no longer used for installation but only for cleanup
 %{!?ruby_sitelib: %global ruby_sitelib %(/usr/bin/ruby -rrbconfig  -e 'puts Config::CONFIG["sitelibdir"] ')}
 %{!?ruby_sitearch: %global ruby_sitearch %(/usr/bin/ruby -rrbconfig -e 'puts Config::CONFIG["sitearchdir"] ')}
 
@@ -28,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        1%{?dist}.2
+Release:        1%{?dist}.3
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -336,11 +338,11 @@ for ruby.
 
 %files -n ruby-qpid-qmf
 %defattr(-,root,root,-)
-%{ruby_sitelib}/qmf.rb
-%{ruby_sitelib}/qmf2.rb
-%{ruby_sitearch}/qmfengine.so
-%{ruby_sitearch}/cqpid.so
-%{ruby_sitearch}/cqmf2.so
+%{ruby_vendorlibdir}/qmf.rb
+%{ruby_vendorlibdir}/qmf2.rb
+%{ruby_vendorarchdir}/qmfengine.so
+%{ruby_vendorarchdir}/cqpid.so
+%{ruby_vendorarchdir}/cqmf2.so
 
 %post -n ruby-qpid-qmf -p /sbin/ldconfig
 
@@ -612,7 +614,8 @@ rm -f %{buildroot}%{_libdir}/libsslcommon.so
 rm -f %{buildroot}%{_libdir}/qpid/client/*.la
 rm -f %{buildroot}%{_libdir}/qpid/daemon/*.la
 rm -f %{buildroot}%{_libdir}/libcqpid_perl.so
-rm -f %{buildroot}%{ruby_sitearchdir}/*.la
+rm -rf %{buildroot}%{ruby_sitearch}
+rm -rf %{buildroot}%{ruby_sitelib}
 
 # this should be fixed in the examples Makefile (make install)
 rm -f %{buildroot}%{_datadir}/qpidc/examples/Makefile
@@ -653,13 +656,13 @@ rm -rf %{buildroot}%{python_sitearch}/_cqpid.la
 rm -rf %{buildroot}%{python_sitearch}/_qmfengine.la
 rm -rf %{buildroot}%{python_sitearch}/.libs
 
-install -d %{buildroot}%{ruby_sitelib}
-install -d %{buildroot}%{ruby_sitearch}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/qmf.rb %{buildroot}%{ruby_sitelib}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/qmf2.rb %{buildroot}%{ruby_sitelib}
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/ruby/.libs/cqpid.so %{buildroot}%{ruby_sitearch}
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengine.so %{buildroot}%{ruby_sitearch}
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/.libs/cqmf2.so %{buildroot}%{ruby_sitearch}
+install -d %{buildroot}%{ruby_vendorlibdir}
+install -d %{buildroot}%{ruby_vendorarchdir}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/qmf.rb %{buildroot}%{ruby_vendorlibdir}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/qmf2.rb %{buildroot}%{ruby_vendorlibdir}
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/ruby/.libs/cqpid.so %{buildroot}%{ruby_vendorarchdir}
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengine.so %{buildroot}%{ruby_vendorarchdir}
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/.libs/cqmf2.so %{buildroot}%{ruby_vendorarchdir}
 
 rm -f %{buildroot}%{_libdir}/_*
 rm -rf %{buildroot}%{_libdir}/qpid/tests
@@ -699,6 +702,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Jun 06 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.3
+- Fixed the Ruby directory macros to use the updated macros.
+
 * Wed Jun 06 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.2
 - Removed the qpid-cpp-server-devel subpackage.
   * qpid-cpp-server now obsoletes this as well.
