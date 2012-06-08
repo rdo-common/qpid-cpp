@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        1%{?dist}.3
+Release:        1%{?dist}.4
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -76,10 +76,8 @@ the AMQP protocol.
 Summary:   Libraries for Qpid C++ client applications
 
 Requires:  boost
-Requires(pre):  /usr/sbin/chkconfig
-Requires(post): /usr/sbin/chkconfig
-Requires(pre):  /sbin/service
-Requires(post): /sbin/service
+Requires:  chkconfig
+Requires:  initscripts
 
 %description -n qpid-cpp-client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -702,6 +700,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jun 07 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.4
+- Replaced the dependency on chkconfig and service binaries with packages.
+
 * Wed Jun 06 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.3
 - Fixed the Ruby directory macros to use the updated macros.
 
