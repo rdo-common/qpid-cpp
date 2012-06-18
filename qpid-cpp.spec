@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        1%{?dist}.4
+Release:        1%{?dist}.5
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -174,7 +174,7 @@ format for easy browsing.
 
 %package -n qpid-cpp-server
 Summary:   An AMQP message broker daemon
-Obsoletes: qpid-cpp-server <= %{version}-%{release}
+Obsoletes: qpid-cpp-server-devel < %{version}-%{release}
 
 Requires:  qpid-cpp-client = %{version}-%{release}
 Requires:  cyrus-sasl
@@ -700,6 +700,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Jun 18 2012 Rex Dieter <rdieter@fedoraproject.org> 0.16-1.5
+- -server: Obsoletes -server-devel (and so it doesn't Obsoletes itself)
+
 * Fri Jun 07 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.4
 - Replaced the dependency on chkconfig and service binaries with packages.
 
