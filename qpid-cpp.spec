@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        1%{?dist}.5
+Release:        2%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -63,6 +63,8 @@ BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
 BuildRequires: db4-devel
 BuildRequires: libaio-devel
+
+Patch0: 01-make-BrokerImportExport.h-public.patch
 
 %description
 
@@ -531,6 +533,8 @@ Summary: Perl bindings for Apache Qpid Messaging
 %setup -q -n qpid-%{version}
 %setup -q -T -D -b 1 -n qpid-%{version}
 
+%patch0 -p2
+
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
 %global rh_qpid_tests_failover "failover_soak run_failover_soak"
@@ -700,6 +704,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Jun 27 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-2
+- Makes qmf/BrokerImportExport.h public.
+
 * Mon Jun 18 2012 Rex Dieter <rdieter@fedoraproject.org> 0.16-1.5
 - -server: Obsoletes -server-devel (and so it doesn't Obsoletes itself)
 
