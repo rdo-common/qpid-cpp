@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -65,6 +65,8 @@ BuildRequires: db4-devel
 BuildRequires: libaio-devel
 
 Patch0: 01-make-BrokerImportExport.h-public.patch
+Patch1: 02-Remove-colons-from-conditionals.patch
+patch2: 03-Fix-string-encoding.patch
 
 %description
 
@@ -534,6 +536,8 @@ Summary: Perl bindings for Apache Qpid Messaging
 %setup -q -T -D -b 1 -n qpid-%{version}
 
 %patch0 -p2
+%patch1 -p2
+%patch2 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -704,6 +708,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jun 29 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-3
+- Removed colons from conditions in QMF Ruby.
+- Fixed string encoding for Ruby.
+
 * Wed Jun 27 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-2
 - Makes qmf/BrokerImportExport.h public.
 
