@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -66,7 +66,9 @@ BuildRequires: libaio-devel
 
 Patch0: 01-make-BrokerImportExport.h-public.patch
 Patch1: 02-Remove-colons-from-conditionals.patch
-patch2: 03-Fix-string-encoding.patch
+Patch2: 03-Fix-string-encoding.patch
+Patch3: 04-Adds-a-Cmake-target-to-generate-a-source-tarball-for.patch
+Patch4: 05-Relocated-all-swig-.i-files-to-the-include-directory.patch
 
 %description
 
@@ -129,6 +131,7 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %defattr(-,root,root,-)
 %dir %{_includedir}/qpid
 %{_includedir}/qpid/*.h
+%{_includedir}/*.i
 %{_includedir}/qpid/amqp_0_10
 %{_includedir}/qpid/client
 %{_includedir}/qpid/console
@@ -538,6 +541,8 @@ Summary: Perl bindings for Apache Qpid Messaging
 %patch0 -p2
 %patch1 -p2
 %patch2 -p2
+%patch3 -p2
+%patch4 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -692,6 +697,12 @@ pushd %{_builddir}/qpid-%{version}
 install -d -m 755 %{buildroot}%{perl_vendorarch}/
 install -p -m 644 cpp/bindings/qpid/perl/cqpid_perl.pm %{buildroot}%{perl_vendorarch}/
 install -p -m 755 cpp/bindings/qpid/perl/blib/arch/auto/cqpid_perl/cqpid_perl.so %{buildroot}%{perl_vendorarch}/
+install -p -m 644 cpp/include/qpid.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/include/qmfengine.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/include/qmf2.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/include/swig_perl_typemaps.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/include/swig_python_typemaps.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/include/swig_ruby_typemaps.i %{buildroot}%{_includedir}
 popd
 
 %clean
@@ -708,6 +719,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Jul 25 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-4
+- Added the swig descriptor files to the client-devel package.
+
 * Fri Jun 29 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-3
 - Removed colons from conditions in QMF Ruby.
 - Fixed string encoding for Ruby.
