@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -719,6 +719,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jul 27 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.16-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Wed Jul 25 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-4
 - Added the swig descriptor files to the client-devel package.
 
