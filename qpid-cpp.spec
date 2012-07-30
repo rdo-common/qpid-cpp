@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -61,14 +61,16 @@ BuildRequires: nss-devel
 BuildRequires: nspr-devel
 BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
-BuildRequires: db4-devel
+BuildRequires: libdb-devel
+BuildRequires: libdb4-devel
 BuildRequires: libaio-devel
 
-Patch0: 01-make-BrokerImportExport.h-public.patch
-Patch1: 02-Remove-colons-from-conditionals.patch
-Patch2: 03-Fix-string-encoding.patch
-Patch3: 04-Adds-a-Cmake-target-to-generate-a-source-tarball-for.patch
-Patch4: 05-Relocated-all-swig-.i-files-to-the-include-directory.patch
+Patch1: 01-make-BrokerImportExport.h-public.patch
+Patch2: 02-Remove-colons-from-conditionals.patch
+Patch3: 03-Fix-string-encoding.patch
+Patch4: 04-Adds-a-Cmake-target-to-generate-a-source-tarball-for.patch
+Patch5: 05-Relocated-all-swig-.i-files-to-the-include-directory.patch
+Patch6: 06-Fixed-db4-on-Fedora.patch
 
 %description
 
@@ -538,11 +540,16 @@ Summary: Perl bindings for Apache Qpid Messaging
 %setup -q -n qpid-%{version}
 %setup -q -T -D -b 1 -n qpid-%{version}
 
-%patch0 -p2
 %patch1 -p2
 %patch2 -p2
 %patch3 -p2
 %patch4 -p2
+%patch5 -p2
+
+# qpid-store
+pushd ../store-%{version}.%{store_svnrev}
+%patch6 -p1
+popd
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -719,6 +726,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Jul 30 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-6
+- Added patches for qpid-store to work with the new BDB packages.
+- Added BR for libdb-devel and libdb4-devel, replacing db4-devel.
+
 * Fri Jul 27 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.16-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
