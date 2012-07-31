@@ -62,7 +62,7 @@ BuildRequires: nspr-devel
 BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
 BuildRequires: libdb-devel
-BuildRequires: libdb4-devel
+BuildRequires: libdb4-cxx-devel
 BuildRequires: libaio-devel
 
 Patch1: 01-make-BrokerImportExport.h-public.patch
@@ -728,7 +728,7 @@ rm -rf %{buildroot}
 %changelog
 * Mon Jul 30 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-6
 - Added patches for qpid-store to work with the new BDB packages.
-- Added BR for libdb-devel and libdb4-devel, replacing db4-devel.
+- Added BR for libdb-devel and libdb4-cxx-devel, replacing db4-devel.
 
 * Fri Jul 27 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.16-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
