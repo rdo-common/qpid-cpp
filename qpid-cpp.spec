@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        6%{?dist}
+Release:        6.1%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -133,7 +133,10 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %defattr(-,root,root,-)
 %dir %{_includedir}/qpid
 %{_includedir}/qpid/*.h
-%{_includedir}/*.i
+%{_includedir}/qpid.i
+%{_includedir}/swig_perl_typemaps.i
+%{_includedir}/swig_python_typemaps.i
+%{_includedir}/swig_ruby_typemaps.i
 %{_includedir}/qpid/amqp_0_10
 %{_includedir}/qpid/client
 %{_includedir}/qpid/console
@@ -280,6 +283,8 @@ components.
 %{_libdir}/libqmf2.so
 %{_libdir}/libqmfengine.so
 %{_libdir}/libqmfconsole.so
+%{_includedir}/qmfengine.i
+%{_includedir}/qmf2.i
 %{_bindir}/qmf-gen
 %{python_sitelib}/qmfgen
 
@@ -726,6 +731,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Aug  1 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-6.1
+- Moved the QMF related swig descriptors to the qmf-devel package.
+
 * Mon Jul 30 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-6
 - Added patches for qpid-store to work with the new BDB packages.
 - Added BR for libdb-devel and libdb4-cxx-devel, replacing db4-devel.
