@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        6.1%{?dist}
+Release:        7%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -71,6 +71,7 @@ Patch3: 03-Fix-string-encoding.patch
 Patch4: 04-Adds-a-Cmake-target-to-generate-a-source-tarball-for.patch
 Patch5: 05-Relocated-all-swig-.i-files-to-the-include-directory.patch
 Patch6: 06-Fixed-db4-on-Fedora.patch
+Patch7: 07-Fix-boost-filesystem-for-1.50.patch
 
 %description
 
@@ -550,6 +551,7 @@ Summary: Perl bindings for Apache Qpid Messaging
 %patch3 -p2
 %patch4 -p2
 %patch5 -p2
+%patch7 -p1
 
 # qpid-store
 pushd ../store-%{version}.%{store_svnrev}
@@ -731,6 +733,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Aug 13 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-7
+- QPID4095: Boost 1.50.0 has removed filesystem version 2 from the library
+
 * Wed Aug  1 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-6.1
 - Moved the QMF related swig descriptors to the qmf-devel package.
 
