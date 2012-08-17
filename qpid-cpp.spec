@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -204,7 +204,6 @@ the open AMQP messaging protocol.
 %{_sbindir}/qpidd
 %config(noreplace) %{_sysconfdir}/qpidd.conf
 %config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
-%{_initrddir}/qpidd
 %dir %{_libdir}/qpid/daemon
 %{_libdir}/qpid/daemon/acl.so
 %attr(755, qpidd, qpidd) %{_localstatedir}/lib/qpidd
@@ -219,19 +218,32 @@ getent passwd qpidd >/dev/null || \
     -c "Owner of Qpidd Daemons" qpidd
 exit 0
 
-%post -n qpid-cpp-server
+
+
+%package -n qpid-cpp-server-daemon
+Summary:  Files for launching the AMQP message broker daemon
+
+Requires: qpid-cpp-server = %{version}-%{release}
+
+%description -n qpid-cpp-server-daemon
+%{summary}.
+
+%files -n qpid-cpp-server-daemon
+%{_initrddir}/qpidd
+
+%post -n qpid-cpp-server-daemon
 # This adds the proper /etc/rc*.d links for the script
 /sbin/chkconfig --add qpidd
 /sbin/ldconfig
 
-%preun -n qpid-cpp-server
+%preun -n qpid-cpp-server-daemon
 # Check that this is actual deinstallation, not just removing for upgrade.
 if [ $1 = 0 ]; then
         /sbin/service qpidd stop >/dev/null 2>&1 || :
         /sbin/chkconfig --del qpidd
 fi
 
-%postun -n qpid-cpp-server
+%postun -n qpid-cpp-server-daemon
 if [ $1 -ge 1 ]; then
         /sbin/service qpidd condrestart >/dev/null 2>&1 || :
 fi
@@ -733,6 +745,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Aug 17 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-8
+- Added the qpid-cpp-server-daemon subpackage.
+  * This package delivers the SysVInit scripts needed by qpidd.
+
 * Mon Aug 13 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-7
 - QPID4095: Boost 1.50.0 has removed filesystem version 2 from the library
 
