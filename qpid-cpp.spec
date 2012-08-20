@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.16
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -754,6 +754,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Aug 20 2012 Dan Horák <dan[at]danny.cz> - 0.16-9
+- allow build without InfiniBand eg. on s390(x)
+- fix build on non-x86 64-bit arches
+
 * Fri Aug 17 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-8
 - Added the qpid-cpp-server-daemon subpackage.
   * This package delivers the SysVInit scripts needed by qpidd.
