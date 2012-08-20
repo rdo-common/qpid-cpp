@@ -55,8 +55,10 @@ BuildRequires: cyrus-sasl
 BuildRequires: boost-program-options
 BuildRequires: boost-filesystem
 BuildRequires: libuuid-devel
+%ifnarch s390 s390x
 BuildRequires: libibverbs-devel
 BuildRequires: librdmacm-devel
+%endif
 BuildRequires: nss-devel
 BuildRequires: nspr-devel
 BuildRequires: xqilla-devel
@@ -375,6 +377,7 @@ for ruby.
 
 
 
+%ifnarch s390 s390x
 %package -n qpid-cpp-client-rdma
 Summary:   RDMA Protocol support (including Infiniband) for Qpid clients
 
@@ -413,6 +416,7 @@ transport for AMQP messaging.
 %post -n qpid-cpp-server-rdma -p /sbin/ldconfig
 
 %postun -n qpid-cpp-server-rdma -p /sbin/ldconfig
+%endif
 
 
 
@@ -583,7 +587,11 @@ pushd cpp
 CXXFLAGS="%{optflags} -DNDEBUG -O3 -Wno-unused-result" \
 %configure --disable-static --with-swig --with-sasl --with-ssl --without-help2man \
 --with-swig \
+%ifnarch s390 s390x
 --with-rdma \
+%else
+--without-rdma \
+%endif
 --without-cpg \
 --with-xml
 ECHO=echo make %{LIB_VERSION_MAKE_PARAMS} %{?_smp_mflags}
