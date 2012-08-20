@@ -689,7 +689,8 @@ install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/.libs/_cqm
 chmod +x %{buildroot}%{python_sitelib}/qpidtoollibs/disp.py
 chmod +x %{buildroot}%{python_sitearch}/*.so
 
-%ifarch x86_64
+# remove on 64-bit arches
+%ifarch x86_64 ppc64 s390x sparc64
 rm -rf %{buildroot}%{python_sitelib}/cqmf2.py*
 rm -rf %{buildroot}%{python_sitelib}/cqpid.py*
 rm -rf %{buildroot}%{python_sitelib}/qmf.py*
