@@ -8,8 +8,8 @@
 %{!?ruby_sitearch: %global ruby_sitearch %(/usr/bin/ruby -rrbconfig -e 'puts Config::CONFIG["sitearchdir"] ')}
 
 # Release numbers
-%global qpid_svnrev  1336378
-%global store_svnrev 4509
+%global qpid_svnrev  1373004
+%global store_svnrev 4512
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
 
 # LIBRARY VERSIONS
@@ -29,8 +29,8 @@
 %global LIB_VERSION_MAKE_PARAMS QPIDCOMMON_VERSION_INFO=%{QPIDCOMMON_VERSION_INFO} QPIDBROKER_VERSION_INFO=%{QPIDBROKER_VERSION_INFO} QPIDCLIENT_VERSION_INFO=%{QPIDCLIENT_VERSION_INFO} QPIDMESSAGING_VERSION_INFO=%{QPIDMESSAGING_VERSION_INFO} QMF_VERSION_INFO=%{QMF_VERSION_INFO} QMFENGINE_VERSION_INFO=%{QMFENGINE_VERSION_INFO} QMFCONSOLE_VERSION_INFO=%{QMFCONSOLE_VERSION_INFO} RDMAWRAP_VERSION_INFO=%{RDMAWRAP_VERSION_INFO} SSLCOMMON_VERSION_INFO=%{SSLCOMMON_VERSION_INFO}
 
 Name:           qpid-cpp
-Version:        0.16
-Release:        9%{?dist}
+Version:        0.18
+Release:        1%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -67,13 +67,10 @@ BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: libaio-devel
 
-Patch1: 01-make-BrokerImportExport.h-public.patch
-Patch2: 02-Remove-colons-from-conditionals.patch
-Patch3: 03-Fix-string-encoding.patch
-Patch4: 04-Adds-a-Cmake-target-to-generate-a-source-tarball-for.patch
-Patch5: 05-Relocated-all-swig-.i-files-to-the-include-directory.patch
-Patch6: 06-Fixed-db4-on-Fedora.patch
-Patch7: 07-Fix-boost-filesystem-for-1.50.patch
+Patch1: 01-Adds-a-Cmake-target-to-generate-a-source-tarball-for.patch
+Patch2: 02-Relocated-all-swig-.i-files-to-the-include-directory.patch
+Patch3: 03-Fixed-db4-on-Fedora.patch
+Patch4: 04-Fix-boost-filesystem-for-1.50.patch
 
 %description
 
@@ -189,7 +186,9 @@ format for easy browsing.
 
 %package -n qpid-cpp-server
 Summary:   An AMQP message broker daemon
-Obsoletes: qpid-cpp-server-devel < %{version}-%{release}
+Obsoletes: qpid-cpp-server-devel <= %{version}-%{release}
+Obsoletes: qpid-cpp-server-daemon <= %{version}-%{release}
+Provides:  qpid-cpp-server-daemon = %{version}-%{release}
 
 Requires:  qpid-cpp-client = %{version}-%{release}
 Requires:  cyrus-sasl
@@ -204,6 +203,7 @@ the open AMQP messaging protocol.
 %{_libdir}/qpid/daemon/replicating_listener.so
 %{_libdir}/qpid/daemon/replication_exchange.so
 %{_sbindir}/qpidd
+%{_initrddir}/qpidd
 %config(noreplace) %{_sysconfdir}/qpidd.conf
 %config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
 %dir %{_libdir}/qpid/daemon
@@ -220,34 +220,53 @@ getent passwd qpidd >/dev/null || \
     -c "Owner of Qpidd Daemons" qpidd
 exit 0
 
-
-
-%package -n qpid-cpp-server-daemon
-Summary:  Files for launching the AMQP message broker daemon
-
-Requires: qpid-cpp-server = %{version}-%{release}
-
-%description -n qpid-cpp-server-daemon
-%{summary}.
-
-%files -n qpid-cpp-server-daemon
-%{_initrddir}/qpidd
-
-%post -n qpid-cpp-server-daemon
+%post -n qpid-cpp-server
 # This adds the proper /etc/rc*.d links for the script
 /sbin/chkconfig --add qpidd
 /sbin/ldconfig
 
-%preun -n qpid-cpp-server-daemon
+%preun -n qpid-cpp-server
 # Check that this is actual deinstallation, not just removing for upgrade.
 if [ $1 = 0 ]; then
         /sbin/service qpidd stop >/dev/null 2>&1 || :
         /sbin/chkconfig --del qpidd
 fi
 
-%postun -n qpid-cpp-server-daemon
+%postun -n qpid-cpp-server
 if [ $1 -ge 1 ]; then
         /sbin/service qpidd condrestart >/dev/null 2>&1 || :
+fi
+/sbin/ldconfig
+
+
+
+%package -n qpid-cpp-server-ha
+Summary: Provides extensions to the AMQP message broker to provide high availability
+
+Requires: qpid-cpp-server = %{version}-%{release}
+Requires: qpid-qmf = %{version}-%{release}
+
+%description -n qpid-cpp-server-ha
+%{summary}.
+
+%files -n qpid-cpp-server-ha
+%{_bindir}/qpid-ha
+%{_initrddir}/qpidd-primary
+%{_libdir}/qpid/daemon/ha.so
+
+%post -n qpid-cpp-server-ha
+/sbin/chkconfig --add qpidd-primary
+/sbin/ldconfig
+
+%preun -n qpid-cpp-server-ha
+if [ $1 = 0 ]; then
+  /sbin/service qpidd-primary stop > /dev/null 2>&1 || :
+  /sbin/chkconfig --del qpidd-primary
+fi
+
+%postun -n qpid-cpp-server-ha
+if [$1 -ge 1 ]; then
+  /sbin/service qpidd-primary condrestart >/dev/null 2>&1 || :
 fi
 /sbin/ldconfig
 
@@ -564,14 +583,11 @@ Summary: Perl bindings for Apache Qpid Messaging
 
 %patch1 -p2
 %patch2 -p2
-%patch3 -p2
 %patch4 -p2
-%patch5 -p2
-%patch7 -p1
 
 # qpid-store
 pushd ../store-%{version}.%{store_svnrev}
-%patch6 -p1
+%patch3 -p1
 popd
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
@@ -635,6 +651,14 @@ install -Dp -m0755 etc/qpidd %{buildroot}%{_initrddir}/qpidd
 install -d -m0755 %{buildroot}%{_localstatedir}/lib/qpidd
 install -d -m0755 %{buildroot}%{_libdir}/qpidd
 install -d -m0755 %{buildroot}/var/run/qpidd
+
+#install the daemon files in the right location
+mkdir -p %{buildroot}/%{_initrddir}
+install %{buildroot}/%{_sysconfdir}/init.d/qpidd %{buildroot}/%{_initrddir}/qpidd
+rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd
+install %{buildroot}/%{_sysconfdir}/init.d/qpidd-primary %{buildroot}/%{_initrddir}/qpidd-primary
+rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd-primary
+
 # Install perftest utilities
 pushd src/tests/
 for ptest in %{perftests}; do
@@ -673,10 +697,6 @@ rm -rf %{buildroot}%{_datadir}/qpidc/examples/qmf-console
 rm -rf %{buildroot}%{_datadir}/qpidc/examples/request-response
 rm -rf %{buildroot}%{_datadir}/qpidc/examples/tradedemo
 rm -rf %{buildroot}%{_datadir}/qpidc/examples/xml-exchange
-
-# remove HA files
-rm -rf %{buildroot}%{_libdir}/qpid/daemon/ha.so
-rm -rf %{buildroot}%{_bindir}/qpid-ha
 
 install -d %{buildroot}%{python_sitearch}
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitearch}
@@ -754,6 +774,13 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Sep  5 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-1
+- Rebased on Qpid release 0.18.
+- Added the new HA subpackage: qpid-cpp-server-ha
+- Merged the qpid-cpp-server-daemon package back into qpid-cpp-server
+- Resolves: BZ#854263
+- qpid-cpp-server now provides qpid-cpp-server-daemon
+
 * Mon Aug 20 2012 Dan Horák <dan[at]danny.cz> - 0.16-9
 - allow build without InfiniBand eg. on s390(x)
 - fix build on non-x86 64-bit arches
