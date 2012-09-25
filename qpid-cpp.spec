@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.18
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -71,6 +71,7 @@ Patch1: 01-Adds-a-Cmake-target-to-generate-a-source-tarball-for.patch
 Patch2: 02-Relocated-all-swig-.i-files-to-the-include-directory.patch
 Patch3: 03-Fixed-db4-on-Fedora.patch
 Patch4: 04-Fix-boost-filesystem-for-1.50.patch
+Patch5: 05-Provides-systemd-support-to-qpidd.patch
 
 %description
 
@@ -187,11 +188,15 @@ format for easy browsing.
 %package -n qpid-cpp-server
 Summary:   An AMQP message broker daemon
 Obsoletes: qpid-cpp-server-devel <= %{version}-%{release}
-Obsoletes: qpid-cpp-server-daemon <= %{version}-%{release}
+Obsoletes: qpid-cpp-server-daemon < %{version}-%{release}
 Provides:  qpid-cpp-server-daemon = %{version}-%{release}
 
 Requires:  qpid-cpp-client = %{version}-%{release}
 Requires:  cyrus-sasl
+
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
 
 %description -n qpid-cpp-server
 A message broker daemon that receives stores and routes messages using
@@ -203,7 +208,7 @@ the open AMQP messaging protocol.
 %{_libdir}/qpid/daemon/replicating_listener.so
 %{_libdir}/qpid/daemon/replication_exchange.so
 %{_sbindir}/qpidd
-%{_initrddir}/qpidd
+%{_unitdir}/qpidd.service
 %config(noreplace) %{_sysconfdir}/qpidd.conf
 %config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
 %dir %{_libdir}/qpid/daemon
@@ -221,20 +226,23 @@ getent passwd qpidd >/dev/null || \
 exit 0
 
 %post -n qpid-cpp-server
-# This adds the proper /etc/rc*.d links for the script
-/sbin/chkconfig --add qpidd
-/sbin/ldconfig
+if [$1 -eq 1] ; then
+    # Initial installation
+    /sbin/systemctl --no-reload enable qpidd.service >/dev/null 2>&1 || :
+fi
 
 %preun -n qpid-cpp-server
-# Check that this is actual deinstallation, not just removing for upgrade.
-if [ $1 = 0 ]; then
-        /sbin/service qpidd stop >/dev/null 2>&1 || :
-        /sbin/chkconfig --del qpidd
+if [ $1 -eq 0 ] ; then
+   # Package removal, not upgrade
+   /bin/systemctl --no-reload disable qpidd.service > /dev/null 2>&1 || :
+   /bin/systemctl stop qpidd.service > /dev/null 2>&1 || :
 fi
 
 %postun -n qpid-cpp-server
-if [ $1 -ge 1 ]; then
-        /sbin/service qpidd condrestart >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+   # Package upgrade, not uninstall
+   /bin/systemctl stop qpidd.service > /dev/null 2>&1 || :
+   /bin/systemctl start qpidd.service > /dev/null 2>&1 || :
 fi
 /sbin/ldconfig
 
@@ -584,6 +592,7 @@ Summary: Perl bindings for Apache Qpid Messaging
 %patch1 -p2
 %patch2 -p2
 %patch4 -p2
+%patch5 -p2
 
 # qpid-store
 pushd ../store-%{version}.%{store_svnrev}
@@ -641,13 +650,13 @@ popd
 %install
 rm -rf %{buildroot}
 mkdir -p -m0755 %{buildroot}/%{_bindir}
+mkdir -p -m0755 %{buildroot}/%{_unitdir}
 
 (cd python; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
 (cd extras/qmf; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
 pushd %{_builddir}/qpid-%{version}/cpp
 make install DESTDIR=%{buildroot}
 
-install -Dp -m0755 etc/qpidd %{buildroot}%{_initrddir}/qpidd
 install -d -m0755 %{buildroot}%{_localstatedir}/lib/qpidd
 install -d -m0755 %{buildroot}%{_libdir}/qpidd
 install -d -m0755 %{buildroot}/var/run/qpidd
@@ -697,6 +706,11 @@ rm -rf %{buildroot}%{_datadir}/qpidc/examples/qmf-console
 rm -rf %{buildroot}%{_datadir}/qpidc/examples/request-response
 rm -rf %{buildroot}%{_datadir}/qpidc/examples/tradedemo
 rm -rf %{buildroot}%{_datadir}/qpidc/examples/xml-exchange
+
+# install systemd files
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/etc/qpidd.service %{buildroot}/%{_unitdir}
+rm -f %{buildroot}/%{_initrddir}/qpidd
+rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd.service
 
 install -d %{buildroot}%{python_sitearch}
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitearch}
@@ -774,6 +788,11 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Sep 26 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-2
+- Added systemd support.
+- Removed SysVInit support.
+- Related: BZ#832724
+
 * Wed Sep  5 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-1
 - Rebased on Qpid release 0.18.
 - Added the new HA subpackage: qpid-cpp-server-ha
