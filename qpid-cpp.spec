@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.18
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -569,22 +569,6 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 
 
 
-%package -n perl-qpid
-Summary: Perl bindings for Apache Qpid Messaging
-
-# turns off rpmlint warning: private-shared-object-provides
-%{?perl_default_filter}
-
-%description -n perl-qpid
-%{summary}.
-
-%files -n perl-qpid
-%defattr(-,root,root,-)
-%doc cpp/bindings/qpid/examples/perl/*
-%{perl_vendorarch}/*
-
-
-
 %prep
 %setup -q -n qpid-%{version}
 %setup -q -T -D -b 1 -n qpid-%{version}
@@ -761,11 +745,8 @@ rm -f %{buildroot}%{_libdir}/*.la
 rm -f %{buildroot}%{_sysconfdir}/rhmd.conf
 popd
 
-# Perl bindings
+# install swig definition files
 pushd %{_builddir}/qpid-%{version}
-install -d -m 755 %{buildroot}%{perl_vendorarch}/
-install -p -m 644 cpp/bindings/qpid/perl/cqpid_perl.pm %{buildroot}%{perl_vendorarch}/
-install -p -m 755 cpp/bindings/qpid/perl/blib/arch/auto/cqpid_perl/cqpid_perl.so %{buildroot}%{perl_vendorarch}/
 install -p -m 644 cpp/include/qpid.i %{buildroot}%{_includedir}
 install -p -m 644 cpp/include/qmfengine.i %{buildroot}%{_includedir}
 install -p -m 644 cpp/include/qmf2.i %{buildroot}%{_includedir}
@@ -788,7 +769,10 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Fri Sep 26 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-2
+* Wed Sep 26 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-3
+- Removed the perl-qpid subpackage.
+
+* Fri Sep 21 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-2
 - Added systemd support.
 - Removed SysVInit support.
 - Related: BZ#832724
