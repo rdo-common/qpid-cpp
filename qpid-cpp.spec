@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.18
-Release:        3%{?dist}
+Release:        3.1%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -226,20 +226,20 @@ getent passwd qpidd >/dev/null || \
 exit 0
 
 %post -n qpid-cpp-server
-if [$1 -eq 1] ; then
+if [ $1 -eq 1 ]; then
     # Initial installation
     /sbin/systemctl --no-reload enable qpidd.service >/dev/null 2>&1 || :
 fi
 
 %preun -n qpid-cpp-server
-if [ $1 -eq 0 ] ; then
+if [ $1 -eq 0 ]; then
    # Package removal, not upgrade
    /bin/systemctl --no-reload disable qpidd.service > /dev/null 2>&1 || :
    /bin/systemctl stop qpidd.service > /dev/null 2>&1 || :
 fi
 
 %postun -n qpid-cpp-server
-if [ $1 -ge 1 ] ; then
+if [ $1 -ge 1 ]; then
    # Package upgrade, not uninstall
    /bin/systemctl stop qpidd.service > /dev/null 2>&1 || :
    /bin/systemctl start qpidd.service > /dev/null 2>&1 || :
@@ -273,7 +273,7 @@ if [ $1 = 0 ]; then
 fi
 
 %postun -n qpid-cpp-server-ha
-if [$1 -ge 1 ]; then
+if [ $1 -ge 1 ]; then
   /sbin/service qpidd-primary condrestart >/dev/null 2>&1 || :
 fi
 /sbin/ldconfig
@@ -769,6 +769,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Oct 10 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-3.1
+- Added space to fix conditional.
+- Resolves: BZ#864792
+
 * Wed Sep 26 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-3
 - Removed the perl-qpid subpackage.
 
