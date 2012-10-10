@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.18
-Release:        3.1%{?dist}
+Release:        3.2%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -228,7 +228,7 @@ exit 0
 %post -n qpid-cpp-server
 if [ $1 -eq 1 ]; then
     # Initial installation
-    /sbin/systemctl --no-reload enable qpidd.service >/dev/null 2>&1 || :
+    /bin/systemctl --no-reload enable qpidd.service >/dev/null 2>&1 || :
 fi
 
 %preun -n qpid-cpp-server
@@ -769,6 +769,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Oct 10 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-3.2
+- Fixed reference to systemctl.
+- Resolves: BZ#864987
+
 * Wed Oct 10 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-3.1
 - Added space to fix conditional.
 - Resolves: BZ#864792
