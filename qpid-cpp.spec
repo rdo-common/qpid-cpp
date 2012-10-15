@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.18
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -72,7 +72,8 @@ Patch2: 02-Relocated-all-swig-.i-files-to-the-include-directory.patch
 Patch3: 03-Fixed-db4-on-Fedora.patch
 Patch4: 04-Fix-boost-filesystem-for-1.50.patch
 Patch5: 05-Provides-systemd-support-to-qpidd.patch
-Patch6: 04-Fix-building-of-messaging-examples-after-installatio.patch
+Patch6: 06-Fix-building-of-messaging-examples-after-installatio.patch
+Patch7: 07-Install-CMake-file-for-C-messaging-example.patch
 
 %description
 
@@ -298,7 +299,6 @@ An extensible management framework layered on QPID messaging.
 %{_libdir}/libqmf2.so.*
 %{_libdir}/libqmfengine.so.*
 %{_libdir}/libqmfconsole.so.*
-%{_libdir}/pkgconfig/qmf2.pc
 
 %post -n qpid-qmf -p /sbin/ldconfig
 
@@ -329,6 +329,7 @@ components.
 %{_includedir}/qmf2.i
 %{_bindir}/qmf-gen
 %{python_sitelib}/qmfgen
+%{_libdir}/pkgconfig/qmf2.pc
 
 %post -n qpid-qmf-devel -p /sbin/ldconfig
 
@@ -578,6 +579,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %patch4 -p2
 %patch5 -p2
 %patch6 -p2
+%patch7 -p2
 
 # qpid-store
 pushd ../store-%{version}.%{store_svnrev}
@@ -770,6 +772,11 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Oct 16 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-5
+- Install CMake file for C++ messaging examples.
+- Moved qfm2.pc from qpid-qmf to qpid-qmf-devel
+- Resolves: BZ#866892
+
 * Sat Oct 13 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-4
 - Fixed building C++ messaging examples.
 - Fixed ownership for /usr/share/qpidc and /usr/shar/qpidc/messaging
