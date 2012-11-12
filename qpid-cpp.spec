@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.18
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -74,6 +74,7 @@ Patch4: 04-Fix-boost-filesystem-for-1.50.patch
 Patch5: 05-Provides-systemd-support-to-qpidd.patch
 Patch6: 06-Fix-building-of-messaging-examples-after-installatio.patch
 Patch7: 07-Install-CMake-file-for-C-messaging-example.patch
+Patch8: 08-Changed-systemd-support-to-requiring-Networking-star.patch
 
 %description
 
@@ -580,6 +581,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %patch5 -p2
 %patch6 -p2
 %patch7 -p2
+%patch8 -p2
 
 # qpid-store
 pushd ../store-%{version}.%{store_svnrev}
@@ -772,6 +774,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Nov 12 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-6
+- Changed qpidd.service to not start until after networking.
+
 * Tue Oct 16 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-5
 - Install CMake file for C++ messaging examples.
 - Moved qfm2.pc from qpid-qmf to qpid-qmf-devel
