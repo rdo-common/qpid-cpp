@@ -1,0 +1,31 @@
+From 3f950799b766942c3a3b69441770ec541f989fc2 Mon Sep 17 00:00:00 2001
+From: "Darryl L. Pierce" <dpierce@redhat.com>
+Date: Wed, 23 Jan 2013 15:05:36 -0500
+Subject: [PATCH] Add support for ARM processors.
+
+---
+ lib/jrnl/jcfg.hpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/lib/jrnl/jcfg.hpp b/lib/jrnl/jcfg.hpp
+index 4dcb31d..1b94318 100644
+--- a/lib/jrnl/jcfg.hpp
++++ b/lib/jrnl/jcfg.hpp
+@@ -45,6 +45,14 @@
+ #elif defined(__powerpc64__) || defined(__s390x__) /* big endian, 64 bits */
+ #define JRNL_BIG_ENDIAN
+ #define JRNL_64_BIT
++#elif defined(__arm__)
++#  if defined(__ARMEB__) /* big endian, 32 bits */
++#define JRNL_BIG_ENDIAN
++#define JRNL_32_BIT
++#  else /* little endian, 32 bits */
++#define JRNL_LITTLE_ENDIAN
++#define JRNL_32_BIT
++#  endif
+ #else
+ #error endian?
+ #endif
+-- 
+1.8.1
+

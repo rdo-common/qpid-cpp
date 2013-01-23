@@ -8,8 +8,8 @@
 %{!?ruby_sitearch: %global ruby_sitearch %(/usr/bin/ruby -rrbconfig -e 'puts Config::CONFIG["sitearchdir"] ')}
 
 # Release numbers
-%global qpid_svnrev  1373004
-%global store_svnrev 4512
+%global qpid_svnrev  1430909
+%global store_svnrev 4521
 # Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
 
 # LIBRARY VERSIONS
@@ -29,8 +29,8 @@
 %global LIB_VERSION_MAKE_PARAMS QPIDCOMMON_VERSION_INFO=%{QPIDCOMMON_VERSION_INFO} QPIDBROKER_VERSION_INFO=%{QPIDBROKER_VERSION_INFO} QPIDCLIENT_VERSION_INFO=%{QPIDCLIENT_VERSION_INFO} QPIDMESSAGING_VERSION_INFO=%{QPIDMESSAGING_VERSION_INFO} QMF_VERSION_INFO=%{QMF_VERSION_INFO} QMFENGINE_VERSION_INFO=%{QMFENGINE_VERSION_INFO} QMFCONSOLE_VERSION_INFO=%{QMFCONSOLE_VERSION_INFO} RDMAWRAP_VERSION_INFO=%{RDMAWRAP_VERSION_INFO} SSLCOMMON_VERSION_INFO=%{SSLCOMMON_VERSION_INFO}
 
 Name:           qpid-cpp
-Version:        0.18
-Release:        6%{?dist}
+Version:        0.20
+Release:        1%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -55,7 +55,7 @@ BuildRequires: cyrus-sasl
 BuildRequires: boost-program-options
 BuildRequires: boost-filesystem
 BuildRequires: libuuid-devel
-%ifnarch s390 s390x
+%ifnarch s390 s390x %{arm}
 BuildRequires: libibverbs-devel
 BuildRequires: librdmacm-devel
 %endif
@@ -67,14 +67,8 @@ BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: libaio-devel
 
-Patch1: 01-Adds-a-Cmake-target-to-generate-a-source-tarball-for.patch
-Patch2: 02-Relocated-all-swig-.i-files-to-the-include-directory.patch
-Patch3: 03-Fixed-db4-on-Fedora.patch
-Patch4: 04-Fix-boost-filesystem-for-1.50.patch
-Patch5: 05-Provides-systemd-support-to-qpidd.patch
-Patch6: 06-Fix-building-of-messaging-examples-after-installatio.patch
-Patch7: 07-Install-CMake-file-for-C-messaging-example.patch
-Patch8: 08-Changed-systemd-support-to-requiring-Networking-star.patch
+Patch1: 01-Add-support-for-ARM-processors.patch
+Patch2: 02-Fixed-db4-on-Fedora.patch
 
 %description
 
@@ -207,8 +201,6 @@ the open AMQP messaging protocol.
 %files -n qpid-cpp-server
 %defattr(-,root,root,-)
 %{_libdir}/libqpidbroker.so.*
-%{_libdir}/qpid/daemon/replicating_listener.so
-%{_libdir}/qpid/daemon/replication_exchange.so
 %{_sbindir}/qpidd
 %{_unitdir}/qpidd.service
 %config(noreplace) %{_sysconfdir}/qpidd.conf
@@ -406,7 +398,7 @@ for ruby.
 
 
 
-%ifnarch s390 s390x
+%ifnarch s390 s390x %{arm}
 %package -n qpid-cpp-client-rdma
 Summary:   RDMA Protocol support (including Infiniband) for Qpid clients
 
@@ -575,18 +567,12 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %setup -q -n qpid-%{version}
 %setup -q -T -D -b 1 -n qpid-%{version}
 
-%patch1 -p2
-%patch2 -p2
-%patch4 -p2
-%patch5 -p2
-%patch6 -p2
-%patch7 -p2
-%patch8 -p2
-
 # qpid-store
 pushd ../store-%{version}.%{store_svnrev}
-%patch3 -p1
+%patch1 -p1
+%patch2 -p1
 popd
+
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -601,7 +587,7 @@ pushd cpp
 CXXFLAGS="%{optflags} -DNDEBUG -O3 -Wno-unused-result" \
 %configure --disable-static --with-swig --with-sasl --with-ssl --without-help2man \
 --with-swig \
-%ifnarch s390 s390x
+%ifnarch s390 s390x %{arm}
 --with-rdma \
 %else
 --without-rdma \
@@ -683,6 +669,7 @@ rm -f %{buildroot}%{_libdir}/qpid/daemon/*.la
 rm -f %{buildroot}%{_libdir}/libcqpid_perl.so
 rm -rf %{buildroot}%{ruby_sitearch}
 rm -rf %{buildroot}%{ruby_sitelib}
+rm -rf %{buildroot}%{_libdir}/perl5
 
 # this should be fixed in the examples Makefile (make install)
 rm -f %{buildroot}%{_datadir}/qpidc/examples/Makefile
@@ -752,12 +739,12 @@ popd
 
 # install swig definition files
 pushd %{_builddir}/qpid-%{version}
-install -p -m 644 cpp/include/qpid.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/include/qmfengine.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/include/qmf2.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/include/swig_perl_typemaps.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/include/swig_python_typemaps.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/include/swig_ruby_typemaps.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/bindings/qpid/qpid.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/bindings/qmf/qmfengine.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/bindings/qmf2/qmf2.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/bindings/swig_perl_typemaps.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/bindings/swig_python_typemaps.i %{buildroot}%{_includedir}
+install -p -m 644 cpp/bindings/swig_ruby_typemaps.i %{buildroot}%{_includedir}
 popd
 
 %clean
@@ -774,6 +761,13 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Jan 23 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-1
+- Rebased Qpid on release 0.20.
+- Rebased Store on SVN revision 4521.
+- Fixed builds on ARM system by disabling RDMA support.
+- Added a check in the store for ARM architecture.
+- Resolves: BZ#820282
+
 * Mon Nov 12 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.18-6
 - Changed qpidd.service to not start until after networking.
 
