@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.20
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -69,6 +69,8 @@ BuildRequires: libaio-devel
 
 Patch1: 01-Add-support-for-ARM-processors.patch
 Patch2: 02-Fixed-db4-on-Fedora.patch
+# BZ#885149
+Patch3: 03-QPID-4493-Fixes-a-memory-leak-in-the-Perl-language-b.patch
 
 %description
 
@@ -567,12 +569,13 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %setup -q -n qpid-%{version}
 %setup -q -T -D -b 1 -n qpid-%{version}
 
+%patch3 -p2
+
 # qpid-store
 pushd ../store-%{version}.%{store_svnrev}
 %patch1 -p1
 %patch2 -p1
 popd
-
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -761,6 +764,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Jan 28 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-2
+- Fixed memory leak in Perl bindings typemap.
+- Resolves: BZ#885149
+
 * Wed Jan 23 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-1
 - Rebased Qpid on release 0.20.
 - Rebased Store on SVN revision 4521.
