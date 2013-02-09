@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.20
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -764,6 +764,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sat Feb 09 2013 Denis Arnaud <denis.arnaud_fedora@m4x.org> - 0.20-3
+- Rebuild for Boost-1.53.0
+
 * Mon Jan 28 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-2
 - Fixed memory leak in Perl bindings typemap.
 - Resolves: BZ#885149
