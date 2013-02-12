@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.20
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -71,6 +71,8 @@ Patch1: 01-Add-support-for-ARM-processors.patch
 Patch2: 02-Fixed-db4-on-Fedora.patch
 # BZ#885149
 Patch3: 03-QPID-4493-Fixes-a-memory-leak-in-the-Perl-language-b.patch
+# BZ#910201
+Patch4: 04-QPID-4579-Fixes-building-Qpid-under-the-latest-GCC-4.patch
 
 %description
 
@@ -570,6 +572,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %setup -q -T -D -b 1 -n qpid-%{version}
 
 %patch3 -p2
+%patch4 -p2
 
 # qpid-store
 pushd ../store-%{version}.%{store_svnrev}
@@ -764,6 +767,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Feb 12 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-4
+- Moved Functor and MemFuncRef out of the definition of Handler.
+- Resolves: BZ#910201
+
 * Sat Feb 09 2013 Denis Arnaud <denis.arnaud_fedora@m4x.org> - 0.20-3
 - Rebuild for Boost-1.53.0
 
