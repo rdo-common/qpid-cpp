@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.20
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -135,10 +135,10 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %defattr(-,root,root,-)
 %dir %{_includedir}/qpid
 %{_includedir}/qpid/*.h
-%{_includedir}/qpid.i
-%{_includedir}/swig_perl_typemaps.i
-%{_includedir}/swig_python_typemaps.i
-%{_includedir}/swig_ruby_typemaps.i
+%{_includedir}/qpid/qpid.i
+%{_includedir}/qpid/swig_perl_typemaps.i
+%{_includedir}/qpid/swig_python_typemaps.i
+%{_includedir}/qpid/swig_ruby_typemaps.i
 %{_includedir}/qpid/amqp_0_10
 %{_includedir}/qpid/client
 %{_includedir}/qpid/console
@@ -322,8 +322,8 @@ components.
 %{_libdir}/libqmf2.so
 %{_libdir}/libqmfengine.so
 %{_libdir}/libqmfconsole.so
-%{_includedir}/qmfengine.i
-%{_includedir}/qmf2.i
+%{_includedir}/qmf/qmfengine.i
+%{_includedir}/qmf/qmf2.i
 %{_bindir}/qmf-gen
 %{python_sitelib}/qmfgen
 %{_libdir}/pkgconfig/qmf2.pc
@@ -745,12 +745,15 @@ popd
 
 # install swig definition files
 pushd %{_builddir}/qpid-%{version}
-install -p -m 644 cpp/bindings/qpid/qpid.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/bindings/qmf/qmfengine.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/bindings/qmf2/qmf2.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/bindings/swig_perl_typemaps.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/bindings/swig_python_typemaps.i %{buildroot}%{_includedir}
-install -p -m 644 cpp/bindings/swig_ruby_typemaps.i %{buildroot}%{_includedir}
+mkdir -p -m0755 %{buildroot}%{_includedir}/qpid
+mkdir -p -m0755 %{buildroot}%{_includedir}/qmf
+
+install -p -m 644 cpp/bindings/qpid/qpid.i %{buildroot}%{_includedir}/qpid
+install -p -m 644 cpp/bindings/qmf/qmfengine.i %{buildroot}%{_includedir}/qmf
+install -p -m 644 cpp/bindings/qmf2/qmf2.i %{buildroot}%{_includedir}/qmf
+install -p -m 644 cpp/bindings/swig_perl_typemaps.i %{buildroot}%{_includedir}/qpid
+install -p -m 644 cpp/bindings/swig_python_typemaps.i %{buildroot}%{_includedir}/qpid
+install -p -m 644 cpp/bindings/swig_ruby_typemaps.i %{buildroot}%{_includedir}/qpid
 popd
 
 %clean
@@ -767,6 +770,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Feb 14 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-5
+- Moved the Qpidd swig descriptors to /usr/include/qpid
+- Moved the QMF swig descriptors to /usr/include/qmf
+
 * Tue Feb 12 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-4
 - Moved Functor and MemFuncRef out of the definition of Handler.
 - Resolves: BZ#910201
