@@ -30,7 +30,7 @@
 
 Name:           qpid-cpp
 Version:        0.20
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Libraries for Qpid C++ client applications
 License:        ASL 2.0
 URL:            http://qpid.apache.org
@@ -770,6 +770,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Mar 25 2013 Vít Ondruch <vondruch@redhat.com> - 0.20-6
+- Rebuild for https://fedoraproject.org/wiki/Features/Ruby_2.0.0
+
 * Thu Feb 14 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-5
 - Moved the Qpidd swig descriptors to /usr/include/qpid
 - Moved the QMF swig descriptors to /usr/include/qmf
