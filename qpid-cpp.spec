@@ -25,7 +25,7 @@
 
 Name:          qpid-cpp
 Version:       0.22
-Release:       1%{?dist}
+Release:       1.1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -675,7 +675,7 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Thu Jun 13 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-6
+* Thu Jun 13 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.22-1.1
 - Rebased on Qpid 0.22.
 - The package now uses the CMake build system from Qpid.
 - No longer use a separate source for the store.
