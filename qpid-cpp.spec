@@ -7,11 +7,6 @@
 %{!?ruby_sitelib: %global ruby_sitelib %(/usr/bin/ruby -rrbconfig  -e 'puts Config::CONFIG["sitelibdir"] ')}
 %{!?ruby_sitearch: %global ruby_sitearch %(/usr/bin/ruby -rrbconfig -e 'puts Config::CONFIG["sitearchdir"] ')}
 
-# Release numbers
-%global qpid_svnrev  1430909
-%global store_svnrev 4521
-# Change this release number for each build of the same qpid_svnrev, otherwise set back to 1.
-
 # LIBRARY VERSIONS
 %global QPIDCOMMON_VERSION_INFO             5:0:0
 %global QPIDTYPES_VERSION_INFO              3:0:2
@@ -28,16 +23,16 @@
 # Single var with all lib version params (except store) for make
 %global LIB_VERSION_MAKE_PARAMS QPIDCOMMON_VERSION_INFO=%{QPIDCOMMON_VERSION_INFO} QPIDBROKER_VERSION_INFO=%{QPIDBROKER_VERSION_INFO} QPIDCLIENT_VERSION_INFO=%{QPIDCLIENT_VERSION_INFO} QPIDMESSAGING_VERSION_INFO=%{QPIDMESSAGING_VERSION_INFO} QMF_VERSION_INFO=%{QMF_VERSION_INFO} QMFENGINE_VERSION_INFO=%{QMFENGINE_VERSION_INFO} QMFCONSOLE_VERSION_INFO=%{QMFCONSOLE_VERSION_INFO} RDMAWRAP_VERSION_INFO=%{RDMAWRAP_VERSION_INFO} SSLCOMMON_VERSION_INFO=%{SSLCOMMON_VERSION_INFO}
 
-Name:           qpid-cpp
-Version:        0.20
-Release:        6%{?dist}
-Summary:        Libraries for Qpid C++ client applications
-License:        ASL 2.0
-URL:            http://qpid.apache.org
+Name:          qpid-cpp
+Version:       0.22
+Release:       1%{?dist}
+Summary:       Libraries for Qpid C++ client applications
+License:       ASL 2.0
+URL:           http://qpid.apache.org
 
-Source0:        http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
-Source1:        store-%{version}.%{store_svnrev}.tar.gz
+Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
 
+BuildRequires: cmake
 BuildRequires: boost-devel
 BuildRequires: libtool
 BuildRequires: doxygen
@@ -67,12 +62,14 @@ BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: libaio-devel
 
-Patch1: 01-Add-support-for-ARM-processors.patch
-Patch2: 02-Fixed-db4-on-Fedora.patch
-# BZ#885149
-Patch3: 03-QPID-4493-Fixes-a-memory-leak-in-the-Perl-language-b.patch
-# BZ#910201
-Patch4: 04-QPID-4579-Fixes-building-Qpid-under-the-latest-GCC-4.patch
+
+Patch1: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch2: 02-QPID-4826-Patch-Perl-bindings-memory-leak.patch
+Patch3: 03-QPID-4843-Fixed-the-Perl-spout.pl-example.patch
+Patch4: 04-QPID-4857-Fixed-passing-Perl-Message-to-C-code.patch
+Patch5: 05-QPID-4885-C-examples-install-to-qpid-examples.patch
+Patch6: 06-QPID-4889-Only-installs-the-Swig-descriptors-in-usr-.patch
+
 
 %description
 
@@ -102,12 +99,12 @@ the AMQP protocol.
 %doc cpp/NOTICE
 %doc cpp/README.txt
 %doc cpp/RELEASE_NOTES
-%{_libdir}/libqpidcommon.so.*
-%{_libdir}/libqpidclient.so.*
-%{_libdir}/libqpidtypes.so.*
-%{_libdir}/libqpidmessaging.so.*
+%{_libdir}/libqpidcommon.so*
+%{_libdir}/libqpidclient.so*
+%{_libdir}/libqpidtypes.so*
+%{_libdir}/libqpidmessaging.so*
 %dir %{_libdir}/qpid
-%dir %{_libdir}/qpid/client
+%{_libdir}/qpid/client/*
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
@@ -155,7 +152,7 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_libdir}/libqpidtypes.so
 %{_libdir}/libqpidmessaging.so
 %{_libdir}/pkgconfig/qpid.pc
-%{_datadir}/qpidc
+%{_datadir}/qpid
 %defattr(755,root,root,-)
 %{_bindir}/qpid-perftest
 %{_bindir}/qpid-topic-listener
@@ -163,6 +160,8 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_bindir}/qpid-latency-test
 %{_bindir}/qpid-client-test
 %{_bindir}/qpid-txtest
+%{_datadir}/qpid/examples
+%{_libexecdir}/qpid/tests
 
 %post -n qpid-cpp-client-devel -p /sbin/ldconfig
 
@@ -181,7 +180,7 @@ format for easy browsing.
 
 %files -n qpid-cpp-client-devel-docs
 %defattr(-,root,root,-)
-%doc cpp/docs/api/html
+%{_docdir}/qpid-cpp-%{version}
 
 
 
@@ -204,17 +203,16 @@ the open AMQP messaging protocol.
 
 %files -n qpid-cpp-server
 %defattr(-,root,root,-)
-%{_libdir}/libqpidbroker.so.*
+%{_libdir}/libqpidbroker.so*
 %{_sbindir}/qpidd
 %{_unitdir}/qpidd.service
 %config(noreplace) %{_sysconfdir}/qpidd.conf
 %config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
-%dir %{_libdir}/qpid/daemon
-%{_libdir}/qpid/daemon/acl.so
+%{_libdir}/qpid/daemon/*
 %attr(755, qpidd, qpidd) %{_localstatedir}/lib/qpidd
 %ghost %attr(755, qpidd, qpidd) /var/run/qpidd
 #%attr(600, qpidd, qpidd) %config(noreplace) %{_localstatedir}/lib/qpidd/qpidd.sasldb
-%doc %{_mandir}/man1/qpidd.*
+%doc %{_mandir}/man1/qpidd*
 
 %pre -n qpid-cpp-server
 getent group qpidd >/dev/null || groupadd -r qpidd
@@ -292,10 +290,10 @@ An extensible management framework layered on QPID messaging.
 
 %files -n qpid-qmf
 %defattr(-,root,root,-)
-%{_libdir}/libqmf.so.*
-%{_libdir}/libqmf2.so.*
-%{_libdir}/libqmfengine.so.*
-%{_libdir}/libqmfconsole.so.*
+%{_libdir}/libqmf.so*
+%{_libdir}/libqmf2.so*
+%{_libdir}/libqmfengine.so*
+%{_libdir}/libqmfconsole.so*
 
 %post -n qpid-qmf -p /sbin/ldconfig
 
@@ -456,7 +454,7 @@ for Qpid messaging.
 
 %files -n qpid-cpp-client-ssl
 %defattr(-,root,root,-)
-%{_libdir}/libsslcommon.so.*
+%{_libdir}/libsslcommon.so*
 %{_libdir}/qpid/client/sslconnector.so
 
 %post -n qpid-cpp-client-ssl -p /sbin/ldconfig
@@ -523,15 +521,7 @@ with Berkeley DB.
 
 %files -n qpid-cpp-server-store
 %defattr(-,root,root,-)
-%doc ../store-%{version}.%{store_svnrev}/README
-%{_libdir}/qpid/daemon/msgstore.so*
-%{python_sitearch}/qpidstore/__init__.py*
-%{python_sitearch}/qpidstore/jerr.py*
-%{python_sitearch}/qpidstore/jrnl.py*
-%{python_sitearch}/qpidstore/janal.py*
-%{_libexecdir}/qpid/resize
-%{_libexecdir}/qpid/store_chk
-%attr(0775,qpidd,qpidd) %dir %{_localstatedir}/rhm
+%{_libdir}/qpid/daemon/store.so
 
 %post -n qpid-cpp-server-store -p /sbin/ldconfig
 
@@ -569,16 +559,13 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 
 %prep
 %setup -q -n qpid-%{version}
-%setup -q -T -D -b 1 -n qpid-%{version}
 
+%patch1 -p2
+%patch2 -p2
 %patch3 -p2
 %patch4 -p2
-
-# qpid-store
-pushd ../store-%{version}.%{store_svnrev}
-%patch1 -p1
-%patch2 -p1
-popd
+%patch5 -p2
+%patch6 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -588,27 +575,9 @@ popd
 
 %build
 pushd cpp
-./bootstrap
-
-CXXFLAGS="%{optflags} -DNDEBUG -O3 -Wno-unused-result" \
-%configure --disable-static --with-swig --with-sasl --with-ssl --without-help2man \
---with-swig \
-%ifnarch s390 s390x %{arm}
---with-rdma \
-%else
---without-rdma \
-%endif
---without-cpg \
---with-xml
-ECHO=echo make %{LIB_VERSION_MAKE_PARAMS} %{?_smp_mflags}
-
-# Make perftest utilities
-pushd src/tests
-for ptest in %{perftests}; do
-  ECHO=echo make $ptest
-done
-
-popd
+%cmake .
+make %{?_smp_mflags}
+make docs-user-api
 
 pushd ../python
 ./setup.py build
@@ -620,141 +589,77 @@ pushd ../extras/qmf
 ./setup.py build
 popd
 
-# Store
-pushd ../../store-%{version}.%{store_svnrev}
-export CXXFLAGS="%{optflags} -DNDEBUG"
-./bootstrap
-%configure --disable-static --disable-rpath --disable-dependency-tracking --with-qpid-checkout=%{_builddir}/qpid-%{version}
-make %{?_smp_mflags}
 popd
 
 %install
-rm -rf %{buildroot}
 mkdir -p -m0755 %{buildroot}/%{_bindir}
 mkdir -p -m0755 %{buildroot}/%{_unitdir}
 
-(cd python; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
-(cd extras/qmf; %{__python} setup.py install --skip-build --install-purelib %{python_sitearch} --root %{buildroot})
-pushd %{_builddir}/qpid-%{version}/cpp
-make install DESTDIR=%{buildroot}
-
-install -d -m0755 %{buildroot}%{_localstatedir}/lib/qpidd
-install -d -m0755 %{buildroot}%{_libdir}/qpidd
-install -d -m0755 %{buildroot}/var/run/qpidd
-
-#install the daemon files in the right location
-mkdir -p %{buildroot}/%{_initrddir}
-install %{buildroot}/%{_sysconfdir}/init.d/qpidd %{buildroot}/%{_initrddir}/qpidd
-rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd
-install %{buildroot}/%{_sysconfdir}/init.d/qpidd-primary %{buildroot}/%{_initrddir}/qpidd-primary
-rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd-primary
-
-# Install perftest utilities
-pushd src/tests/
-for ptest in %{perftests}; do
-  libtool --mode=install install -m755 $ptest %{buildroot}/%{_bindir}
-done
-
-popd
-pushd docs/api
-make html
+pushd python
+%{__python} setup.py install \
+   --skip-build \
+   --install-purelib %{python_sitearch} \
+   --root %{buildroot}
 popd
 
-pushd ../tools
-./setup.py install --skip-build --root $RPM_BUILD_ROOT
+pushd tools
+%{__python} setup.py install \
+    --skip-build \
+    --install-purelib %{python_sitelib} \
+    --root %{buildroot}
 popd
 
-# remove things we don't want to package
-rm -f %{buildroot}%{_libdir}/*.a
-rm -f %{buildroot}%{_libdir}/*.l
-rm -f %{buildroot}%{_libdir}/*.la
-rm -f %{buildroot}%{_libdir}/libqpidbroker.so
-rm -f %{buildroot}%{_libdir}/libsslcommon.so
-rm -f %{buildroot}%{_libdir}/qpid/client/*.la
-rm -f %{buildroot}%{_libdir}/qpid/daemon/*.la
-rm -f %{buildroot}%{_libdir}/libcqpid_perl.so
-rm -rf %{buildroot}%{ruby_sitearch}
-rm -rf %{buildroot}%{ruby_sitelib}
-rm -rf %{buildroot}%{_libdir}/perl5
+pushd extras/qmf
+%{__python} setup.py install \
+    --skip-build \
+    --install-purelib %{python_sitearch} \
+    --root %{buildroot}
+popd
 
-# this should be fixed in the examples Makefile (make install)
-rm -f %{buildroot}%{_datadir}/qpidc/examples/Makefile
-rm -f %{buildroot}%{_datadir}/qpidc/examples/README.txt
-rm -rf %{buildroot}%{_datadir}/qpidc/examples/direct
-rm -rf %{buildroot}%{_datadir}/qpidc/examples/failover
-rm -rf %{buildroot}%{_datadir}/qpidc/examples/fanout
-rm -rf %{buildroot}%{_datadir}/qpidc/examples/pub-sub
-rm -rf %{buildroot}%{_datadir}/qpidc/examples/qmf-console
-rm -rf %{buildroot}%{_datadir}/qpidc/examples/request-response
-rm -rf %{buildroot}%{_datadir}/qpidc/examples/tradedemo
-rm -rf %{buildroot}%{_datadir}/qpidc/examples/xml-exchange
+pushd cpp
+make install DESTDIR=%{buildroot}/
+
+# clean up items we're not installing
+rm -f %{buildroot}/%{_libdir}/libqpidbroker.so
+rm -f %{buildroot}/%{_libdir}/libcqpid_perl.so
+rm -f %{buildroot}/%{_libdir}/ruby/cqmf2.so
+rm -f %{buildroot}/%{_libdir}/ruby/cqpid.so
+rm -f %{buildroot}/%{_libdir}/ruby/qmfengine.so
+rm -f %{buildroot}/%{ruby_sitelib}
+rm -rf %{buildroot}/%{_libdir}/perl5
 
 # install systemd files
+mkdir -p %{buildroot}/%{_unitdir}
 install -pm 644 %{_builddir}/qpid-%{version}/cpp/etc/qpidd.service %{buildroot}/%{_unitdir}
 rm -f %{buildroot}/%{_initrddir}/qpidd
 rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd.service
 
-install -d %{buildroot}%{python_sitearch}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/cqpid.py %{buildroot}%{python_sitearch}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/python/.libs/_cqpid.so %{buildroot}%{python_sitearch}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/*.py %{buildroot}%{python_sitearch}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/python/.libs/_qmfengine.so %{buildroot}%{python_sitearch}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/*.py %{buildroot}%{python_sitearch}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/python/.libs/_cqmf2.so %{buildroot}%{python_sitearch}
+# install perftests utilities
+mkdir -p %{buildroot}/%{_bindir}
+pushd src/tests
+for ptest in %{perftests}; do
+  libtool --mode=install install -m755 $ptest %{buildroot}/%{_bindir}
+done
+popd
 
-chmod +x %{buildroot}%{python_sitelib}/qpidtoollibs/disp.py
-chmod +x %{buildroot}%{python_sitearch}/*.so
+popd
 
-# remove on 64-bit arches
-%ifarch x86_64 ppc64 s390x sparc64
-rm -rf %{buildroot}%{python_sitelib}/cqmf2.py*
-rm -rf %{buildroot}%{python_sitelib}/cqpid.py*
-rm -rf %{buildroot}%{python_sitelib}/qmf.py*
-rm -rf %{buildroot}%{python_sitelib}/qmf2.py*
-rm -rf %{buildroot}%{python_sitelib}/qmfengine.py*
-%endif
-rm -rf %{buildroot}%{python_sitearch}/_cqmf2.la
-rm -rf %{buildroot}%{python_sitearch}/_cqpid.la
-rm -rf %{buildroot}%{python_sitearch}/_qmfengine.la
-rm -rf %{buildroot}%{python_sitearch}/.libs
-
+# QMF Ruby package
 install -d %{buildroot}%{ruby_vendorlibdir}
 install -d %{buildroot}%{ruby_vendorarchdir}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/qmf.rb %{buildroot}%{ruby_vendorlibdir}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/qmf2.rb %{buildroot}%{ruby_vendorlibdir}
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/ruby/.libs/cqpid.so %{buildroot}%{ruby_vendorarchdir}
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/.libs/qmfengine.so %{buildroot}%{ruby_vendorarchdir}
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/.libs/cqmf2.so %{buildroot}%{ruby_vendorarchdir}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/qmf.rb \
+     %{buildroot}%{ruby_vendorlibdir}
+install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/qmf2.rb \
+    %{buildroot}%{ruby_vendorlibdir}
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/ruby/libcqpid_ruby.so \
+     %{buildroot}%{ruby_vendorarchdir}/cqpid.so
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/libqmfengine_ruby.so \
+    %{buildroot}%{ruby_vendorarchdir}/qmfengine.so
+install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/libcqmf2_ruby.so \
+    %{buildroot}%{ruby_vendorarchdir}/cqmf2.so
 
-rm -f %{buildroot}%{_libdir}/_*
-rm -rf %{buildroot}%{_libdir}/qpid/tests
-rm -rf %{buildroot}%{_libexecdir}/qpid/tests
-popd
-
-#Store
-pushd %{_builddir}/store-%{version}.%{store_svnrev}
-make install DESTDIR=%{buildroot}
-install -d -m0775 %{buildroot}%{_localstatedir}/rhm
-install -d -m0755 %{buildroot}%{_libdir}/qpid/daemon
-rm -f %{buildroot}%{_libdir}/qpid/daemon/*.a
-rm -f %{buildroot}%{_libdir}/qpid/daemon/*.la
-rm -f %{buildroot}%{_libdir}/*.a
-rm -f %{buildroot}%{_libdir}/*.la
-rm -f %{buildroot}%{_sysconfdir}/rhmd.conf
-popd
-
-# install swig definition files
-pushd %{_builddir}/qpid-%{version}
-mkdir -p -m0755 %{buildroot}%{_includedir}/qpid
-mkdir -p -m0755 %{buildroot}%{_includedir}/qmf
-
-install -p -m 644 cpp/bindings/qpid/qpid.i %{buildroot}%{_includedir}/qpid
-install -p -m 644 cpp/bindings/qmf/qmfengine.i %{buildroot}%{_includedir}/qmf
-install -p -m 644 cpp/bindings/qmf2/qmf2.i %{buildroot}%{_includedir}/qmf
-install -p -m 644 cpp/bindings/swig_perl_typemaps.i %{buildroot}%{_includedir}/qpid
-install -p -m 644 cpp/bindings/swig_python_typemaps.i %{buildroot}%{_includedir}/qpid
-install -p -m 644 cpp/bindings/swig_ruby_typemaps.i %{buildroot}%{_includedir}/qpid
-popd
+# clean up leftover ruby files
+rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 %clean
 rm -rf %{buildroot}
@@ -770,6 +675,14 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Jun 13 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.20-6
+- Rebased on Qpid 0.22.
+- The package now uses the CMake build system from Qpid.
+- No longer use a separate source for the store.
+- Resolves: BZ#616080
+- Resolves: BZ#966780
+- Resolves: BZ#967100
+
 * Mon Mar 25 2013 Vít Ondruch <vondruch@redhat.com> - 0.20-6
 - Rebuild for https://fedoraproject.org/wiki/Features/Ruby_2.0.0
 

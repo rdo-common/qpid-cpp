@@ -1,0 +1,33 @@
+From 6384693571583f431e9306b304efd4a9036f9111 Mon Sep 17 00:00:00 2001
+From: "Darryl L. Pierce" <mcpierce@apache.org>
+Date: Fri, 24 May 2013 18:19:54 +0000
+Subject: [PATCH 6/6] QPID-4889: Only installs the Swig descriptors in
+ /usr/include
+
+Previously the files were being installed under both /usr/include
+and also /usr/share/doc/qpid. Files are now installed only once.
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1486148 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/CMakeLists.txt | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/qpid/cpp/CMakeLists.txt b/qpid/cpp/CMakeLists.txt
+index f9b3be6..85bc35a 100644
+--- a/qpid/cpp/CMakeLists.txt
++++ b/qpid/cpp/CMakeLists.txt
+@@ -68,11 +68,6 @@ set (QPIDD_CONF_FILE ${QPIDD_CONF_PATH} CACHE STRING
+      "Name of the Qpid broker configuration file")
+ 
+ install(FILES  LICENSE NOTICE  DESTINATION ${QPID_INSTALL_DOCDIR})
+-install(FILES  include/qpid/qpid.i
+-               include/qpid/swig_perl_typemaps.i
+-               include/qpid/swig_python_typemaps.i
+-               include/qpid/swig_ruby_typemaps.i
+-               DESTINATION ${QPID_INSTALL_DATADIR}/qpid)
+ install(FILES  include/qmf/qmfengine.i
+                include/qmf/qmf2.i
+         DESTINATION ${QPID_INSTALL_INCLUDEDIR}/qmf)
+-- 
+1.8.1.4
+

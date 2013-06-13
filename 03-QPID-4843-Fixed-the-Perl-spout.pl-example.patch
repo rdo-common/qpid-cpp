@@ -1,0 +1,29 @@
+From f5c5701a22fcdff6d949a4cbb43d86b2e9fcd478 Mon Sep 17 00:00:00 2001
+From: "Darryl L. Pierce" <mcpierce@apache.org>
+Date: Tue, 14 May 2013 21:26:37 +0000
+Subject: [PATCH 3/6] QPID-4843: Fixed the Perl spout.pl example.
+
+It still called the old setProperty method on Message rather than
+set_property.
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1482598 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/bindings/qpid/examples/perl/spout.pl | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qpid/cpp/bindings/qpid/examples/perl/spout.pl b/qpid/cpp/bindings/qpid/examples/perl/spout.pl
+index d8ac860..74e589b 100755
+--- a/qpid/cpp/bindings/qpid/examples/perl/spout.pl
++++ b/qpid/cpp/bindings/qpid/examples/perl/spout.pl
+@@ -70,7 +70,7 @@ sub setProperties {
+ 
+     foreach (@properties) {
+         my ( $name, $value ) = split( "=", $_ );
+-        $message->setProperty( $name, $value );
++        $message->set_property( $name, $value );
+     }
+ }
+ 
+-- 
+1.8.1.4
+
