@@ -1,0 +1,47 @@
+From 593c53d62c4bba0404389eee7a3bc41bba5c1fef Mon Sep 17 00:00:00 2001
+From: "Darryl L. Pierce" <mcpierce@apache.org>
+Date: Fri, 17 May 2013 12:36:10 +0000
+Subject: [PATCH 4/6] QPID-4857: Fixed passing Perl Message to C++ code
+
+The Perl code mistakenly passed the Perl Message object, rather than the
+wrapped C+ Message object, to the release and reject methods.
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1483771 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/bindings/qpid/perl/lib/qpid/messaging/Session.pm | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/qpid/cpp/bindings/qpid/perl/lib/qpid/messaging/Session.pm b/qpid/cpp/bindings/qpid/perl/lib/qpid/messaging/Session.pm
+index af85731..316f1fa 100644
+--- a/qpid/cpp/bindings/qpid/perl/lib/qpid/messaging/Session.pm
++++ b/qpid/cpp/bindings/qpid/perl/lib/qpid/messaging/Session.pm
+@@ -112,7 +112,7 @@ sub rollback {
+ 
+ =over
+ 
+-=item $session->acknowledge( msg )
++=item $session->acknowledge
+ 
+ Acknowledges that a specific message that has been received.
+ 
+@@ -149,7 +149,7 @@ sub reject {
+     my ($self) = @_;
+     my $impl = $self->{_impl};
+ 
+-    $impl->reject($_[1]);
++    $impl->reject($_[1]->get_implementation);
+ }
+ 
+ =pod
+@@ -168,7 +168,7 @@ sub release {
+     my ($self) = @_;
+     my $impl = $self->{_impl};
+ 
+-    $impl->release($_[1]);
++    $impl->release($_[1]->get_implementation);
+ }
+ 
+ =pod
+-- 
+1.8.1.4
+
