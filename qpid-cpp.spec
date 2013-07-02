@@ -25,7 +25,7 @@
 
 Name:          qpid-cpp
 Version:       0.22
-Release:       1.1%{?dist}
+Release:       2%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -69,6 +69,7 @@ Patch3: 03-QPID-4843-Fixed-the-Perl-spout.pl-example.patch
 Patch4: 04-QPID-4857-Fixed-passing-Perl-Message-to-C-code.patch
 Patch5: 05-QPID-4885-C-examples-install-to-qpid-examples.patch
 Patch6: 06-QPID-4889-Only-installs-the-Swig-descriptors-in-usr-.patch
+Patch7: 07-QPID-4825-Add-SOVERSION-link-to-shared-libraries.patch
 
 
 %description
@@ -566,6 +567,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %patch4 -p2
 %patch5 -p2
 %patch6 -p2
+%patch7 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -675,6 +677,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Jul  2 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.22-2
+- Fixed adding the soversion to shared libraries.
+- Resolves: BZ#980364
+
 * Thu Jun 13 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.22-1
 - Rebased on Qpid 0.22.
 - The package now uses the CMake build system from Qpid.
