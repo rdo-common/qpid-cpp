@@ -25,7 +25,7 @@
 
 Name:          qpid-cpp
 Version:       0.22
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -677,6 +677,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sat Jul 27 2013 pmachata@redhat.com - 0.22-3
+- Rebuild for boost 1.54.0
+
 * Tue Jul  2 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.22-2
 - Fixed adding the soversion to shared libraries.
 - Resolves: BZ#980364
