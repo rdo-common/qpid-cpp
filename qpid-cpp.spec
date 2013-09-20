@@ -474,6 +474,8 @@ messages.
 Summary:   Red Hat persistence extension to the Qpid messaging system
 License:   LGPLv2+
 
+ExcludeArch: %{arm}
+
 Obsoletes: rhm
 
 Requires:  qpid-cpp-server = %{version}
@@ -641,7 +643,10 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Mon Sep 20 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-1
+* Fri Sep 20 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-2
+- Disabled building on ARM due to failure of the legacy store to build.
+
+* Mon Sep 16 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-1
 - Rebased on Qpid 0.24.
 - Relocated qpidd.conf to /etc/qpid
 - Trimmed old changelog entries due to bogus date complaints.
