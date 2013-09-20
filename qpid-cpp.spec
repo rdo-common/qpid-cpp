@@ -1,4 +1,7 @@
-# qpid-cpp
+# qpid-cpp 
+
+# Define pkgdocdir for releases that don't define it already
+%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
@@ -20,17 +23,17 @@
 %global RDMAWRAP_VERSION_INFO               5:0:0
 %global SSLCOMMON_VERSION_INFO              5:0:0
 
-# Single var with all lib version params (except store) for make
-%global LIB_VERSION_MAKE_PARAMS QPIDCOMMON_VERSION_INFO=%{QPIDCOMMON_VERSION_INFO} QPIDBROKER_VERSION_INFO=%{QPIDBROKER_VERSION_INFO} QPIDCLIENT_VERSION_INFO=%{QPIDCLIENT_VERSION_INFO} QPIDMESSAGING_VERSION_INFO=%{QPIDMESSAGING_VERSION_INFO} QMF_VERSION_INFO=%{QMF_VERSION_INFO} QMFENGINE_VERSION_INFO=%{QMFENGINE_VERSION_INFO} QMFCONSOLE_VERSION_INFO=%{QMFCONSOLE_VERSION_INFO} RDMAWRAP_VERSION_INFO=%{RDMAWRAP_VERSION_INFO} SSLCOMMON_VERSION_INFO=%{SSLCOMMON_VERSION_INFO}
-
 Name:          qpid-cpp
-Version:       0.22
-Release:       2%{?dist}
+Version:       0.24
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
+
+Obsoletes:     qpid-cpp-client-ssl < 0.24
+Obsoletes:     qpid-cpp-server-ssl < 0.24
 
 BuildRequires: cmake
 BuildRequires: boost-devel
@@ -61,15 +64,15 @@ BuildRequires: xerces-c-devel
 BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: libaio-devel
+BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.5
 
 
 Patch1: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch2: 02-QPID-4826-Patch-Perl-bindings-memory-leak.patch
-Patch3: 03-QPID-4843-Fixed-the-Perl-spout.pl-example.patch
-Patch4: 04-QPID-4857-Fixed-passing-Perl-Message-to-C-code.patch
-Patch5: 05-QPID-4885-C-examples-install-to-qpid-examples.patch
-Patch6: 06-QPID-4889-Only-installs-the-Swig-descriptors-in-usr-.patch
-Patch7: 07-QPID-4825-Add-SOVERSION-link-to-shared-libraries.patch
+Patch2: 02-QPID-4670-Move-to-proton-0.5-remove-dummy-string-in-.patch
+Patch3: 03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
+Patch4: 04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
+Patch5: 05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
+Patch6: 06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
 
 
 %description
@@ -86,6 +89,7 @@ Summary:   Libraries for Qpid C++ client applications
 Requires:  boost
 Requires:  chkconfig
 Requires:  initscripts
+Requires:  qpid-proton-c%{_isa} >= 0.5
 
 %description -n qpid-cpp-client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -161,7 +165,7 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_bindir}/qpid-latency-test
 %{_bindir}/qpid-client-test
 %{_bindir}/qpid-txtest
-%{_datadir}/qpid/examples
+# %{_datadir}/qpid/examples
 %{_libexecdir}/qpid/tests
 
 %post -n qpid-cpp-client-devel -p /sbin/ldconfig
@@ -181,7 +185,7 @@ format for easy browsing.
 
 %files -n qpid-cpp-client-devel-docs
 %defattr(-,root,root,-)
-%{_docdir}/qpid-cpp-%{version}
+%doc %{_pkgdocdir}
 
 
 
@@ -193,6 +197,7 @@ Provides:  qpid-cpp-server-daemon = %{version}-%{release}
 
 Requires:  qpid-cpp-client = %{version}-%{release}
 Requires:  cyrus-sasl
+Requires:  qpid-proton-c%{_isa} >= 0.5
 
 Requires(post): systemd-units
 Requires(preun): systemd-units
@@ -207,7 +212,7 @@ the open AMQP messaging protocol.
 %{_libdir}/libqpidbroker.so*
 %{_sbindir}/qpidd
 %{_unitdir}/qpidd.service
-%config(noreplace) %{_sysconfdir}/qpidd.conf
+%config(noreplace) %{_sysconfdir}/qpid/qpidd.conf
 %config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
 %{_libdir}/qpid/daemon/*
 %attr(755, qpidd, qpidd) %{_localstatedir}/lib/qpidd
@@ -444,46 +449,6 @@ transport for AMQP messaging.
 
 
 
-%package -n qpid-cpp-client-ssl
-Summary:   SSL support for Qpid clients
-
-Requires:  qpid-cpp-client = %{version}-%{release}
-
-%description -n qpid-cpp-client-ssl
-A client plugin and support library to support SSL as the transport
-for Qpid messaging.
-
-%files -n qpid-cpp-client-ssl
-%defattr(-,root,root,-)
-%{_libdir}/libsslcommon.so*
-%{_libdir}/qpid/client/sslconnector.so
-
-%post -n qpid-cpp-client-ssl -p /sbin/ldconfig
-
-%postun -n qpid-cpp-client-ssl -p /sbin/ldconfig
-
-
-
-%package -n qpid-cpp-server-ssl
-Summary:   SSL support for the Qpid daemon
-
-Requires:  qpid-cpp-server = %{version}-%{release}
-Requires:  qpid-cpp-client-ssl = %{version}-%{release}
-
-%description -n qpid-cpp-server-ssl
-A Qpid daemon plugin to support SSL as the transport for AMQP
-messaging.
-
-%files -n qpid-cpp-server-ssl
-%defattr(-,root,root,-)
-%{_libdir}/qpid/daemon/ssl.so
-
-%post -n qpid-cpp-server-ssl -p /sbin/ldconfig
-
-%postun -n qpid-cpp-server-ssl -p /sbin/ldconfig
-
-
-
 %package -n qpid-cpp-server-xml
 Summary:   XML extensions for the Qpid daemon
 
@@ -567,7 +532,6 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %patch4 -p2
 %patch5 -p2
 %patch6 -p2
-%patch7 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -577,7 +541,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 
 %build
 pushd cpp
-%cmake .
+%cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} .
 make %{?_smp_mflags}
 make docs-user-api
 
@@ -677,6 +641,18 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Sep 20 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-1
+- Rebased on Qpid 0.24.
+- Relocated qpidd.conf to /etc/qpid
+- Trimmed old changelog entries due to bogus date complaints.
+- Added fixes to support ARM as a primary platform.
+- Build depends on qpid-proton 0.5.
+- QPID-4938: Stop building ssl and acl support as separate plugin modules on Unix
+- Cleaner encoding of index for delivery tags - QPID-5122
+- QPID-5123: Changes to Fedora 19 packaging of libdb4 prevents legacystore from building
+- QPID-5016: Legacy store not correctly initialising rmgr
+- QPID-5126: Fix for building legacy store on ARM platforms
+
 * Tue Jul  2 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.22-2
 - Fixed adding the soversion to shared libraries.
 - Resolves: BZ#980364
@@ -785,7 +761,7 @@ rm -rf %{buildroot}
 * Mon Jun 18 2012 Rex Dieter <rdieter@fedoraproject.org> 0.16-1.5
 - -server: Obsoletes -server-devel (and so it doesn't Obsoletes itself)
 
-* Fri Jun 07 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.4
+* Thu Jun 07 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.4
 - Replaced the dependency on chkconfig and service binaries with packages.
 
 * Wed Jun 06 2012 Darryl L. Pierce <dpierce@redhat.com> - 0.16-1.3
@@ -821,383 +797,3 @@ rm -rf %{buildroot}
 
 * Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-6.3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
-
-* Thu Dec 08 2011 Denis Arnaud <denis.arnaud_fedora@m4x.org> - 0.12-6.2
-- Fixed the Boost.Singleton issue (thanks to Petr Machata's patch: #761045)
-
-* Wed Dec 07 2011 Denis Arnaud <denis.arnaud_fedora@m4x.org> - 0.12-5.2
-- Rebuilt for Boost-1.48
-
-* Wed Oct 26 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.12-4.2
-- Rebuilt for glibc bug#747377
-
-* Thu Oct 20 2011 Nuno Santos <nsantos@redhat.com> - 0.12-4.1
-- BZ747351 - python-qpid-qmf has namespace collision
-
-* Thu Sep 22 2011 Nuno Santos <nsantos@redhat.com> - 0.12-3.1
-- BZ705208 - [RFE] qpid needs package config files for dependency usage by autotools
-
-* Tue Sep 20 2011 Nuno Santos <nsantos@redhat.com> - 0.12-2.1
-- Updated patch for qmf-related issues fixed post-0.12
-
-* Tue Aug 30 2011 Nuno Santos <nsantos@redhat.com> - 0.12-1.1
-- Rebased to sync with upstream's official 0.12 release
-
-* Sun Aug 14 2011 Rex Dieter <rdieter@fedoraproject.org> - 0.10-4.1
-- Rebuilt for rpm (#728707)
-
-* Thu Jul 21 2011 Jaroslav Reznik <jreznik@redhat.com> - 0.10-4
-- Rebuilt for boost 1.47.0
-
-* Tue Jun 14 2011 Nuno Santos <nsantos@redhat.com> - 0.10-3
-- BZ709948 - package the perl bindings (patch from jpo@di.uminho.pt)
-
-* Mon May  2 2011 Nuno Santos <nsantos@redhat.com> - 0.10-1
-- Rebased to sync with upstream's official 0.10 release
-
-* Sun Apr 17 2011 Kalev Lember <kalev@smartlink.ee> - 0.8-8
-- Rebuilt for boost 1.46.1 soname bump
-
-* Thu Mar 10 2011 Kalev Lember <kalev@smartlink.ee> - 0.8-7
-- Rebuilt with xerces-c 3.1
-
-* Tue Feb 22 2011 Nuno Santos <nsantos@redhat.com> - 0.8-6
-- BZ661736 - renaming qmf subpackage to qpid-qmf
-
-* Mon Feb 14 2011 Nuno Santos <nsantos@redhat.com> - 0.8-5
-- Updated qmf patch
-
-* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8-4.1
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
-
-* Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-4
-- BZ671520 - SELinux is preventing /usr/bin/updatedb from 'getattr' accesses on the directory /var/run/qpidd
-
-* Mon Feb  7 2011 Nuno Santos <nsantos@redhat.com> - 0.8-3
-- Updated qmf-related patch, includes previous size_t-related patch
-- New patch to deal with updated boost
-- BZ665366 - qpidd post install is blowing away default SELinux policy
-
-* Thu Jan 21 2011 Dan Horák <dan[at]danny.cz> - 0.8-2
-- fix build with different size_t - https://issues.apache.org/jira/browse/QPID-2996
-
-* Mon Jan 10 2011 Nuno Santos <nsantos@redhat.com> - 0.8-1
-- Rebased to sync with upstream's official 0.8 release, based on svn rev 1037942
-
-* Tue Dec 21 2010 Dan Horák <dan[at]danny.cz> - 0.7.946106-4.1
-- don't build with InfiniBand support on s390(x)
-- don't limit architectures in Fedora
-
-* Mon Nov 29 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-4
-- BZ656680 - Update Spec File to use ghost macro on files in /var/run
-
-* Tue Jul 27 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-2
-- Patch for autoconf swig version comparison macro
-
-* Tue Jul 22 2010 Nuno Santos <nsantos@redhat.com> - 0.7.946106-1
-- Rebased to sync with mrg
-
-* Mon May  3 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-4
-- Patch for qmf.rb
-
-* Tue Apr  6 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-3
-- BZ529448 - qpidd should not require selinux-policy-minimum
-
-* Fri Mar 19 2010 Nuno Santos <nsantos@redhat.com> - 0.6.895736-2
-- BZ574880 - Add restorecon to qpid init script
-
-* Tue Mar 2 2010 Kim van der Riet<kim.vdriet@redhat.com> - 0.6.895736-1
-- Imported unified specfile from RHEL maintained by Kim van der Riet
-
-* Mon Feb  8 2010 Nuno Santos <nsantos@nsantos-laptop> - 0.5.829175-4
-- Package rename
-
-* Wed Dec  2 2009 Nuno Santos <nsantos@redhat.com> - 0.5.829175-3
-- Patch for BZ538355
-
-* Tue Nov  3 2009 Nuno Santos <nsantos@redhat.com> - 0.5.829175-2
-- Add patch for qmf fixes
-
-* Fri Oct 23 2009 Nuno Santos <nsantos@redhat.com> - 0.5.829175-1
-- Rebased to svn rev 829175
-
-* Thu Oct 15 2009 Nuno Santos <nsantos@redhat.com> - 0.5.825677-1
-- Rebased to svn rev 825677
-
-* Tue Sep 29 2009 Nuno Santos <nsantos@redhat.com> - 0.5.819819-1
-- Rebased to svn rev 819819 for F12 beta
-
-* Thu Sep 24 2009 Nuno Santos <nsantos@redhat.com> - 0.5.818599-1
-- Rebased to svn rev 818599
-- rhm-cpp-server-store obsoletes rhm top-level package
-
-* Fri Sep 19 2009 Nuno Santos <nsantos@redhat.com> - 0.5.817349
-- Rebased to svn rev 817349
-
-* Wed Jul 29 2009 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.5.790661-3
-- Update BuildRequires and Requires to use latest stable versions of
-  corosync and clusterlib.
-- Unbreak perftests define (and fix vim spec syntax coloring).
-
-* Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.5.790661-2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
-
-* Thu Jul  2 2009 Nuno Santos <nsantos@redhat.com> - 0.5.790661-1
-- Rebased to svn rev 790661; .so lib numbers bumped
-
-* Fri Jun 26 2009 Nuno Santos <nsantos@redhat.com> - 0.5.788782-1
-- Rebased to svn rev 788782
-
-* Mon Jun 22 2009 Nuno Santos <nsantos@redhat.com> - 0.5.787286-1
-- Rebased to svn rev 787286
-
-* Wed Jun 10 2009 Fabio M. Di Nitto <fdinitto@redhat.com> - 0.5.752600-8
-- update BuildRequires to use corosynclib-devel in correct version.
-- update BuildRequires to use clusterlib-devel instead of the obsoleted
-  cmanlib-devel.
-- drop Requires on cmanlib. This should come in automatically as part
-  of the rpm build process.
-- re-align package version to -8. -7 didn't have a changelog entry?
-- add patch to port Cluster/Cpg to newest Cpg code.
-- change patch tag to use patch0.
-
-* Mon May  4 2009 Nuno Santos <nsantos@redhat.com> - 0.5.752600-5
-- patch for SASL credentials refresh
-
-* Wed Apr  1 2009 Michael Schwendt <mschwendt@fedoraproject.org> - 0.5.752600-5
-- Fix unowned examples directory in -devel pkg.
-
-* Mon Mar 16 2009 Nuno Santos <nsantos@localhost.localdomain> - 0.5.752600-4
-- BZ483925 - split docs into a separate noarch subpackage
-
-* Mon Mar 16 2009 Nuno Santos <nsantos@redhat.com> - 0.5.752600-3
-- Disable auth by default; fix selinux requires
-
-* Wed Mar 11 2009 Nuno Santos <nsantos@redhat.com> - 0.5.752600-1
-- Rebased to svn rev 752600
-
-* Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.738618-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
-
-* Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.4.738618-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
-
-* Wed Jan 28 2009 Nuno Santos <nsantos@redhat.com> - 0.4.738618-2
-- Rebased to svn rev 738618
-
-* Tue Jan 20 2009 Nuno Santos <nsantos@redhat.com> - 0.4.734452-3
-- BZ474614 and BZ474613 - qpidc/rhm unowned directories
-
-* Thu Jan 15 2009 Nuno Santos <nsantos@redhat.com> - 0.4.734452-1
-- Rebased to svn rev 734452
-
-* Tue Dec 23 2008 Nuno Santos <nsantos@redhat.com> - 0.4.728142-1
-- Rebased to svn rev 728142
-- Re-enable cluster, now using corosync
-
-* Tue Dec  2 2008 Nuno Santos <nsantos@redhat.com> - 0.3.722557-1
-- Rebased to svn rev 722557
-- Temporarily disabled cluster due to openais version incompatibility
-
-* Wed Nov 26 2008 Nuno Santos <nsantos@redhat.com> - 0.3.720979-1
-- Rebased to svn rev 720979
-
-* Fri Nov 21 2008  Mick Goulish <mgoulish@redhat.com>
-- updated to 719552
-
-* Thu Nov 20 2008  Mick Goulish <mgoulish@redhat.com>
-- updated to 719323
-- For subpackage qpidd-cluster, added dependency to cman-devel.
-- For subpackage qpidd-cluster, added dependency to qpidc.
-- added BuildRequires cman-devel
-
-* Fri Nov 14 2008 Justin Ross <jross@redhat.com> - 0.3.714072-1
-- Update to svn rev 714072
-- Enable building --with-cpg
-
-* Wed Nov 12 2008 Justin Ross <jross@redhat.com> - 0.3.713378-1
-- Update to svn rev 713378
-
-* Fri Nov  7 2008 Justin Ross <jross@redhat.com> - 0.3.712127-1
-- Update to svn rev 712127
-
-* Thu Nov  6 2008 Nuno Santos <nsantos@redhat.com> - 0.3.711915-2
-- Removed extraneous openais-devel dependency
-
-* Thu Nov  6 2008 Justin Ross <jross@redhat.com> - 0.3.711915-1
-- Update to svn rev 711915
-
-* Tue Nov  4 2008 Nuno Santos <nsantos@redhat.com> - 0.3.709187-2
-- Remove extraneous dependency
-
-* Thu Oct 30 2008 Nuno Santos <nsantos@redhat.com> - 0.3.709187-1
-- Rebsed to svn rev 709187
-
-* Tue Oct 28 2008 Nuno Santos <nsantos@redhat.com> - 0.3.708576-1
-- Rebased to svn rev 708576
-
-* Mon Oct 27 2008 Nuno Santos <nsantos@redhat.com> - 0.3.708210-1
-- Rebased to svn rev 708210; address make check libtool issue
-
-* Fri Oct 24 2008 Justin Ross <jross@redhat.com> - 0.3.707724-1
-- Update to revision 707724
-
-* Thu Oct 23 2008 Justin Ross <jross@redhat.com> - 0.3.707468-1
-- Don't use silly idenity defines
-- Add new ssl and rdma subpackages
-- Move cluster and xml plugins into their own subpackages
-- Reflect new naming of plugins
-
-* Wed Aug 21 2008 Justin Ross <jross@redhat.com> - 0.2.687156-1
-- Update to source revision 687156 of the qpid.0-10 branch
-
-* Wed Aug 14 2008 Justin Ross <jross@redhat.com> - 0.2.685273-1
-- Update to source revision 685273 of the qpid.0-10 branch
-
-* Wed Aug  6 2008 Justin Ross <jross@redhat.com> - 0.2.683301-1
-- Update to source revision 683301 of the qpid.0-10 branch
-
-* Thu Jul 15 2008 Justin Ross <jross@redhat.com> - 0.2.676581-1
-- Update to source revision 676581 of the qpid.0-10 branch
-- Work around home dir creation problem
-- Use a license string that rpmlint likes
-
-* Thu Jul 10 2008 Nuno Santos <nsantos@redhat.com> - 0.2.667603-3
-- BZ453818: added additional tests to -perftest
-
-* Thu Jun 13 2008 Justin Ross <jross@redhat.com> - 0.2.667603-1
-- Update to source revision 667603
-
-* Thu Jun 12 2008 Justin Ross <jross@redhat.com> - 0.2.667253-1
-- Update to source revision 667253
-
-* Thu Jun 12 2008 Nuno Santos <nsantos@redhat.com> - 0.2.666138-5
-- add missing doc files
-
-* Wed Jun 11 2008 Justin Ross <jross@redhat.com> - 0.2.666138-3
-- Added directories for modules and pid files to install script
-
-* Wed May 28 2008 David Sommerseth <dsommers@redhat.com> - 0.2.663761-1
-- Added perftest utilities
-
-* Thu May 22 2008 Nuno Santos <nsantos@redhat.com> - 0.2.656926-4
-- Additional build flags for i686
-
-* Tue May 20 2008 Nuno Santos <nsantos@redhat.com> - 0.2.656926-3
-- BZ 432872: remove examples, which are being packaged separately
-
-* Tue May 20 2008 Justin Ross <jross@redhat.com> -0.2.656926-2
-- Drop build requirements for graphviz and help2man
-
-* Wed May 14 2008 Nuno Santos <nsantos@redhat.com> - 0.2-34
-- Bumped for Beta 4 release
-
-* Fri May  9 2008 Matthew Farrellee <mfarrellee@redhat> - 0.2-33
-- Moved qpidd.conf from qpidc package to qpidd package
-- Added BuildRequires xqilla-devel and xerces-c-devel to qpidd for XML Exchange
-- Added BuildRequires openais-devel to qpidd for CPG
-- Added missing Requires xqilla-devel to qpidd-devel
-
-* Thu May  8 2008 Matthew Farrellee <mfarrellee@redhat> - 0.2-32
-- Added sasl2 config file for qpidd
-- Added cyrus-sasl dependencies
-
-* Wed May  7 2008 Matthew Farrellee <mfarrellee@redhat> - 0.2-31
-- Added python dependency, needed by managementgen
-
-* Wed May  7 2008 Matthew Farrellee <mfarrellee@redhat> - 0.2-30
-- Added management-types.xml to qpidc-devel package
-
-* Tue May  6 2008 Matthew Farrellee <mfarrellee@redhat> - 0.2-29
-- Added managementgen to the qpidc-devel package
-
-* Mon Apr 14 2008 Nuno Santos <nsantos@redhat.com> - 0.2-28
- - Fix home dir permissions
- - Bumped for Fedora 9
-
-* Mon Mar 31 2008 Nuno Santos <nsantos@redhat.com> - 0.2-25
-- Create user qpidd, start qpidd service as qpidd
-
-* Mon Feb 18 2008 Rafael Schloming <rafaels@redhat.com> - 0.2-24
-- Bug fix for TCK issue in Beta 3
-
-* Thu Feb 14 2008 Rafael Schloming <rafaels@redhat.com> - 0.2-23
-- Bumped to pull in fixes for Beta 3
-
-* Tue Feb 12 2008 Alan Conway <aconway@redhat.com> - 0.2-22
-- Added -g to compile flags for debug symbols.
-
-* Tue Feb 12 2008 Alan Conway <aconway@redhat.com> - 0.2-21
-- Create /var/lib/qpidd correctly.
-
-* Mon Feb 11 2008 Rafael Schloming <rafaels@redhat.com> - 0.2-20
-- bumped for Beta 3
-
-* Mon Jan 21 2008 Gordon Sim <gsim@redhat.com> - 0.2-18
-- bump up rev for recent changes to plugin modules & mgmt
-
-* Thu Jan 03 2008 Nuno Santos <nsantos@redhat.com> - 0.2-17
-- add missing header file SessionManager.h
-
-* Thu Jan 03 2008 Nuno Santos <nsantos@redhat.com> - 0.2-16
-- limit builds to i386 and x86_64 archs
-
-* Thu Jan 03 2008 Nuno Santos <nsantos@redhat.com> - 0.2-15
-- add ruby as a build dependency
-
-* Tue Dec 18 2007 Nuno Santos <nsantos@redhat.com> - 0.2-14
-- include fixes from Gordon Sim (fragmentation, lazy-loading, staging) 
-  and Alan Conway (exception handling in the client).
-
-* Thu Dec 6 2007 Alan Conway <aconway@redhat.com> - 0.2-13
-- installcheck target to build examples in installation.
-
-* Thu Nov 8 2007 Alan Conway <aconway@redhat.com> - 0.2-10
-- added examples to RPM package.
-
-* Thu Oct 9 2007 Alan Conway <aconway@redhat.com> - 0.2-9
-- added config(noreplace) for qpidd.conf
-
-* Thu Oct 4 2007 Alan Conway <aconway@redhat.com> - 0.2-8
-- Added qpidd.conf configuration file.
-- Updated man page to detail configuration options.
-
-* Thu Sep 20 2007 Alan Conway <aconway@redhat.com> - 0.2-7
-- Removed apr dependency.
-
-* Wed Aug 1 2007 Alan Conway <aconway@redhat.com> - 0.2-6
-- added --disable-cluster flag
-
-* Tue Apr 17 2007 Alan Conway <aconway@redhat.com> - 0.2-5
-- Add missing Requires: e2fsprogs-devel for qpidc-devel.
-
-* Tue Apr 17 2007 Alan Conway <aconway@redhat.com> - 0.2-4
-- longer broker_start timeout to avoid failures in plague builds.
-
-* Tue Apr 17 2007 Alan Conway <aconway@redhat.com> - 0.2-3
-- Add missing Requires: apr in qpidc.
-
-* Mon Apr 16 2007 Alan Conway <aconway@redhat.com> - 0.2-2
-- Bugfix for memory errors on x86_64.
-
-* Thu Apr 12 2007 Alan Conway <aconway@redhat.com> - 0.2-1
-- Bumped version number for rhm dependencies.
-
-* Wed Apr 11 2007 Alan Conway <aconway@redhat.com> - 0.1-5
-- Add qpidd-devel sub-package.
-
-* Mon Feb 19 2007 Jim Meyering <meyering@redhat.com> - 0.1-4
-- Address http://bugzilla.redhat.com/220630:
-- Remove redundant "cppunit" build-requires.
-- Add --disable-static.
-
-* Thu Jan 25 2007 Alan Conway <aconway@redhat.com> - 0.1-3
-- Applied Jim Meyerings fixes from http://mail-archives.apache.org/mod_mbox/incubator-qpid-dev/200701.mbox/<87hcugzmyp.fsf@rho.meyering.net>
-
-* Mon Dec 22 2006 Alan Conway <aconway@redhat.com> - 0.1-1
-- Fixed all rpmlint complaints (with help from David Lutterkort)
-- Added qpidd --daemon behaviour, fix init.rc scripts
-
-* Fri Dec  8 2006 David Lutterkort <dlutter@redhat.com> - 0.1-1
-- Initial version based on Jim Meyering's sketch and discussions with Alan
-  Conway

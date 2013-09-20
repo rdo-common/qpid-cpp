@@ -1,0 +1,117 @@
+From e9ec612f443e666df8d54c3a2ab1a7f7d0507326 Mon Sep 17 00:00:00 2001
+From: Kim van der Riet <kpvdr@apache.org>
+Date: Tue, 10 Sep 2013 01:48:58 +0000
+Subject: [PATCH] QPID-5123: Changes to Fedora 19 packaging of libdb4 prevents
+ legacystore from building
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1521335 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/src/finddb.cmake                          | 20 +++++++++++---------
+ qpid/cpp/src/legacystore.cmake                     |  4 ++--
+ qpid/cpp/src/qpid/legacystore/MessageStoreImpl.cpp |  2 +-
+ 3 files changed, 14 insertions(+), 12 deletions(-)
+
+diff --git a/qpid/cpp/src/finddb.cmake b/qpid/cpp/src/finddb.cmake
+index fad827c..2f2f94f 100644
+--- a/qpid/cpp/src/finddb.cmake
++++ b/qpid/cpp/src/finddb.cmake
+@@ -22,31 +22,33 @@ if(UNIX)
+ # - Find BerkeleyDB
+ # Find the BerkeleyDB includes and library
+ # This module defines
+-# DB_INCLUDE_DIR, where to find db.h, etc.
++# DB_CXX_INCLUDE_DIR, where to find db_cxx.h, etc.
+ # DB_LIBRARIES, the libraries needed to use BerkeleyDB.
+ # DB_FOUND, If false, do not try to use BerkeleyDB.
+ # also defined, but not for general use are
+ # DB_LIBRARY, where to find the BerkeleyDB library.
+ 
+-FIND_PATH(DB_INCLUDE_DIR db.h
++FIND_PATH(DB_CXX_INCLUDE_DIR db_cxx.h
+     /usr/local/include/db4
++    /usr/local/include/libdb4
+     /usr/local/include
+     /usr/include/db4
++    /usr/include/libdb4
+     /usr/include
+ )
+ 
+-SET(DB_NAMES ${DB_NAMES} db_cxx)
++SET(DB_NAMES ${DB_NAMES} db_cxx db_cxx-4)
+ FIND_LIBRARY(DB_LIBRARY
+     NAMES ${DB_NAMES}
+     PATHS /usr/lib /usr/local/lib
+ )
+ 
+-IF (DB_LIBRARY AND DB_INCLUDE_DIR)
++IF (DB_LIBRARY AND DB_CXX_INCLUDE_DIR)
+     SET(DB_LIBRARIES ${DB_LIBRARY})
+     SET(DB_FOUND "YES")
+-ELSE (DB_LIBRARY AND DB_INCLUDE_DIR)
++ELSE (DB_LIBRARY AND DB_CXX_INCLUDE_DIR)
+     UNSET( DB_FOUND )
+-ENDIF (DB_LIBRARY AND DB_INCLUDE_DIR)
++ENDIF (DB_LIBRARY AND DB_CXX_INCLUDE_DIR)
+ 
+ 
+ IF (DB_FOUND)
+@@ -60,15 +62,15 @@ ELSE (DB_FOUND)
+ ENDIF (DB_FOUND)
+ 
+ # Deprecated declarations.
+-SET (NATIVE_DB_INCLUDE_PATH ${DB_INCLUDE_DIR} )
++SET (NATIVE_DB_INCLUDE_PATH ${DB_CXX_INCLUDE_DIR} )
+ GET_FILENAME_COMPONENT (NATIVE_DB_LIB_PATH ${DB_LIBRARY} PATH)
+ 
+ MARK_AS_ADVANCED(
+     DB_LIBRARY
+-    DB_INCLUDE_DIR
++    DB_CXX_INCLUDE_DIR
+ )
+ 
+ else(UNIX)
+     MESSAGE(STATUS "BerkeleyDB is ignored on non-Unix platforms")
+     UNSET( DB_FOUND )
+-endif(UNIX)
+\ No newline at end of file
++endif(UNIX)
+diff --git a/qpid/cpp/src/legacystore.cmake b/qpid/cpp/src/legacystore.cmake
+index 9d6876b..1fdb51a 100644
+--- a/qpid/cpp/src/legacystore.cmake
++++ b/qpid/cpp/src/legacystore.cmake
+@@ -126,10 +126,10 @@ if (BUILD_LEGACYSTORE)
+     )
+ 
+     if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/db-inc.h)
+-      message(STATUS "Including BDB from ${DB_INCLUDE_DIR}/db_cxx.h")
++      message(STATUS "Including BDB from ${DB_CXX_INCLUDE_DIR}/db_cxx.h")
+         file(WRITE 
+              ${CMAKE_CURRENT_BINARY_DIR}/db-inc.h
+-             "#include <${DB_INCLUDE_DIR}/db_cxx.h>\n")
++             "#include <${DB_CXX_INCLUDE_DIR}/db_cxx.h>\n")
+     endif()
+ 
+     add_library (legacystore MODULE
+diff --git a/qpid/cpp/src/qpid/legacystore/MessageStoreImpl.cpp b/qpid/cpp/src/qpid/legacystore/MessageStoreImpl.cpp
+index c92c982..4db2790 100644
+--- a/qpid/cpp/src/qpid/legacystore/MessageStoreImpl.cpp
++++ b/qpid/cpp/src/qpid/legacystore/MessageStoreImpl.cpp
+@@ -21,6 +21,7 @@
+ 
+ #include "qpid/legacystore/MessageStoreImpl.h"
+ 
++#include "db-inc.h"
+ #include "qpid/broker/QueueSettings.h"
+ #include "qpid/legacystore/BindingDbt.h"
+ #include "qpid/legacystore/BufferValue.h"
+@@ -31,7 +32,6 @@
+ #include "qmf/org/apache/qpid/legacystore/Package.h"
+ #include "qpid/legacystore/StoreException.h"
+ #include <dirent.h>
+-#include <db.h>
+ 
+ #define MAX_AIO_SLEEPS 100000 // tot: ~1 sec
+ #define AIO_SLEEP_TIME_US  10 // 0.01 ms
+-- 
+1.8.3.1
+
