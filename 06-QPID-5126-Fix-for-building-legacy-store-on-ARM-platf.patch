@@ -1,0 +1,35 @@
+From 0bd06fdd4d4bcbef63de1e2ee4a1e4cee9b0d7f4 Mon Sep 17 00:00:00 2001
+From: "Darryl L. Pierce" <mcpierce@apache.org>
+Date: Tue, 10 Sep 2013 20:24:29 +0000
+Subject: [PATCH] QPID-5126: Fix for building legacy store on ARM platforms
+
+Contributed by: Kim van der Riet <kim.vdriet@redhat.com>
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1521629 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h b/qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h
+index 0a0d0df..01d92ee 100644
+--- a/qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h
++++ b/qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h
+@@ -33,13 +33,13 @@
+ #ifndef QPID_LEGACYSTORE_JRNL_JCFG_H
+ #define QPID_LEGACYSTORE_JRNL_JCFG_H
+ 
+-#if defined(__i386__) /* little endian, 32 bits */
++#if defined(__i386__) || (__arm__) /* little endian, 32 bits */
+ #define JRNL_LITTLE_ENDIAN
+ #define JRNL_32_BIT
+ #elif defined(__PPC__) || defined(__s390__)  /* big endian, 32 bits */
+ #define JRNL_BIG_ENDIAN
+ #define JRNL_32_BIT
+-#elif defined(__ia64__) || defined(__x86_64__) || defined(__alpha__) /* little endian, 64 bits */
++#elif defined(__ia64__) || defined(__x86_64__) || defined(__alpha__) || (__arm64__) /* little endian, 64 bits */
+ #define JRNL_LITTLE_ENDIAN
+ #define JRNL_64_BIT
+ #elif defined(__powerpc64__) || defined(__s390x__) /* big endian, 64 bits */
+-- 
+1.8.3.1
+
