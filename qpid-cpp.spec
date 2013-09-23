@@ -1,4 +1,4 @@
-# qpid-cpp 
+# qpid-cpp
 
 # Define pkgdocdir for releases that don't define it already
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
@@ -25,15 +25,12 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
-
-Obsoletes:     qpid-cpp-client-ssl < 0.24
-Obsoletes:     qpid-cpp-server-ssl < 0.24
 
 BuildRequires: cmake
 BuildRequires: boost-devel
@@ -86,10 +83,14 @@ the AMQP protocol.
 %package -n qpid-cpp-client
 Summary:   Libraries for Qpid C++ client applications
 
+# Remove with 0.28
+Provides:      qpid-cpp-client-ssl = %{version}
+Obsoletes:     qpid-cpp-client-ssl <= 0.24
+
 Requires:  boost
 Requires:  chkconfig
 Requires:  initscripts
-Requires:  qpid-proton-c%{_isa} >= 0.5
+Requires:  qpid-proton-c%{?_isa} >= 0.5
 
 %description -n qpid-cpp-client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -122,7 +123,7 @@ the AMQP protocol.
 %package -n qpid-cpp-client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
 
-Requires:  qpid-cpp-client = %{version}-%{release}
+Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
 Requires:  boost-devel
 Requires:  boost-filesystem
 Requires:  boost-program-options
@@ -191,13 +192,14 @@ format for easy browsing.
 
 %package -n qpid-cpp-server
 Summary:   An AMQP message broker daemon
-Obsoletes: qpid-cpp-server-devel <= %{version}-%{release}
-Obsoletes: qpid-cpp-server-daemon < %{version}-%{release}
-Provides:  qpid-cpp-server-daemon = %{version}-%{release}
 
-Requires:  qpid-cpp-client = %{version}-%{release}
+# Remove with 0.28
+Provides:      qpid-cpp-server-ssl = %{version}
+Obsoletes:     qpid-cpp-server-ssl <= 0.24
+
+Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
 Requires:  cyrus-sasl
-Requires:  qpid-proton-c%{_isa} >= 0.5
+Requires:  qpid-proton-c%{?_isa} >= 0.5
 
 Requires(post): systemd-units
 Requires(preun): systemd-units
@@ -253,8 +255,8 @@ fi
 %package -n qpid-cpp-server-ha
 Summary: Provides extensions to the AMQP message broker to provide high availability
 
-Requires: qpid-cpp-server = %{version}-%{release}
-Requires: qpid-qmf = %{version}-%{release}
+Requires: qpid-cpp-server%{?_isa} = %{version}-%{release}
+Requires: qpid-qmf%{?_isa} = %{version}-%{release}
 
 %description -n qpid-cpp-server-ha
 %{summary}.
@@ -285,10 +287,7 @@ fi
 %package -n qpid-qmf
 Summary:   The QPID Management Framework
 
-Provides:  qmf = %{version}-%{release}
-Obsoletes: qmf < %{version}-%{release}
-
-Requires:  qpid-cpp-client = %{version}-%{release}
+Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
 Requires:  python-qpid >= %{version}
 
 %description -n qpid-qmf
@@ -310,11 +309,8 @@ An extensible management framework layered on QPID messaging.
 %package -n qpid-qmf-devel
 Summary:   Header files and tools for developing QMF extensions
 
-Provides:  qmf-devel = %{version}-%{release}
-Obsoletes: qmf-devel < %{version}-%{release}
-
-Requires:  qpid-qmf = %{version}-%{release}
-Requires:  qpid-cpp-client-devel = %{version}-%{release}
+Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
+Requires:  qpid-cpp-client-devel%{?_isa} = %{version}-%{release}
 
 %description -n qpid-qmf-devel
 Header files and code-generation tools needed for developers of QMF-managed
@@ -341,10 +337,7 @@ components.
 %package -n python-qpid-qmf
 Summary:   The QPID Management Framework bindings for python
 
-Provides:  python-qmf = %{version}-%{release}
-Obsoletes: python-qmf < %{version}-%{release}
-
-Requires:  qpid-qmf = %{version}-%{release}
+Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
 
 # removes private-shared-object-provides warning
 %{?filter_setup:
@@ -382,10 +375,7 @@ for python.
 %package -n ruby-qpid-qmf
 Summary:   The QPID Management Framework bindings for ruby
 
-Provides:  ruby-qmf = %{version}-%{release}
-Obsoletes: ruby-qmf < %{version}-%{release}
-
-Requires:  qpid-qmf = %{version}-%{release}
+Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
 
 
 %description -n ruby-qpid-qmf
@@ -410,7 +400,7 @@ for ruby.
 %package -n qpid-cpp-client-rdma
 Summary:   RDMA Protocol support (including Infiniband) for Qpid clients
 
-Requires:  qpid-cpp-client = %{version}-%{release}
+Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
 
 %description -n qpid-cpp-client-rdma
 A client plugin and support library to support RDMA protocols (including
@@ -431,8 +421,8 @@ Infiniband) as the transport for Qpid messaging.
 %package -n qpid-cpp-server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
 
-Requires:  qpid-cpp-server = %{version}-%{release}
-Requires:  qpid-cpp-client-rdma = %{version}-%{release}
+Requires:  qpid-cpp-server%{?_isa} = %{version}-%{release}
+Requires:  qpid-cpp-client-rdma%{?_isa} = %{version}-%{release}
 
 %description -n qpid-cpp-server-rdma
 A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
@@ -452,7 +442,7 @@ transport for AMQP messaging.
 %package -n qpid-cpp-server-xml
 Summary:   XML extensions for the Qpid daemon
 
-Requires:  qpid-cpp-server = %{version}-%{release}
+Requires:  qpid-cpp-server%{?_isa} = %{version}-%{release}
 Requires:  xqilla
 Requires:  xerces-c
 
@@ -474,9 +464,7 @@ messages.
 Summary:   Red Hat persistence extension to the Qpid messaging system
 License:   LGPLv2+
 
-Obsoletes: rhm
-
-Requires:  qpid-cpp-server = %{version}
+Requires:  qpid-cpp-server%{?_isa} = %{version}
 Requires:  db4
 Requires:  libaio
 
@@ -641,6 +629,11 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Sep 23 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-2
+- Add arch checks for all requires to block potential multilib errors on upgrade.
+- Added virtual provides for both obsoleted -ssl packages.
+- Resolves: BZ#1010999
+
 * Mon Sep 20 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-1
 - Rebased on Qpid 0.24.
 - Relocated qpidd.conf to /etc/qpid
