@@ -25,7 +25,7 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -361,7 +361,7 @@ for python.
 %{python_sitearch}/qmf2.py*
 %{python_sitearch}/cqmf2.py*
 %{python_sitearch}/_cqmf2.so
-%{_bindir}/qpid-python-test
+%exclude %{_bindir}/qpid-python-test
 %exclude %{python_sitearch}/mllib
 %exclude %{python_sitearch}/qpid
 %exclude %{python_sitearch}/*.egg-info
@@ -490,7 +490,7 @@ Summary:   Management and diagnostic tools for Apache Qpid
 BuildArch: noarch
 
 Requires:  python-qpid >= 0.8
-Requires:  python-qmf = %{version}
+Requires:  python-qpid-qmf = %{version}
 
 %description -n qpid-tools
 Management and diagnostic tools for Apache Qpid brokers and clients.
@@ -631,6 +631,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Sep 23 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-4
+- Fixed dependencies on python-qmf to be python-qpid-qmf.
+
 * Mon Sep 23 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-3
 - Add arch checks for all requires to block potential multilib errors on upgrade.
 - Added virtual provides for both obsoleted -ssl packages.
