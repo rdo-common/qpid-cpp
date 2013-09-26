@@ -25,7 +25,7 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       4%{?dist}
+Release:       4%{?dist}.1
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -214,6 +214,8 @@ the open AMQP messaging protocol.
 %{_libdir}/libqpidbroker.so*
 %{_sbindir}/qpidd
 %{_unitdir}/qpidd.service
+# TODO: Delete with 0.26
+%ghost %config %{_sysconfdir}/qpidd.conf
 %config(noreplace) %{_sysconfdir}/qpid/qpidd.conf
 %config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
 %{_libdir}/qpid/daemon/*
@@ -233,6 +235,8 @@ exit 0
 if [ $1 -eq 1 ]; then
     # Initial installation
     /bin/systemctl --no-reload enable qpidd.service >/dev/null 2>&1 || :
+    # BZ#1012001 remove with 0.26
+    /usr/bin/ln -s %{_sysconfdir}/qpid/qpidd.conf %{_sysconfdir}/qpidd.conf
 fi
 
 %preun -n qpid-cpp-server
@@ -247,6 +251,10 @@ if [ $1 -ge 1 ]; then
    # Package upgrade, not uninstall
    /bin/systemctl stop qpidd.service > /dev/null 2>&1 || :
    /bin/systemctl start qpidd.service > /dev/null 2>&1 || :
+   if [ ! -f %{_sysconfdir}/qpidd.conf ]; then
+       # BZ#1012001 remove with 0.26
+       /usr/bin/ln -s %{_sysconfdir}/qpid/qpidd.conf %{_sysconfdir}/qpidd.conf
+   fi
 fi
 /sbin/ldconfig
 
@@ -631,6 +639,12 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Sep 26 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-4.1
+- Provide a symlink from /etc/qpid/qpidd.conf to /etc/qpidd.conf:
+-  * this will be removed with the 0.26 release
+-  * for upgrades any existing file is preserved for now
+- Resolves: BZ#1012001
+
 * Mon Sep 23 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-4
 - Fixed dependencies on python-qmf to be python-qpid-qmf.
 
