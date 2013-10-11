@@ -1,0 +1,408 @@
+From e6147f6717def76f8c62c1ab1e6ba23afbd519a6 Mon Sep 17 00:00:00 2001
+From: Andrew Stitcher <astitcher@apache.org>
+Date: Tue, 8 Oct 2013 15:08:44 +0000
+Subject: [PATCH 1/2] QPID-4582: Get legacystore unit tests working
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1530300 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/src/CMakeLists.txt                        |  1 +
+ qpid/cpp/src/legacystore.cmake                     | 20 +++++++
+ qpid/cpp/src/tests/legacystore/CMakeLists.txt      | 28 ++++-----
+ qpid/cpp/src/tests/legacystore/OrderingTest.cpp    | 17 +++---
+ qpid/cpp/src/tests/legacystore/SimpleTest.cpp      | 31 +++++-----
+ .../src/tests/legacystore/TransactionalTest.cpp    | 15 +++--
+ .../src/tests/legacystore/TwoPhaseCommitTest.cpp   | 15 +++--
+ qpid/cpp/src/tests/legacystore/run_test            | 69 ----------------------
+ 8 files changed, 76 insertions(+), 120 deletions(-)
+ delete mode 100644 qpid/cpp/src/tests/legacystore/run_test
+
+diff --git a/qpid/cpp/src/CMakeLists.txt b/qpid/cpp/src/CMakeLists.txt
+index c1d1640..53edb52 100644
+--- a/qpid/cpp/src/CMakeLists.txt
++++ b/qpid/cpp/src/CMakeLists.txt
+@@ -1602,6 +1602,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+ add_subdirectory(qpid/store)
+ add_subdirectory(tests)
++add_subdirectory(tests/legacystore)
+ 
+ # Support for pkg-config
+ 
+diff --git a/qpid/cpp/src/legacystore.cmake b/qpid/cpp/src/legacystore.cmake
+index 1fdb51a..afb5ea0 100644
+--- a/qpid/cpp/src/legacystore.cmake
++++ b/qpid/cpp/src/legacystore.cmake
+@@ -152,6 +152,26 @@ if (BUILD_LEGACYSTORE)
+         ${DB_LIBRARY}
+     )
+ 
++    # For use in the store tests only
++    add_library (legacystore_shared SHARED
++        ${legacy_jrnl_SOURCES}
++        ${legacy_store_SOURCES}
++        ${legacy_qmf_SOURCES}
++    )
++
++    set_target_properties (legacystore_shared PROPERTIES
++        COMPILE_DEFINITIONS _IN_QPID_BROKER
++        INCLUDE_DIRECTORIES "${legacy_include_DIRECTORIES}"
++    )
++
++    target_link_libraries (legacystore_shared
++        aio
++        uuid
++        qpidcommon qpidtypes qpidbroker
++        ${Boost_PROGRAM_OPTIONS_LIBRARY}
++        ${DB_LIBRARY}
++    )
++
+ install(TARGETS legacystore
+         DESTINATION ${QPIDD_MODULE_DIR}
+         COMPONENT ${QPID_COMPONENT_BROKER})
+diff --git a/qpid/cpp/src/tests/legacystore/CMakeLists.txt b/qpid/cpp/src/tests/legacystore/CMakeLists.txt
+index 6cfaa7e..cf5062c 100644
+--- a/qpid/cpp/src/tests/legacystore/CMakeLists.txt
++++ b/qpid/cpp/src/tests/legacystore/CMakeLists.txt
+@@ -70,36 +70,28 @@ set (qpid_test_boost_libs
+ # womp on each other's store directory.
+ 
+ #
+-# define_selftest
++# define_legacystore_test
+ # macro to accept the name of a single source file and to create a
+ #  unit test executable that runs the source.
+ #
+-MACRO (define_selftest theSourceFile)
++MACRO (define_legacystore_test theSourceFile)
+ add_executable (legacystore_${theSourceFile}
+-            unit_test
+             ${theSourceFile}
++            unit_test
+             ${platform_test_additions})
+ target_link_libraries (legacystore_${theSourceFile}
+                        ${qpid_test_boost_libs}
+-                       qpidmessaging qpidbroker qmfconsole legacystore)
+-get_property(ls_include TARGET legacystore_${theSourceFile} PROPERTY INCLUDE_DIRECTORIES)
+-list(APPEND  ls_include ${abs_top_srcdir}/src/qpid/legacystore)
+-list(APPEND  ls_include ${abs_top_srcdir}/src/tests)
+-set_target_properties (legacystore_${theSourceFile} PROPERTIES
+-            INCLUDE_DIRECTORIES "${ls_include}"
+-            COMPILE_DEFINITIONS _IN_QPID_BROKER)
++                       qpidmessaging qpidtypes qpidbroker qpidcommon legacystore_shared)
++set_target_properties (legacystore_${theSourceFile} PROPERTIES COMPILE_DEFINITIONS _IN_QPID_BROKER)
+ remember_location(legacystore_${theSourceFile})
+-set(test_wrap ${shell} ${CMAKE_CURRENT_SOURCE_DIR}/run_test${test_script_suffix})
+ 
+ add_test (legacystore_${theSourceFile} ${test_wrap} ${legacystore_${theSourceFile}_LOCATION})
+-ENDMACRO (define_selftest)
+-
+-# add_definitions(-H)
++ENDMACRO (define_legacystore_test)
+ 
+-define_selftest (SimpleTest)
+-define_selftest (OrderingTest)
+-define_selftest (TransactionalTest)
+-define_selftest (TwoPhaseCommitTest)
++define_legacystore_test (SimpleTest)
++define_legacystore_test (OrderingTest)
++define_legacystore_test (TransactionalTest)
++define_legacystore_test (TwoPhaseCommitTest)
+ 
+ #
+ # Other test programs
+diff --git a/qpid/cpp/src/tests/legacystore/OrderingTest.cpp b/qpid/cpp/src/tests/legacystore/OrderingTest.cpp
+index 92a09f0..74a9db1 100644
+--- a/qpid/cpp/src/tests/legacystore/OrderingTest.cpp
++++ b/qpid/cpp/src/tests/legacystore/OrderingTest.cpp
+@@ -20,16 +20,18 @@
+  */
+ 
+ #include "unit_test.h"
++#include "MessageUtils.h"
+ 
++#include "qpid/broker/Queue.h"
++#include "qpid/broker/RecoveryManagerImpl.h"
++#include "qpid/broker/PersistableObject.h"
++#include "qpid/framing/AMQHeaderBody.h"
+ #include "qpid/legacystore/MessageStoreImpl.h"
+-#include <iostream>
+-#include "MessageUtils.h"
+-#include <qpid/broker/Queue.h>
+-#include <qpid/broker/RecoveryManagerImpl.h>
+-#include <qpid/framing/AMQHeaderBody.h>
+ #include "qpid/log/Logger.h"
+ #include "qpid/sys/Timer.h"
+ 
++#include <iostream>
++
+ using namespace qpid;
+ using namespace qpid::broker;
+ using namespace qpid::framing;
+@@ -48,7 +50,7 @@ QPID_AUTO_TEST_SUITE(OrderingTest)
+ 
+ const std::string test_filename("OrderingTest");
+ const char* tdp = getenv("TMP_DATA_DIR");
+-const std::string test_dir(tdp && strlen(tdp) > 0 ? tdp : "/tmp/OrderingTest");
++const std::string test_dir(tdp && strlen(tdp) > 0 ? tdp : "/var/tmp/OrderingTest");
+ 
+ // === Helper fns ===
+ 
+@@ -118,7 +120,8 @@ void restart()
+     sys::Timer t;
+     DtxManager mgr(t);
+     mgr.setStore (store.get());
+-    RecoveryManagerImpl recoveryMgr(queues, exchanges, links, mgr, br.getProtocolRegistry());
++    RecoveredObjects ro;
++    RecoveryManagerImpl recoveryMgr(queues, exchanges, links, mgr, br.getProtocolRegistry(), ro);
+     store->recover(recoveryMgr);
+ 
+     queue = queues.find(name);
+diff --git a/qpid/cpp/src/tests/legacystore/SimpleTest.cpp b/qpid/cpp/src/tests/legacystore/SimpleTest.cpp
+index a49333d..e03e005 100644
+--- a/qpid/cpp/src/tests/legacystore/SimpleTest.cpp
++++ b/qpid/cpp/src/tests/legacystore/SimpleTest.cpp
+@@ -20,21 +20,23 @@
+  */
+ 
+ #include "unit_test.h"
++#include "MessageUtils.h"
+ 
++#include "qpid/broker/DirectExchange.h"
++#include "qpid/broker/Queue.h"
++#include "qpid/broker/QueueSettings.h"
++#include "qpid/broker/RecoveryManagerImpl.h"
++#include "qpid/broker/PersistableObject.h"
++#include "qpid/framing/AMQHeaderBody.h"
++#include "qpid/framing/FieldTable.h"
++#include "qpid/framing/FieldValue.h"
+ #include "qpid/legacystore/MessageStoreImpl.h"
+-#include <iostream>
+-#include "tests/legacystore/MessageUtils.h"
+ #include "qpid/legacystore/StoreException.h"
+-#include "qpid/broker/DirectExchange.h"
+-#include <qpid/broker/Queue.h>
+-#include <qpid/broker/QueueSettings.h>
+-#include <qpid/broker/RecoveryManagerImpl.h>
+-#include <qpid/framing/AMQHeaderBody.h>
+-#include <qpid/framing/FieldTable.h>
+-#include <qpid/framing/FieldValue.h>
+ #include "qpid/log/Logger.h"
+ #include "qpid/sys/Timer.h"
+ 
++#include <iostream>
++
+ qpid::broker::Broker::Options opts;
+ qpid::broker::Broker br(opts);
+ 
+@@ -57,15 +59,15 @@ QPID_AUTO_TEST_SUITE(SimpleTest)
+ 
+ const string test_filename("SimpleTest");
+ const char* tdp = getenv("TMP_DATA_DIR");
+-const string test_dir(tdp && strlen(tdp) > 0 ? tdp : "/tmp/SimpleTest");
++const string test_dir(tdp && strlen(tdp) > 0 ? tdp : "/var/tmp/SimpleTest");
+ 
+ // === Helper fns ===
+ 
+-struct DummyHandler : OutputHandler
++struct DummyHandler : FrameHandler
+ {
+     std::vector<AMQFrame> frames;
+ 
+-    virtual void send(AMQFrame& frame){
++    virtual void handle(AMQFrame& frame){
+         frames.push_back(frame);
+     }
+ };
+@@ -75,7 +77,8 @@ void recover(MessageStoreImpl& store, QueueRegistry& queues, ExchangeRegistry& e
+     sys::Timer t;
+     DtxManager mgr(t);
+     mgr.setStore (&store);
+-    RecoveryManagerImpl recovery(queues, exchanges, links, mgr, br.getProtocolRegistry());
++    RecoveredObjects ro;
++    RecoveryManagerImpl recovery(queues, exchanges, links, mgr, br.getProtocolRegistry(), ro);
+     store.recover(recovery);
+ }
+ 
+@@ -307,7 +310,7 @@ QPID_AUTO_TEST_CASE(Enqueue)
+         BOOST_CHECK_EQUAL(routingKey, msg.getRoutingKey());
+         BOOST_CHECK_EQUAL(messageId, MessageUtils::getMessageId(msg));
+         BOOST_CHECK_EQUAL(std::string("xyz"), msg.getAnnotation("abc"));
+-        BOOST_CHECK_EQUAL((u_int64_t) 14, msg.getContentSize());
++        BOOST_CHECK_EQUAL((u_int64_t) 14, msg.getContent().size());
+ 
+         DummyHandler handler;
+         MessageUtils::deliver(msg, handler, 100);
+diff --git a/qpid/cpp/src/tests/legacystore/TransactionalTest.cpp b/qpid/cpp/src/tests/legacystore/TransactionalTest.cpp
+index 2d3f6f9..d1bc34d 100644
+--- a/qpid/cpp/src/tests/legacystore/TransactionalTest.cpp
++++ b/qpid/cpp/src/tests/legacystore/TransactionalTest.cpp
+@@ -20,18 +20,20 @@
+  */
+ 
+ #include "unit_test.h"
+-
+-#include "qpid/legacystore/MessageStoreImpl.h"
+-#include <iostream>
+ #include "MessageUtils.h"
+-#include "qpid/legacystore/StoreException.h"
++
+ #include "qpid/broker/Queue.h"
+ #include "qpid/broker/RecoveryManagerImpl.h"
++#include "qpid/broker/PersistableObject.h"
+ #include "qpid/framing/AMQHeaderBody.h"
++#include "qpid/legacystore/MessageStoreImpl.h"
++#include "qpid/legacystore/StoreException.h"
+ #include "qpid/log/Statement.h"
+ #include "qpid/log/Logger.h"
+ #include "qpid/sys/Timer.h"
+ 
++#include <iostream>
++
+ using namespace mrg::msgstore;
+ using namespace qpid;
+ using namespace qpid::broker;
+@@ -53,7 +55,7 @@ QPID_AUTO_TEST_SUITE(TransactionalTest)
+ 
+ const string test_filename("TransactionalTest");
+ const char* tdp = getenv("TMP_DATA_DIR");
+-const string test_dir(tdp && strlen(tdp) > 0 ? tdp : "/tmp/TransactionalTest");
++const string test_dir(tdp && strlen(tdp) > 0 ? tdp : "/var/tmp/TransactionalTest");
+ 
+ // Test txn context which has special setCompleteFailure() method which prevents entire "txn complete" process from hapenning
+ class TestTxnCtxt : public TxnCtxt
+@@ -141,7 +143,8 @@ void restart()
+     sys::Timer t;
+     DtxManager mgr(t);
+     mgr.setStore (store.get());
+-    RecoveryManagerImpl recovery(*queues, exchanges, links, mgr, br.getProtocolRegistry());
++    RecoveredObjects ro;
++    RecoveryManagerImpl recovery(*queues, exchanges, links, mgr, br.getProtocolRegistry(), ro);
+     store->recover(recovery);
+ 
+     queueA = queues->find(nameA);
+diff --git a/qpid/cpp/src/tests/legacystore/TwoPhaseCommitTest.cpp b/qpid/cpp/src/tests/legacystore/TwoPhaseCommitTest.cpp
+index 92e49df..25bb9dc 100644
+--- a/qpid/cpp/src/tests/legacystore/TwoPhaseCommitTest.cpp
++++ b/qpid/cpp/src/tests/legacystore/TwoPhaseCommitTest.cpp
+@@ -20,18 +20,20 @@
+  */
+ 
+ #include "unit_test.h"
+-
+-#include "qpid/legacystore/MessageStoreImpl.h"
+-#include <iostream>
+ #include "MessageUtils.h"
++
+ #include "qpid/broker/Queue.h"
+ #include "qpid/broker/RecoveryManagerImpl.h"
++#include "qpid/broker/PersistableObject.h"
+ #include "qpid/framing/AMQHeaderBody.h"
+-#include "qpid/log/Statement.h"
++#include "qpid/legacystore/MessageStoreImpl.h"
+ #include "qpid/legacystore/TxnCtxt.h"
+ #include "qpid/log/Logger.h"
++#include "qpid/log/Statement.h"
+ #include "qpid/sys/Timer.h"
+ 
++#include <iostream>
++
+ using namespace mrg::msgstore;
+ using namespace qpid;
+ using namespace qpid::broker;
+@@ -54,7 +56,7 @@ QPID_AUTO_TEST_SUITE(TwoPhaseCommitTest)
+ 
+ const string test_filename("TwoPhaseCommitTest");
+ const char* tdp = getenv("TMP_DATA_DIR");
+-string test_dir(tdp && strlen(tdp) > 0 ? tdp : "/tmp/TwoPhaseCommitTest");
++string test_dir(tdp && strlen(tdp) > 0 ? tdp : "/var/tmp/TwoPhaseCommitTest");
+ 
+ // === Helper fns ===
+ 
+@@ -386,7 +388,8 @@ class TwoPhaseCommitTest
+         links = std::auto_ptr<LinkRegistry>(new LinkRegistry);
+         dtxmgr = std::auto_ptr<DtxManager>(new DtxManager(t));
+         dtxmgr->setStore (store.get());
+-        RecoveryManagerImpl recovery(*queues, exchanges, *links, *dtxmgr, br.getProtocolRegistry());
++        RecoveredObjects ro;
++        RecoveryManagerImpl recovery(*queues, exchanges, *links, *dtxmgr, br.getProtocolRegistry(), ro);
+         store->recover(recovery);
+ 
+         queueA = queues->find(nameA);
+diff --git a/qpid/cpp/src/tests/legacystore/run_test b/qpid/cpp/src/tests/legacystore/run_test
+deleted file mode 100644
+index 1d5c2ae..0000000
+--- a/qpid/cpp/src/tests/legacystore/run_test
++++ /dev/null
+@@ -1,69 +0,0 @@
+-#!/bin/bash
+-
+-#
+-# Licensed to the Apache Software Foundation (ASF) under one
+-# or more contributor license agreements.  See the NOTICE file
+-# distributed with this work for additional information
+-# regarding copyright ownership.  The ASF licenses this file
+-# to you under the Apache License, Version 2.0 (the
+-# "License"); you may not use this file except in compliance
+-# with the License.  You may obtain a copy of the License at
+-#
+-#   http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing,
+-# software distributed under the License is distributed on an
+-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+-# KIND, either express or implied.  See the License for the
+-# specific language governing permissions and limitations
+-# under the License.
+-#
+-
+-# Set up environment and run a test executable or script.
+-#
+-# Output nothing if test passes, show the output if it fails and
+-# leave output in <test>.log for examination.
+-#
+-# If qpidd.port exists run test with QPID_PORT=`cat qpidd.port`
+-#
+-# If $VALGRIND if is set run under valgrind. If there are valgrind
+-# erros show valgrind output, also leave it in <test>.valgrind for
+-# examination.
+-#
+-
+-source `dirname $0`/vg_check
+-
+-# Export variables from makefile.
+-export VALGRIND srcdir
+-
+-# Export QPID_PORT if qpidd.port exists.
+-test -f qpidd.port && export QPID_PORT=`cat qpidd.port`
+-
+-# Avoid silly libtool error messages if these are not defined
+-test -z "$LC_ALL" && export LC_ALL=
+-test -z "$LC_CTYPE" && export LC_CTYPE=
+-test -z "$LC_COLLATE" && export LC_COLLATE=
+-test -z "$LC_MESSAGES" && export LC_MESSAGES=
+-
+-VG_LOG="$1.vglog"
+-rm -f $VG_LOG*
+-
+-if grep -l "^# Generated by .*libtool" "$1" >/dev/null 2>&1; then
+-    # This is a libtool "executable". Valgrind it if VALGRIND specified.
+-    test -n "$VALGRIND" && VALGRIND="$VALGRIND --log-file=$VG_LOG --"
+-    # Hide output unless there's an error.
+-    libtool --mode=execute $VALGRIND "$@" 2>&1 || ERROR=$?
+-    test -n "$VALGRIND" && vg_check $VG_LOG*
+-else
+-    # This is a non-libtool shell script, just execute it.
+-    export VALGRIND srcdir
+-    exec "$@"
+-fi
+-
+-if test -z "$ERROR"; then
+-    # Clean up logs if there was no error.
+-    rm -f $VG_LOG*
+-    exit 0
+-else
+-    exit $ERROR
+-fi
+-- 
+1.8.3.1
+
