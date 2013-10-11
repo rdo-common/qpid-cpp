@@ -25,7 +25,7 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       4%{?dist}.1
+Release:       5%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -70,6 +70,9 @@ Patch3: 03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
 Patch4: 04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
 Patch5: 05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
 Patch6: 06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
+Patch7: 07-QPID-4582-Get-legacystore-unit-tests-working.patch
+Patch8: 08-QPID-4582-Fixed-unit-legacystore-unit-test-to-remove.patch
+Patch9: 09-QPID-5129-Alignment-issues-on-ARM.patch
 
 
 %description
@@ -472,8 +475,6 @@ messages.
 Summary:   Red Hat persistence extension to the Qpid messaging system
 License:   LGPLv2+
 
-ExcludeArch: %{arm}
-
 Requires:  qpid-cpp-server%{?_isa} = %{version}
 Requires:  db4
 Requires:  libaio
@@ -530,6 +531,9 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %patch4 -p2
 %patch5 -p2
 %patch6 -p2
+%patch7 -p2
+%patch8 -p2
+%patch9 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -639,6 +643,11 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Oct 10 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-5
+- QPID-4582: Fix the legacy store when building on ARM
+- QPID-5215: Legacy store tests
+- Resolves: BZ#1010397
+
 * Thu Sep 26 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-4.1
 - Provide a symlink from /etc/qpid/qpidd.conf to /etc/qpidd.conf:
 -  * this will be removed with the 0.26 release
