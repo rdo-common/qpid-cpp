@@ -16,16 +16,12 @@
 %global QPIDBROKER_VERSION_INFO             5:0:0
 %global QPIDCLIENT_VERSION_INFO             5:0:0
 %global QPIDMESSAGING_VERSION_INFO          4:0:1
-%global QMF_VERSION_INFO                    4:0:0
-%global QMF2_VERSION_INFO                   1:0:0
-%global QMFENGINE_VERSION_INFO              4:0:0
-%global QMFCONSOLE_VERSION_INFO             5:0:0
 %global RDMAWRAP_VERSION_INFO               5:0:0
 %global SSLCOMMON_VERSION_INFO              5:0:0
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       5%{?dist}
+Release:       6%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -155,7 +151,6 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_includedir}/qpid/messaging
 %{_includedir}/qpid/agent
 %{_includedir}/qpid/types
-%{_includedir}/qmf
 %{_libdir}/libqpidcommon.so
 %{_libdir}/libqpidclient.so
 %{_libdir}/libqpidtypes.so
@@ -267,7 +262,7 @@ fi
 Summary: Provides extensions to the AMQP message broker to provide high availability
 
 Requires: qpid-cpp-server%{?_isa} = %{version}-%{release}
-Requires: qpid-qmf%{?_isa} = %{version}-%{release}
+Requires: qpid-qmf%{?_isa}
 
 %description -n qpid-cpp-server-ha
 %{summary}.
@@ -292,118 +287,6 @@ if [ $1 -ge 1 ]; then
   /sbin/service qpidd-primary condrestart >/dev/null 2>&1 || :
 fi
 /sbin/ldconfig
-
-
-
-%package -n qpid-qmf
-Summary:   The QPID Management Framework
-
-Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
-Requires:  python-qpid >= %{version}
-
-%description -n qpid-qmf
-An extensible management framework layered on QPID messaging.
-
-%files -n qpid-qmf
-%defattr(-,root,root,-)
-%{_libdir}/libqmf.so*
-%{_libdir}/libqmf2.so*
-%{_libdir}/libqmfengine.so*
-%{_libdir}/libqmfconsole.so*
-
-%post -n qpid-qmf -p /sbin/ldconfig
-
-%postun -n qpid-qmf -p /sbin/ldconfig
-
-
-
-%package -n qpid-qmf-devel
-Summary:   Header files and tools for developing QMF extensions
-
-Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
-Requires:  qpid-cpp-client-devel%{?_isa} = %{version}-%{release}
-
-%description -n qpid-qmf-devel
-Header files and code-generation tools needed for developers of QMF-managed
-components.
-
-%files -n qpid-qmf-devel
-%defattr(-,root,root,-)
-%{_libdir}/libqmf.so
-%{_libdir}/libqmf2.so
-%{_libdir}/libqmfengine.so
-%{_libdir}/libqmfconsole.so
-%{_includedir}/qmf/qmfengine.i
-%{_includedir}/qmf/qmf2.i
-%{_bindir}/qmf-gen
-%{python_sitelib}/qmfgen
-%{_libdir}/pkgconfig/qmf2.pc
-
-%post -n qpid-qmf-devel -p /sbin/ldconfig
-
-%postun -n qpid-qmf-devel -p /sbin/ldconfig
-
-
-
-%package -n python-qpid-qmf
-Summary:   The QPID Management Framework bindings for python
-
-Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
-
-# removes private-shared-object-provides warning
-%{?filter_setup:
-%filter_provides_in %{python_sitearch}/.*\.so$
-%filter_setup
-}
-
-%description -n python-qpid-qmf
-An extensible management framework layered on QPID messaging, bindings
-for python.
-
-%files -n python-qpid-qmf
-%defattr(-,root,root,-)
-%{python_sitelib}/qpidtoollibs
-%{python_sitearch}/qmf
-%{python_sitearch}/cqpid.py*
-%{python_sitearch}/_cqpid.so
-%{python_sitearch}/qmf.py*
-%{python_sitearch}/qmfengine.py*
-%{python_sitearch}/_qmfengine.so
-%{python_sitearch}/qmf2.py*
-%{python_sitearch}/cqmf2.py*
-%{python_sitearch}/_cqmf2.so
-%exclude %{_bindir}/qpid-python-test
-%exclude %{python_sitearch}/mllib
-%exclude %{python_sitearch}/qpid
-%exclude %{python_sitearch}/*.egg-info
-
-%post -n python-qpid-qmf -p /sbin/ldconfig
-
-%postun -n python-qpid-qmf -p /sbin/ldconfig
-
-
-
-%package -n ruby-qpid-qmf
-Summary:   The QPID Management Framework bindings for ruby
-
-Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
-
-
-%description -n ruby-qpid-qmf
-An extensible management framework layered on QPID messaging, bindings
-for ruby.
-
-%files -n ruby-qpid-qmf
-%defattr(-,root,root,-)
-%{ruby_vendorlibdir}/qmf.rb
-%{ruby_vendorlibdir}/qmf2.rb
-%{ruby_vendorarchdir}/qmfengine.so
-%{ruby_vendorarchdir}/cqpid.so
-%{ruby_vendorarchdir}/cqmf2.so
-
-%post -n ruby-qpid-qmf -p /sbin/ldconfig
-
-%postun -n ruby-qpid-qmf -p /sbin/ldconfig
 
 
 
@@ -499,7 +382,7 @@ Summary:   Management and diagnostic tools for Apache Qpid
 BuildArch: noarch
 
 Requires:  python-qpid >= 0.8
-Requires:  python-qpid-qmf = %{version}
+Requires:  python-qpid-qmf
 
 %description -n qpid-tools
 Management and diagnostic tools for Apache Qpid brokers and clients.
@@ -514,7 +397,6 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %{_bindir}/qpid-route
 %{_bindir}/qpid-stat
 %{_bindir}/qpid-tool
-%{_bindir}/qmf-tool
 %doc LICENSE NOTICE
 %if "%{python_version}" >= "2.6"
 %{python_sitelib}/qpid_tools-*.egg-info
@@ -553,9 +435,6 @@ popd
 pushd ../tools
 ./setup.py build
 popd
-pushd ../extras/qmf
-./setup.py build
-popd
 
 popd
 
@@ -574,13 +453,6 @@ pushd tools
 %{__python} setup.py install \
     --skip-build \
     --install-purelib %{python_sitelib} \
-    --root %{buildroot}
-popd
-
-pushd extras/qmf
-%{__python} setup.py install \
-    --skip-build \
-    --install-purelib %{python_sitearch} \
     --root %{buildroot}
 popd
 
@@ -610,21 +482,12 @@ for ptest in %{perftests}; do
 done
 popd
 
-popd
+# Remove with 0.26
+touch %{buildroot}/%{_sysconfdir}/qpidd.conf
+mkdir -p %{buildroot}/%{_localstatedir}/run
+touch %{buildroot}/%{_localstatedir}/run/qpidd
 
-# QMF Ruby package
-install -d %{buildroot}%{ruby_vendorlibdir}
-install -d %{buildroot}%{ruby_vendorarchdir}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/qmf.rb \
-     %{buildroot}%{ruby_vendorlibdir}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/qmf2.rb \
-    %{buildroot}%{ruby_vendorlibdir}
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qpid/ruby/libcqpid_ruby.so \
-     %{buildroot}%{ruby_vendorarchdir}/cqpid.so
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf/ruby/libqmfengine_ruby.so \
-    %{buildroot}%{ruby_vendorarchdir}/qmfengine.so
-install -pm 755 %{_builddir}/qpid-%{version}/cpp/bindings/qmf2/ruby/libcqmf2_ruby.so \
-    %{buildroot}%{ruby_vendorarchdir}/cqmf2.so
+popd
 
 # clean up leftover ruby files
 rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
@@ -642,7 +505,43 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 
+
+%files
+%exclude %{_bindir}/qmf-gen
+%exclude %{_bindir}/qmf-tool
+%exclude %{_libdir}/libqmf*
+%exclude %{_includedir}/qmf
+%exclude %{python_sitelib}/qmfgen
+%{_libdir}/pkgconfig/qmf2.pc
+%exclude %{python_sitelib}/qpidtoollibs
+%exclude %{python_sitearch}/qmf
+%exclude %{python_sitearch}/cqpid.py*
+%exclude %{python_sitearch}/_cqpid.so
+%exclude %{python_sitearch}/qmf.py*
+%exclude %{python_sitearch}/qmfengine.py*
+%exclude %{python_sitearch}/_qmfengine.so
+%exclude %{python_sitearch}/qmf2.py*
+%exclude %{python_sitearch}/cqmf2.py*
+%exclude %{python_sitearch}/_cqmf2.so
+%exclude %{_bindir}/qpid-python-test
+%exclude %{python_sitearch}/mllib
+%exclude %{python_sitearch}/qpid
+%exclude %{python_sitearch}/*.egg-info
+%exclude %{ruby_vendorlibdir}/qmf*
+%exclude %{ruby_vendorarchdir}/cqpid.so
+%exclude %{ruby_vendorarchdir}/*qmf*
+
+
 %changelog
+* Fri Nov  1 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-6
+- Removed the following subpackages:
+- - qpid-qmf
+- - qpid-qmf-devel
+- - python-qpid-qmf
+- - ruby-qpid-qmf
+- Updated all QMF dependencies to not require the specific release.
+- Removed the QMF header files from qpid-cpp-devel
+
 * Thu Oct 10 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-5
 - QPID-4582: Fix the legacy store when building on ARM
 - QPID-5215: Legacy store tests
