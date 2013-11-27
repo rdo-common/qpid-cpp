@@ -21,7 +21,7 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       6%{?dist}
+Release:       7%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -110,6 +110,7 @@ the AMQP protocol.
 %{_libdir}/libqpidmessaging.so*
 %dir %{_libdir}/qpid
 %{_libdir}/qpid/client/*
+%exclude %{_libdir}/qpid/client/rdmaconnector.so*
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
@@ -533,6 +534,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Nov 27 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-7
+- Removed rdmaconnector.so from the -client subpackage.
+- Resolves: BZ#1035323
+
 * Fri Nov  1 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-6
 - Removed the following subpackages:
 - - qpid-qmf
