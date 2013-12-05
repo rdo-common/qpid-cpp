@@ -25,7 +25,7 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       4%{?dist}
+Release:       5%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -219,8 +219,8 @@ the open AMQP messaging protocol.
 %ghost %config %{_sysconfdir}/qpidd.conf
 %config(noreplace) %{_sysconfdir}/qpid/qpidd.conf
 %config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
-%{_libdir}/qpid/daemon/*
-%exclude %{_libdir}/qpid/daemon/rdma.so
+%dir %{_libdir}/qpid/daemon
+%{_libdir}/qpid/daemon/amqp.so
 %attr(755, qpidd, qpidd) %{_localstatedir}/lib/qpidd
 %ghost %attr(755, qpidd, qpidd) /var/run/qpidd
 #%attr(600, qpidd, qpidd) %config(noreplace) %{_localstatedir}/lib/qpidd/qpidd.sasldb
@@ -474,7 +474,7 @@ messages.
 Summary:   Red Hat persistence extension to the Qpid messaging system
 License:   LGPLv2+
 
-Requires:  qpid-cpp-server%{?_isa} = %{version}
+Requires:  qpid-cpp-server%{?_isa} = %{version}-%{release}
 Requires:  db4
 Requires:  libaio
 
@@ -485,7 +485,7 @@ with Berkeley DB.
 
 %files -n qpid-cpp-server-store
 %defattr(-,root,root,-)
-%{_libdir}/qpid/daemon/store.so
+%{_libdir}/qpid/daemon/legacystore.so
 
 %post -n qpid-cpp-server-store -p /sbin/ldconfig
 
@@ -591,6 +591,7 @@ rm -f %{buildroot}/%{_libdir}/ruby/cqpid.so
 rm -f %{buildroot}/%{_libdir}/ruby/qmfengine.so
 rm -f %{buildroot}/%{ruby_sitelib}
 rm -rf %{buildroot}/%{_libdir}/perl5
+rm -rf %{buildroot}/%{_libdir}/qpid/daemon/store.so*
 
 # install systemd files
 mkdir -p %{buildroot}/%{_unitdir}
@@ -639,6 +640,12 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Dec  5 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-5
+- Fixed how qpid-cpp-server was depending on -store.
+- qpidd.service now starts after network.service
+- Resolves: BZ#1038674
+- Resolves: BZ#1038094
+
 * Sat Nov 30 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-4
 - Removed rdma.so from the -server subpackage.
 - Removed rdmaconnector.so from the -client subpackage.
