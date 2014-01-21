@@ -21,12 +21,23 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       8%{?dist}
+Release:       9%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
+
+Patch1: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch2: 02-QPID-4670-Move-to-proton-0.5-remove-dummy-string-in-.patch
+Patch3: 03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
+Patch4: 04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
+Patch5: 05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
+Patch6: 06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
+Patch7: 07-QPID-4582-Get-legacystore-unit-tests-working.patch
+Patch8: 08-QPID-4582-Fixed-unit-legacystore-unit-test-to-remove.patch
+Patch9: 09-QPID-5129-Alignment-issues-on-ARM.patch
+
 
 BuildRequires: cmake
 BuildRequires: boost-devel
@@ -58,17 +69,6 @@ BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: libaio-devel
 BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.5
-
-
-Patch1: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch2: 02-QPID-4670-Move-to-proton-0.5-remove-dummy-string-in-.patch
-Patch3: 03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
-Patch4: 04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
-Patch5: 05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
-Patch6: 06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
-Patch7: 07-QPID-4582-Get-legacystore-unit-tests-working.patch
-Patch8: 08-QPID-4582-Fixed-unit-legacystore-unit-test-to-remove.patch
-Patch9: 09-QPID-5129-Alignment-issues-on-ARM.patch
 
 
 %description
@@ -535,6 +535,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Jan 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-9
+- Set qpidd service to start after the network service.
+- Resolves: BZ#1055660
+
 * Wed Nov 27 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-8
 - Removed rdma.so from the -server subpackage.
 - Resolves: BZ#1035323
