@@ -38,6 +38,7 @@ Patch3: 03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
 Patch4: 04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
 Patch5: 05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
 Patch6: 06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
+Patch10: 10-QPID-5499-Fix-Ruby-bindings-when-built-with-Werror-f.patch
 
 
 BuildRequires: cmake
@@ -110,8 +111,12 @@ the AMQP protocol.
 %{_libdir}/libqpidtypes.so*
 %{_libdir}/libqpidmessaging.so*
 %dir %{_libdir}/qpid
+
+%ifnarch %{arm}
 %{_libdir}/qpid/client/*
 %exclude %{_libdir}/qpid/client/rdmaconnector.so*
+%endif
+
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
@@ -530,6 +535,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %patch4 -p2
 %patch5 -p2
 %patch6 -p2
+%patch10 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -639,10 +645,42 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 
+%files
+%exclude %{_bindir}/qmf-gen
+%exclude %{_bindir}/qmf-tool
+%exclude %{_libdir}/libqmf*
+%exclude %{_includedir}/qmf
+%exclude %{python_sitelib}/qmfgen
+%{_libdir}/pkgconfig/qmf2.pc
+%exclude %{python_sitelib}/qpidtoollibs
+
+%exclude %{python_sitearch}/cqpid.py*
+%exclude %{python_sitearch}/_cqpid.so
+%exclude %{python_sitearch}/qmf.py*
+%exclude %{python_sitearch}/qmfengine.py*
+%exclude %{python_sitearch}/_qmfengine.so
+%exclude %{python_sitearch}/qmf2.py*
+%exclude %{python_sitearch}/cqmf2.py*
+%exclude %{python_sitearch}/_cqmf2.so
+%exclude %{_bindir}/qpid-python-test
+%exclude %{python_sitearch}/mllib
+%exclude %{python_sitearch}/qpid
+%exclude %{python_sitearch}/*.egg-info
+
+%ifnarch %{arm}
+%exclude %{python_sitearch}/qmf
+%exclude %{ruby_vendorlibdir}/qmf*
+%exclude %{ruby_vendorarchdir}/cqpid.so
+%exclude %{ruby_vendorarchdir}/*qmf*
+%endif
+
+
 %changelog
 * Tue Jan 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-6
 - Set qpidd service to start after the network service.
+- QPID-5499: Updated the Swig descriptors.
 - Resolves: BZ#1055660
+- Resolves: BZ#1037295
 
 * Thu Dec  5 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-5
 - Fixed how qpid-cpp-server was depending on -store.
