@@ -28,15 +28,16 @@ URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
 
-Patch1: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch2: 02-QPID-4670-Move-to-proton-0.5-remove-dummy-string-in-.patch
-Patch3: 03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
-Patch4: 04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
-Patch5: 05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
-Patch6: 06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
-Patch7: 07-QPID-4582-Get-legacystore-unit-tests-working.patch
-Patch8: 08-QPID-4582-Fixed-unit-legacystore-unit-test-to-remove.patch
-Patch9: 09-QPID-5129-Alignment-issues-on-ARM.patch
+Patch1:  01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch2:  02-QPID-4670-Move-to-proton-0.5-remove-dummy-string-in-.patch
+Patch3:  03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
+Patch4:  04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
+Patch5:  05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
+Patch6:  06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
+Patch7:  07-QPID-4582-Get-legacystore-unit-tests-working.patch
+Patch8:  08-QPID-4582-Fixed-unit-legacystore-unit-test-to-remove.patch
+Patch9:  09-QPID-5129-Alignment-issues-on-ARM.patch
+Patch10: 10-QPID-5499-Fix-Ruby-bindings-when-built-with-Werror-f.patch
 
 
 BuildRequires: cmake
@@ -109,8 +110,12 @@ the AMQP protocol.
 %{_libdir}/libqpidtypes.so*
 %{_libdir}/libqpidmessaging.so*
 %dir %{_libdir}/qpid
+
+%ifnarch %{arm}
 %{_libdir}/qpid/client/*
 %exclude %{_libdir}/qpid/client/rdmaconnector.so*
+%endif
+
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
@@ -418,6 +423,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %patch7 -p2
 %patch8 -p2
 %patch9 -p2
+%patch10 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -516,7 +522,7 @@ rm -rf %{buildroot}
 %exclude %{python_sitelib}/qmfgen
 %{_libdir}/pkgconfig/qmf2.pc
 %exclude %{python_sitelib}/qpidtoollibs
-%exclude %{python_sitearch}/qmf
+
 %exclude %{python_sitearch}/cqpid.py*
 %exclude %{python_sitearch}/_cqpid.so
 %exclude %{python_sitearch}/qmf.py*
@@ -529,15 +535,21 @@ rm -rf %{buildroot}
 %exclude %{python_sitearch}/mllib
 %exclude %{python_sitearch}/qpid
 %exclude %{python_sitearch}/*.egg-info
+
+%ifnarch %{arm}
+%exclude %{python_sitearch}/qmf
 %exclude %{ruby_vendorlibdir}/qmf*
 %exclude %{ruby_vendorarchdir}/cqpid.so
 %exclude %{ruby_vendorarchdir}/*qmf*
+%endif
 
 
 %changelog
-* Tue Jan 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-9
+* Wed Jan 22 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-9
 - Set qpidd service to start after the network service.
+- QPID-5499: Updated the Swig descriptors.
 - Resolves: BZ#1055660
+- Resolves: BZ#1037295
 
 * Wed Nov 27 2013 Darryl L. Pierce <dpierce@redhat.com> - 0.24-8
 - Removed rdma.so from the -server subpackage.
