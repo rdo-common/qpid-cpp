@@ -1,0 +1,39 @@
+From c78029b46b7bc5142b679084f0b93f65fd68fa86 Mon Sep 17 00:00:00 2001
+From: "Darryl L. Pierce" <mcpierce@apache.org>
+Date: Mon, 17 Feb 2014 22:03:13 +0000
+Subject: [PATCH 3/4] QPID-5556: Provide the right Perl packages in top-level
+ modules.
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1569117 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/bindings/qpid/perl/lib/qpid.pm           | 2 ++
+ qpid/cpp/bindings/qpid/perl/lib/qpid_messaging.pm | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/qpid/cpp/bindings/qpid/perl/lib/qpid.pm b/qpid/cpp/bindings/qpid/perl/lib/qpid.pm
+index 88b9835..1f8d967 100644
+--- a/qpid/cpp/bindings/qpid/perl/lib/qpid.pm
++++ b/qpid/cpp/bindings/qpid/perl/lib/qpid.pm
+@@ -19,4 +19,6 @@
+ 
+ use qpid_messaging;
+ 
++package qpid;
++
+ 1;
+diff --git a/qpid/cpp/bindings/qpid/perl/lib/qpid_messaging.pm b/qpid/cpp/bindings/qpid/perl/lib/qpid_messaging.pm
+index 524bbaa..2948748 100644
+--- a/qpid/cpp/bindings/qpid/perl/lib/qpid_messaging.pm
++++ b/qpid/cpp/bindings/qpid/perl/lib/qpid_messaging.pm
+@@ -32,6 +32,8 @@ use qpid::messaging::Sender;
+ use qpid::messaging::Session;
+ use qpid::messaging::Connection;
+ 
++package qpid_messaging;
++
+ 1;
+ 
+ __END__
+-- 
+1.8.5.3
+
