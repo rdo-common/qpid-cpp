@@ -1,7 +1,7 @@
-From e20753bb2dd1662638055f85aa072c684af978b4 Mon Sep 17 00:00:00 2001
+From af5030f948bdf5aba098c5ce137811ff97c436ea Mon Sep 17 00:00:00 2001
 From: kpvdr <kpvdr@13f79535-47bb-0310-9956-ffa450edef68>
 Date: Thu, 14 Nov 2013 20:39:32 +0000
-Subject: [PATCH 2/2] QPID-4984: Fix for recovery ambiguity issue, other code
+Subject: [PATCH 2/4] QPID-4984: Fix for recovery ambiguity issue, other code
  tidy-ups
 
 git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1542066 13f79535-47bb-0310-9956-ffa450edef68
@@ -5359,5 +5359,5 @@ index 6b455fe..0278317 100644
 +
 +#endif // ifndef QPID_LINEARSTORE_JOURNAL_WMGR_H
 -- 
-1.8.4.2
+1.8.5.3
 

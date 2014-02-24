@@ -3,15 +3,16 @@
 
 Name:          qpid-cpp
 Version:       0.26
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
-Patch1: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch2: 02-QPID-4984-Fix-for-recovery-ambiguity-issue-other-cod.patch
-Patch3: 03-QPID-5556-Provide-the-right-Perl-packages-in-top-lev.patch
+Patch1: 0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch2: 0002-QPID-4984-Fix-for-recovery-ambiguity-issue-other-cod.patch
+Patch3: 0003-QPID-5556-Provide-the-right-Perl-packages-in-top-lev.patch
+Patch4: 0004-QPID-5499-Fix-Ruby-Perl-bindings-when-built-with-Wer.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -390,6 +391,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %patch1 -p2
 %patch2 -p2
 %patch3 -p2
+%patch4 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -485,6 +487,10 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Fri Feb 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-2
+- QPID-5499: Fix for building with -Werror=format-security enabled.
+- * This was previously for files include in qpid-cpp-client-devel.
+
 * Thu Feb 20 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-1
 - Rebased on Qpid 0.26.
 - Updated qpid-cpp-server-ha to be a systemd service.
