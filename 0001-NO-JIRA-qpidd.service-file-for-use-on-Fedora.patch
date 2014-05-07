@@ -1,7 +1,7 @@
-From 3f1ab5d5984c5f3ce25a4dace8a7546a2b618df1 Mon Sep 17 00:00:00 2001
+From 99c3da2bad54d640348b9c81c78ff160cc8c1d6e Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <mcpierce@gmail.com>
 Date: Wed, 3 Apr 2013 10:07:37 -0400
-Subject: [PATCH 1/4] NO-JIRA: qpidd.service file for use on Fedora
+Subject: [PATCH 1/7] NO-JIRA: qpidd.service file for use on Fedora
 
 This patch provides the needed systemd file for running the Qpid broker
 as a service.
@@ -54,5 +54,5 @@ index 0000000..10a99d1
 +[Install]
 +WantedBy=multi-user.target
 -- 
-1.8.5.3
+1.9.0
 

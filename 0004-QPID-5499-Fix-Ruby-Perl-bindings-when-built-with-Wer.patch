@@ -1,7 +1,7 @@
-From 0855e2c108d2dc0b0514c585890da96a092218ce Mon Sep 17 00:00:00 2001
+From bf274f3b6c6fa7ef2dccb2fefa0101850e20d3d6 Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <mcpierce@apache.org>
 Date: Fri, 7 Feb 2014 13:44:03 +0000
-Subject: [PATCH 4/4] QPID-5499: Fix Ruby/Perl bindings when built with
+Subject: [PATCH 4/7] QPID-5499: Fix Ruby/Perl bindings when built with
  -Werror=format-security
 
 Changed the swig descriptors so that they use a constant format string.
@@ -180,5 +180,5 @@ index 1a07cc8..4e07088 100644
  
          return result;
 -- 
-1.8.5.3
+1.9.0
 
