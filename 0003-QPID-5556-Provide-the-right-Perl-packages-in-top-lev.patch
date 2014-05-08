@@ -1,7 +1,7 @@
-From c78029b46b7bc5142b679084f0b93f65fd68fa86 Mon Sep 17 00:00:00 2001
+From db995bb9af85ff1fcbef61b92ecfa9415552c079 Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <mcpierce@apache.org>
 Date: Mon, 17 Feb 2014 22:03:13 +0000
-Subject: [PATCH 3/4] QPID-5556: Provide the right Perl packages in top-level
+Subject: [PATCH 3/7] QPID-5556: Provide the right Perl packages in top-level
  modules.
 
 git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1569117 13f79535-47bb-0310-9956-ffa450edef68
@@ -35,5 +35,5 @@ index 524bbaa..2948748 100644
  
  __END__
 -- 
-1.8.5.3
+1.9.0
 
