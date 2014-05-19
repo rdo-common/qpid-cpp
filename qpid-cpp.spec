@@ -25,19 +25,21 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       6%{?dist}
+Release:       7%{?dist}
+Epoch:         1
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
 
-Patch1: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch2: 02-QPID-4670-Move-to-proton-0.5-remove-dummy-string-in-.patch
-Patch3: 03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
-Patch4: 04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
-Patch5: 05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
-Patch6: 06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
+Patch01: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch02: 02-QPID-4670-Move-to-proton-0.5-remove-dummy-string-in-.patch
+Patch03: 03-QPID-5122-cleaner-encoding-of-index-for-delivery-tag.patch
+Patch04: 04-QPID-5123-Changes-to-Fedora-19-packaging-of-libdb4-p.patch
+Patch05: 05-QPID-5016-Zero-rmgr-struct-element-with-correct-size.patch
+Patch06: 06-QPID-5126-Fix-for-building-legacy-store-on-ARM-platf.patch
+Patch07: 07-NO-JIRA-Bump-max-Proton-to-0.7.patch
 
 
 BuildRequires: cmake
@@ -524,12 +526,13 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %prep
 %setup -q -n qpid-%{version}
 
-%patch1 -p2
-%patch2 -p2
-%patch3 -p2
-%patch4 -p2
-%patch5 -p2
-%patch6 -p2
+%patch01 -p2
+%patch02 -p2
+%patch03 -p2
+%patch04 -p2
+%patch05 -p2
+%patch06 -p2
+%patch07 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -640,6 +643,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon May 19 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-7
+- Added an epoch for F19 to replace the 0.26 release.
+
 * Tue Jan 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-6
 - Set qpidd service to start after the network service.
 - Resolves: BZ#1055660
