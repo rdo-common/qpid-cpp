@@ -3,20 +3,15 @@
 
 Name:          qpid-cpp
 Version:       0.26
-Release:       3%{?dist}
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
-Patch01: 0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch02: 0002-QPID-4984-Fix-for-recovery-ambiguity-issue-other-cod.patch
-Patch03: 0003-QPID-5556-Provide-the-right-Perl-packages-in-top-lev.patch
-Patch04: 0004-QPID-5499-Fix-Ruby-Perl-bindings-when-built-with-Wer.patch
-Patch05: 0005-QPID-5656-Updated-Ruby-bindings-to-build-under-CMake.patch
-Patch06: 0006-QPID-5718-Dead-code-in-the-HA-codebase.patch
-Patch07: 0007-NO-JIRA-Remove-dead-code.patch
-Patch08: 0008-NO-JIRA-Bumped-max-Proton-version-to-0.7.patch
+Patch1: 01-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch2: 02-QPID-4984-Fix-for-recovery-ambiguity-issue-other-cod.patch
+Patch3: 03-QPID-5556-Provide-the-right-Perl-packages-in-top-lev.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -213,7 +208,7 @@ exit 0
 %systemd_preun qpidd.service
 
 %postun server
-%systemd_postun_with_restart qpidd.service
+%systemd_postun qpidd.service
 /sbin/ldconfig
 
 # === qpid-cpp-server-ha
@@ -238,13 +233,24 @@ Requires(postun): systemd-units
 
 %post server-ha
 /sbin/ldconfig
-%systemd_post qpidd-primary.service
+if [ $1 -eq 1 ]; then
+    # Initial installation
+    /bin/systemctl --no-reload enable qpidd-primary.service >/dev/null 2>&1 || :
+fi
 
 %preun server-ha
-%systemd_preun qpidd-primary.service
+if [ $1 -eq 0 ]; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable qpidd-primary.service > /dev/null 2>&1 || :
+    /bin/systemctl stop qpidd-primary.service > /dev/null 2>&1 || :
+fi
 
 %postun server-ha
-%systemd_postun_with_restart qpidd-primary.service
+if [ $1 -ge 1 ]; then
+    # Package upgrade, not uninstall
+    /bin/systemctl stop qpidd-primary.service > /dev/null 2>&1 || :
+    /bin/systemctl start qpidd-primary.service > /dev/null 2>&1 || :
+fi
 /sbin/ldconfig
 
 # === qpid-cpp-client-rdma
@@ -381,14 +387,9 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %prep
 %setup -q -n qpid-%{version}
 
-%patch01 -p2
-%patch02 -p2
-%patch03 -p2
-%patch04 -p2
-%patch05 -p2
-%patch06 -p2
-%patch07 -p2
-%patch08 -p2
+%patch1 -p2
+%patch2 -p2
+%patch3 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -484,14 +485,6 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
-* Wed May  7 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-3
-- Changed qpid-cpp-server-ha to use systemd macros for pre/post/postun
-- Resoves: BZ#1094928
-
-* Fri Feb 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-2
-- QPID-5499: Fix for building with -Werror=format-security enabled.
-- * This was previously for files include in qpid-cpp-client-devel.
-
 * Thu Feb 20 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-1
 - Rebased on Qpid 0.26.
 - Updated qpid-cpp-server-ha to be a systemd service.
