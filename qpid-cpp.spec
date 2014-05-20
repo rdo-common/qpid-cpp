@@ -26,7 +26,6 @@
 Name:          qpid-cpp
 Version:       0.24
 Release:       7%{?dist}
-Epoch:         1
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -85,6 +84,8 @@ the AMQP protocol.
 %package -n qpid-cpp-client
 Summary:   Libraries for Qpid C++ client applications
 
+# BZ#1098154
+Provides:  qpid(client) = %{version}
 # Remove with 0.28
 Provides:      qpid-cpp-client-ssl = %{version}
 Obsoletes:     qpid-cpp-client-ssl <= 0.24
@@ -644,7 +645,8 @@ rm -rf %{buildroot}
 
 %changelog
 * Mon May 19 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-7
-- Added an epoch for F19 to replace the 0.26 release.
+- Add a virtual package in qpid-cpp-client named qpid(client).
+- Resolves: BZ#1098154
 
 * Tue Jan 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-6
 - Set qpidd service to start after the network service.
