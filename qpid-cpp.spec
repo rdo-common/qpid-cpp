@@ -25,7 +25,7 @@
 
 Name:          qpid-cpp
 Version:       0.24
-Release:       8%{?dist}
+Release:       9%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -127,6 +127,8 @@ the AMQP protocol.
 %package -n qpid-cpp-client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
 
+# BZ#1098154
+Provides:  qpid(client-devel) = %{version}
 Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
 Requires:  boost-devel
 Requires:  boost-filesystem
@@ -644,6 +646,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue May 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-9
+- Added virtual package qpid(client-devel) to qpid-cpp-client-devel.
+- Resolves: #BZ#1098154
+
 * Tue May 20 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-8
 - Add a virtual package in qpid-cpp-client named qpid(client).
 - Resolves: BZ#1098154
