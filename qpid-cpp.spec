@@ -59,6 +59,7 @@ the AMQP protocol.
 %package client
 Summary:   Libraries for Qpid C++ client applications
 
+Provides:  qpid(client)%{?_isa} = %{version}
 # !!! Remove with 0.28
 Provides:      qpid-cpp-client-ssl = %{version}
 Obsoletes:     qpid-cpp-client-ssl <= 0.24
@@ -105,6 +106,7 @@ the AMQP protocol.
 %package client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
 
+Provides:  qpid(client-devel)%{?_isa} = %{version}
 Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
 Requires:  boost-devel
 Requires:  boost-filesystem
@@ -484,6 +486,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed May 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-4
+- Added virtual packages for qpid-cpp-client and -client-devel.
+
 * Wed May  7 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-3
 - Changed qpid-cpp-server-ha to use systemd macros for pre/post/postun
 - Resoves: BZ#1094928
