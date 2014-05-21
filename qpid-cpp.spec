@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.26
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -487,7 +487,7 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 %changelog
 * Wed May 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-4
-- Added virtual packages for qpid-cpp-client and -client-devel.
+- Added virtual packages for qpid-cpp-client and -client-devel.y
 
 * Wed May  7 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-3
 - Changed qpid-cpp-server-ha to use systemd macros for pre/post/postun
