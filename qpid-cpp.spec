@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.26
-Release:       4%{?dist}
+Release:       5%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -59,7 +59,7 @@ the AMQP protocol.
 %package client
 Summary:   Libraries for Qpid C++ client applications
 
-Provides:  qpid(client)%{?_isa} = %{version}
+Provides:  qpid(client) = %{version}
 # !!! Remove with 0.28
 Provides:      qpid-cpp-client-ssl = %{version}
 Obsoletes:     qpid-cpp-client-ssl <= 0.24
@@ -106,7 +106,7 @@ the AMQP protocol.
 %package client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
 
-Provides:  qpid(client-devel)%{?_isa} = %{version}
+Provides:  qpid(client-devel) = %{version}
 Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
 Requires:  boost-devel
 Requires:  boost-filesystem
@@ -486,6 +486,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Thu May 22 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-5
+- Removed the architecture macro from the virtual provides.
+
 * Wed May 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-4
 - Added virtual packages for qpid-cpp-client and -client-devel.y
 
