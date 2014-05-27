@@ -24,8 +24,8 @@
 %global SSLCOMMON_VERSION_INFO              5:0:0
 
 Name:          qpid-cpp
-Version:       0.24
-Release:       9%{?dist}
+Version:       0.26
+Release:       7%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -84,9 +84,9 @@ the AMQP protocol.
 %package -n qpid-cpp-client
 Summary:   Libraries for Qpid C++ client applications
 
-# BZ#1098154
-Provides:  qpid(client) = %{version}
-# Remove with 0.28
+Provides:  qpid(client)%{?_isa} = %{version}
+
+# !!! Remove with 0.28
 Provides:      qpid-cpp-client-ssl = %{version}
 Obsoletes:     qpid-cpp-client-ssl <= 0.24
 
@@ -127,9 +127,8 @@ the AMQP protocol.
 %package -n qpid-cpp-client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
 
-# BZ#1098154
-Provides:  qpid(client-devel) = %{version}
-Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
+Provides:  qpid(client-devel)%{?_isa} = %{version}
+Requires:  qpid(client)%{?_isa} = %{version}
 Requires:  boost-devel
 Requires:  boost-filesystem
 Requires:  boost-program-options
@@ -199,11 +198,12 @@ format for easy browsing.
 %package -n qpid-cpp-server
 Summary:   An AMQP message broker daemon
 
-# Remove with 0.28
+Provides:  qpid(server)%{?_isa} = %{version}
+# !!! Remove with 0.28
 Provides:      qpid-cpp-server-ssl = %{version}
 Obsoletes:     qpid-cpp-server-ssl <= 0.24
 
-Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
+Requires:  qpid(client)%{?_isa} = %{version}
 Requires:  cyrus-sasl
 Requires:  qpid-proton-c%{?_isa} >= 0.5
 
@@ -270,8 +270,13 @@ fi
 %package -n qpid-cpp-server-ha
 Summary: Provides extensions to the AMQP message broker to provide high availability
 
-Requires: qpid-cpp-server%{?_isa} = %{version}-%{release}
-Requires: qpid-qmf%{?_isa} = %{version}-%{release}
+Provides: qpid(server-ha}%{?_isa} = %{version}
+Requires: qpid(server)%{?isa} = %{version}
+Requires: qpid-qmf%{?_isa}
+# for systemd
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
 
 %description -n qpid-cpp-server-ha
 %{summary}.
@@ -412,10 +417,11 @@ for ruby.
 
 
 %ifnarch s390 s390x %{arm}
-%package -n qpid-cpp-client-rdma
-Summary:   RDMA Protocol support (including Infiniband) for Qpid clients
+%package client-rdma
+Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
 
-Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
+Provides: qpid(client-rdma)%{?_isa} = %{version}
+Requires: qpid(client)%{?_isa} = %{version}
 
 %description -n qpid-cpp-client-rdma
 A client plugin and support library to support RDMA protocols (including
@@ -436,8 +442,9 @@ Infiniband) as the transport for Qpid messaging.
 %package -n qpid-cpp-server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
 
-Requires:  qpid-cpp-server%{?_isa} = %{version}-%{release}
-Requires:  qpid-cpp-client-rdma%{?_isa} = %{version}-%{release}
+Provides: qpid(server-rdma)%{?_isa} = %{version}
+Requires: qpid(server)%{?_isa} = %{version}
+Requires: qpid(client-rdma}%{?_isa} = %{version}
 
 %description -n qpid-cpp-server-rdma
 A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
@@ -453,13 +460,13 @@ transport for AMQP messaging.
 %endif
 
 
+%package server-xml
+Summary:  XML extensions for the Qpid daemon
 
-%package -n qpid-cpp-server-xml
-Summary:   XML extensions for the Qpid daemon
-
-Requires:  qpid-cpp-server%{?_isa} = %{version}-%{release}
-Requires:  xqilla
-Requires:  xerces-c
+Provides: qpid(server-xml)%{?_isa} = %{version}
+Requires: qpid(server)%{?_isa} = %{version}
+Requires: xqilla
+Requires: xerces-c
 
 %description -n qpid-cpp-server-xml
 A Qpid daemon plugin to support extended XML-based routing of AMQP
@@ -479,7 +486,8 @@ messages.
 Summary:   Red Hat persistence extension to the Qpid messaging system
 License:   LGPLv2+
 
-Requires:  qpid-cpp-server%{?_isa} = %{version}-%{release}
+Provides:  qpid(server-store)%{?_isa} = %{version}
+Requires:  qpid(server)%{?_isa} = %{version}
 Requires:  db4
 Requires:  libaio
 
@@ -646,19 +654,40 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Tue May 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-9
-- Added virtual package qpid(client-devel) to qpid-cpp-client-devel.
-- Resolves: #BZ#1098154
+* Tue May 27 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-7
+- Added virtual packages for all binary subpackages.
+- Updated requires to be for virtual packages.
 
-* Tue May 20 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-8
-- Add a virtual package in qpid-cpp-client named qpid(client).
-- Resolves: BZ#1098154
-- Removed the Epoch field before going to stable.
+* Fri May 23 2014 Petr Machata <pmachata@redhat.com> - 0.26-6
+- Rebuild for boost 1.55.0
 
-* Mon May 19 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-7
-- Added an epoch for F19 to replace the 0.26 release.
+* Thu May 22 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-5
+- Removed the architecture macro from the virtual provides.
 
-* Tue Jan 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-6
+* Wed May 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-4
+- Added virtual packages for qpid-cpp-client and -client-devel.y
+
+* Wed May  7 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-3
+- Changed qpid-cpp-server-ha to use systemd macros for pre/post/postun
+- Resoves: BZ#1094928
+
+* Fri Feb 21 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-2
+- QPID-5499: Fix for building with -Werror=format-security enabled.
+- * This was previously for files include in qpid-cpp-client-devel.
+
+* Thu Feb 20 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-1
+- Rebased on Qpid 0.26.
+- Updated qpid-cpp-server-ha to be a systemd service.
+- Removed qpid-cpp-server dependency on qpid-cpp-server-store.
+- * The package was mistakenly including store libraries.
+- Added BR for gcc-c++.
+- Removed -n option from all subpackages.
+- Removed clean and check sections.
+- Updated package to use systemd macros correctly.
+- Removed unnecessary BRs.
+- Cleaned up the deletes after the build finishes.
+
+* Wed Jan 22 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.24-9
 - Set qpidd service to start after the network service.
 - Resolves: BZ#1055660
 
