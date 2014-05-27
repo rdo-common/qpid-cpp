@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.26
-Release:       6%{?dist}
+Release:       7%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -59,7 +59,8 @@ the AMQP protocol.
 %package client
 Summary:   Libraries for Qpid C++ client applications
 
-Provides:  qpid(client) = %{version}
+Provides:  qpid(client)%{?_isa} = %{version}
+
 # !!! Remove with 0.28
 Provides:      qpid-cpp-client-ssl = %{version}
 Obsoletes:     qpid-cpp-client-ssl <= 0.24
@@ -106,8 +107,8 @@ the AMQP protocol.
 %package client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
 
-Provides:  qpid(client-devel) = %{version}
-Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
+Provides:  qpid(client-devel)%{?_isa} = %{version}
+Requires:  qpid(client)%{?_isa} = %{version}
 Requires:  boost-devel
 Requires:  boost-filesystem
 Requires:  boost-program-options
@@ -173,11 +174,12 @@ format for easy browsing.
 %package server
 Summary:   An AMQP message broker daemon
 
+Provides:  qpid(server)%{?_isa} = %{version}
 # !!! Remove with 0.28
 Provides:      qpid-cpp-server-ssl = %{version}
 Obsoletes:     qpid-cpp-server-ssl <= 0.24
 
-Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
+Requires:  qpid(client)%{?_isa} = %{version}
 Requires:  cyrus-sasl
 Requires:  qpid-proton-c%{?_isa} >= 0.5
 
@@ -223,7 +225,8 @@ exit 0
 %package server-ha
 Summary: Provides extensions to the AMQP message broker to provide high availability
 
-Requires: qpid-cpp-server%{?_isa} = %{version}-%{release}
+Provides: qpid(server-ha}%{?_isa} = %{version}
+Requires: qpid(server)%{?isa} = %{version}
 Requires: qpid-qmf%{?_isa}
 # for systemd
 Requires(post): systemd-units
@@ -253,9 +256,10 @@ Requires(postun): systemd-units
 
 %ifnarch s390 s390x %{arm}
 %package client-rdma
-Summary:   RDMA Protocol support (including Infiniband) for Qpid clients
+Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
 
-Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release}
+Provides: qpid(client-rdma)%{?_isa} = %{version}
+Requires: qpid(client)%{?_isa} = %{version}
 
 %description client-rdma
 A client plugin and support library to support RDMA protocols (including
@@ -275,8 +279,9 @@ Infiniband) as the transport for Qpid messaging.
 %package server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
 
-Requires:  qpid-cpp-server%{?_isa} = %{version}-%{release}
-Requires:  qpid-cpp-client-rdma%{?_isa} = %{version}-%{release}
+Provides: qpid(server-rdma)%{?_isa} = %{version}
+Requires: qpid(server)%{?_isa} = %{version}
+Requires: qpid(client-rdma}%{?_isa} = %{version}
 
 %description server-rdma
 A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
@@ -293,11 +298,12 @@ transport for AMQP messaging.
 # === qpid-cpp-server-xml
 
 %package server-xml
-Summary:   XML extensions for the Qpid daemon
+Summary:  XML extensions for the Qpid daemon
 
-Requires:  qpid-cpp-server%{?_isa} = %{version}-%{release}
-Requires:  xqilla
-Requires:  xerces-c
+Provides: qpid(server-xml)%{?_isa} = %{version}
+Requires: qpid(server)%{?_isa} = %{version}
+Requires: xqilla
+Requires: xerces-c
 
 %description server-xml
 A Qpid daemon plugin to support extended XML-based routing of AMQP
@@ -316,7 +322,8 @@ messages.
 Summary:   Red Hat persistence extension to the Qpid messaging system
 License:   LGPLv2+
 
-Requires:  qpid-cpp-server%{?_isa} = %{version}
+Provides:  qpid(server-store)%{?_isa} = %{version}
+Requires:  qpid(server)%{?_isa} = %{version}
 Requires:  db4
 Requires:  libaio
 
@@ -486,6 +493,10 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Tue May 27 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-7
+- Added virtual packages for all binary subpackages.
+- Updated requires to be for virtual packages.
+
 * Fri May 23 2014 Petr Machata <pmachata@redhat.com> - 0.26-6
 - Rebuild for boost 1.55.0
 
