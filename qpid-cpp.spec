@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.26
-Release:       7%{?dist}
+Release:       8%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -225,7 +225,7 @@ exit 0
 %package server-ha
 Summary: Provides extensions to the AMQP message broker to provide high availability
 
-Provides: qpid(server-ha}%{?_isa} = %{version}
+Provides: qpid(server-ha)%{?_isa} = %{version}
 Requires: qpid(server)%{?isa} = %{version}
 Requires: qpid-qmf%{?_isa}
 # for systemd
@@ -281,7 +281,7 @@ Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
 
 Provides: qpid(server-rdma)%{?_isa} = %{version}
 Requires: qpid(server)%{?_isa} = %{version}
-Requires: qpid(client-rdma}%{?_isa} = %{version}
+Requires: qpid(client-rdma)%{?_isa} = %{version}
 
 %description server-rdma
 A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
@@ -346,7 +346,8 @@ with Berkeley DB.
 # Summary: Red Hat persistence extension to the Qpid messaging system
 # License: LGPLv2+
 #
-# Requires: qpid-cpp-server % {?_isa} = %{version}
+# Provides: qpid(server-linearstore) = %{version}
+# Requires: qpid(server)%{?_isa} = %{version}
 # Requires: db4
 # Requires: libaio
 #
@@ -493,6 +494,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed May 28 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-8
+- Fixed a few typos that slipped into the specfile for virtual packages.
+
 * Tue May 27 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-7
 - Added virtual packages for all binary subpackages.
 - Updated requires to be for virtual packages.
