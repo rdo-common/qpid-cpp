@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.26
-Release:       8%{?dist}
+Release:       9%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -226,7 +226,7 @@ exit 0
 Summary: Provides extensions to the AMQP message broker to provide high availability
 
 Provides: qpid(server-ha)%{?_isa} = %{version}
-Requires: qpid(server)%{?isa} = %{version}
+Requires: qpid(server)%{?_isa} = %{version}
 Requires: qpid-qmf%{?_isa}
 # for systemd
 Requires(post): systemd-units
@@ -494,6 +494,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Tue Jun  3 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-9
+- Fixed dependency of server-ha on qpid(server).
+
 * Wed May 28 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-8
 - Fixed a few typos that slipped into the specfile for virtual packages.
 
