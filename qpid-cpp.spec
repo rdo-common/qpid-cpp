@@ -2,21 +2,15 @@
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 Name:          qpid-cpp
-Version:       0.26
-Release:       9%{?dist}
+Version:       0.28
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
-Patch01: 0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch02: 0002-QPID-4984-Fix-for-recovery-ambiguity-issue-other-cod.patch
-Patch03: 0003-QPID-5556-Provide-the-right-Perl-packages-in-top-lev.patch
-Patch04: 0004-QPID-5499-Fix-Ruby-Perl-bindings-when-built-with-Wer.patch
-Patch05: 0005-QPID-5656-Updated-Ruby-bindings-to-build-under-CMake.patch
-Patch06: 0006-QPID-5718-Dead-code-in-the-HA-codebase.patch
-Patch07: 0007-NO-JIRA-Remove-dead-code.patch
-Patch08: 0008-NO-JIRA-Bumped-max-Proton-version-to-0.7.patch
+Patch0001: 0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch0002: 0002-NO-JIRA-Remove-unused-code.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -150,6 +144,7 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_bindir}/qpid-client-test
 %{_bindir}/qpid-txtest
 %{_libexecdir}/qpid/tests
+%{_libdir}/cmake/Qpid
 
 %post client-devel -p /sbin/ldconfig
 
@@ -364,8 +359,6 @@ with Berkeley DB.
 %package -n qpid-tools
 Summary:   Management and diagnostic tools for Apache Qpid
 
-BuildArch: noarch
-
 Requires:  python-qpid >= 0.8
 Requires:  python-qpid-qmf
 
@@ -379,6 +372,8 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %{_bindir}/qpid-route
 %{_bindir}/qpid-stat
 %{_bindir}/qpid-tool
+%{_bindir}/qpid-receive
+%{_bindir}/qpid-send
 %doc LICENSE NOTICE
 %if "%{python_version}" >= "2.6"
 %{python_sitelib}/qpid_tools-*.egg-info
@@ -391,14 +386,8 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %prep
 %setup -q -n qpid-%{version}
 
-%patch01 -p2
-%patch02 -p2
-%patch03 -p2
-%patch04 -p2
-%patch05 -p2
-%patch06 -p2
-%patch07 -p2
-%patch08 -p2
+%patch0001 -p2
+%patch0002 -p2
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -494,6 +483,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed Jun  4 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-1
+- Rebased on Qpid 0.28.
+
 * Tue Jun  3 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.26-9
 - Fixed dependency of server-ha on qpid(server).
 

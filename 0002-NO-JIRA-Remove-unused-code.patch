@@ -1,0 +1,67 @@
+From 4a97f3b736e3f604f018777b5a04abb7b60daccf Mon Sep 17 00:00:00 2001
+From: "Darryl L. Pierce" <dpierce@redhat.com>
+Date: Wed, 4 Jun 2014 10:42:48 -0400
+Subject: [PATCH 2/2] NO-JIRA: Remove unused code
+
+---
+ qpid/cpp/src/qpid/ha/RemoteBackup.cpp              | 6 ------
+ qpid/cpp/src/qpid/ha/ReplicatingSubscription.cpp   | 7 -------
+ qpid/cpp/src/qpid/messaging/amqp/AddressHelper.cpp | 7 -------
+ 3 files changed, 20 deletions(-)
+
+diff --git a/qpid/cpp/src/qpid/ha/RemoteBackup.cpp b/qpid/cpp/src/qpid/ha/RemoteBackup.cpp
+index bf3d779..feee116 100644
+--- a/qpid/cpp/src/qpid/ha/RemoteBackup.cpp
++++ b/qpid/cpp/src/qpid/ha/RemoteBackup.cpp
+@@ -91,12 +91,6 @@ struct QueueSetPrinter {
+     std::string prefix;
+     QueueSetPrinter(const std::string& p, const QS& q) : qs(q), prefix(p) {}
+ };
+-std::ostream& operator<<(std::ostream& o, const QueueSetPrinter& qp) {
+-    if (!qp.qs.empty()) o << qp.prefix;
+-    for (QS::const_iterator i = qp.qs.begin(); i != qp.qs.end(); ++i)
+-        o << (*i)->getName() << " ";
+-    return o;
+-}
+ }
+ 
+ void RemoteBackup::ready(const QueuePtr& q) {
+diff --git a/qpid/cpp/src/qpid/ha/ReplicatingSubscription.cpp b/qpid/cpp/src/qpid/ha/ReplicatingSubscription.cpp
+index 635d504..4c3823c 100644
+--- a/qpid/cpp/src/qpid/ha/ReplicatingSubscription.cpp
++++ b/qpid/cpp/src/qpid/ha/ReplicatingSubscription.cpp
+@@ -86,13 +86,6 @@ ReplicatingSubscription::Factory::create(
+     return rs;
+ }
+ 
+-namespace {
+-void copyIf(boost::shared_ptr<MessageInterceptor> from, boost::shared_ptr<IdSetter>& to) {
+-    boost::shared_ptr<IdSetter> result = boost::dynamic_pointer_cast<IdSetter>(from);
+-    if (result) to = result;
+-}
+-} // namespace
+-
+ ReplicatingSubscription::ReplicatingSubscription(
+     HaBroker& hb,
+     SemanticState* parent,
+diff --git a/qpid/cpp/src/qpid/messaging/amqp/AddressHelper.cpp b/qpid/cpp/src/qpid/messaging/amqp/AddressHelper.cpp
+index 3dbacac..21d8238 100644
+--- a/qpid/cpp/src/qpid/messaging/amqp/AddressHelper.cpp
++++ b/qpid/cpp/src/qpid/messaging/amqp/AddressHelper.cpp
+@@ -135,13 +135,6 @@ uint64_t getFilterDescriptor(const std::string& key)
+ {
+     return hasWildcards(key) ? qpid::amqp::filters::LEGACY_TOPIC_FILTER_CODE : qpid::amqp::filters::LEGACY_DIRECT_FILTER_CODE;
+ }
+-bool contains(const Variant::List& list, const std::string& item)
+-{
+-    for (Variant::List::const_iterator i = list.begin(); i != list.end(); ++i) {
+-        if (*i == item) return true;
+-    }
+-    return false;
+-}
+ 
+ bool test(const Variant::Map& options, const std::string& name)
+ {
+-- 
+1.9.3
+
