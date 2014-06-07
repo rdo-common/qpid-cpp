@@ -1,16 +1,17 @@
 # Define pkgdocdir for releases that don't define it already
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
-Name:          qpid-cpp
-Version:       0.28
-Release:       1%{?dist}
-Summary:       Libraries for Qpid C++ client applications
-License:       ASL 2.0
-URL:           http://qpid.apache.org
+Name:      qpid-cpp
+Version:   0.28
+Release:   2%{?dist}
+Summary:   Libraries for Qpid C++ client applications
+License:   ASL 2.0
+URL:       http://qpid.apache.org
 
-Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
+Source0:   http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
 Patch0001: 0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch0002: 0002-NO-JIRA-Remove-unused-code.patch
+Patch0003: qpid-cpp-aarch64.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -36,7 +37,7 @@ BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.5
 BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 
-%ifnarch s390 s390x %{arm}
+%ifnarch s390 s390x
 BuildRequires: libibverbs-devel
 BuildRequires: librdmacm-devel
 %endif
@@ -81,11 +82,11 @@ the AMQP protocol.
 %{_libdir}/libqpidmessaging.so*
 %dir %{_libdir}/qpid
 
-%ifnarch s390 s390x %{arm}
+%ifnarch s390 s390x
 %{_libdir}/qpid/client/*
 %endif
 
-%ifnarch s390 s390x %{arm}
+%ifnarch s390 s390x
 %exclude %{_libdir}/qpid/client/rdmaconnector.so*
 %endif
 
@@ -249,7 +250,7 @@ Requires(postun): systemd-units
 
 # === qpid-cpp-client-rdma
 
-%ifnarch s390 s390x %{arm}
+%ifnarch s390 s390x
 %package client-rdma
 Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
 
@@ -388,6 +389,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 
 %patch0001 -p2
 %patch0002 -p2
+%patch0003 -p1
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -483,6 +485,10 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Sat Jun  7 2014 Peter Robinson <pbrobinson@fedoraproject.org> 0.28-2
+- Remove arm conditionals as we now have the dependencies
+- Fix aarch64 defines (it's not arm64)
+
 * Wed Jun  4 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-1
 - Rebased on Qpid 0.28.
 
