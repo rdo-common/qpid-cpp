@@ -1,7 +1,7 @@
 From 4a97f3b736e3f604f018777b5a04abb7b60daccf Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <dpierce@redhat.com>
 Date: Wed, 4 Jun 2014 10:42:48 -0400
-Subject: [PATCH 2/2] NO-JIRA: Remove unused code
+Subject: [PATCH 2/4] NO-JIRA: Remove unused code
 
 ---
  qpid/cpp/src/qpid/ha/RemoteBackup.cpp              | 6 ------

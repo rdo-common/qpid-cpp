@@ -1,17 +1,19 @@
 # Define pkgdocdir for releases that don't define it already
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
-Name:      qpid-cpp
-Version:   0.28
-Release:   2%{?dist}
-Summary:   Libraries for Qpid C++ client applications
-License:   ASL 2.0
-URL:       http://qpid.apache.org
+Name:          qpid-cpp
+Version:       0.28
+Release:       3%{?dist}
+Summary:       Libraries for Qpid C++ client applications
+License:       ASL 2.0
+URL:           http://qpid.apache.org
 
-Source0:   http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
-Patch0001: 0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch0002: 0002-NO-JIRA-Remove-unused-code.patch
-Patch0003: qpid-cpp-aarch64.patch
+Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
+Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch0002:     0002-NO-JIRA-Remove-unused-code.patch
+Patch0003:     0003-QPID-3650-Avoid-unaligned-memory-access.patch
+Patch0004:     0004-QPID-3650-Avoid-unaligned-memory-access.patch
+Patch1000:     qpid-cpp-aarch64.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -389,7 +391,10 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 
 %patch0001 -p2
 %patch0002 -p2
-%patch0003 -p1
+%patch0003 -p2
+%patch0004 -p2
+
+%patch1000 -p1
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -485,6 +490,10 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Tue Jun 10 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-3
+- Fixes alignment issues on ARM platforms.
+- Resolves: BZ#1106272
+
 * Sat Jun  7 2014 Peter Robinson <pbrobinson@fedoraproject.org> 0.28-2
 - Remove arm conditionals as we now have the dependencies
 - Fix aarch64 defines (it's not arm64)
