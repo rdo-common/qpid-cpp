@@ -1,9 +1,28 @@
 # Define pkgdocdir for releases that don't define it already
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
+# since ldconfig is in a different space as of EL7/ we need to macroize it
+%if 0%{?fedora}
+
+%if 0%{?fedora} > 19
+%global ldconfig /usr/sbin/ldconfig
+%else
+%global ldconfig /sbin/ldconfig
+%endif
+
+%else
+
+%if 0%{?rhel} > 6
+%global ldconfig /usr/sbin/ldconfig
+%else
+%global ldconfig /sbin/ldconfig
+%endif
+
+%endif
+
 Name:          qpid-cpp
 Version:       0.28
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -95,9 +114,9 @@ the AMQP protocol.
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%post client -p /sbin/ldconfig
+%post client -p %{ldconfig}
 
-%postun client -p /sbin/ldconfig
+%postun client -p %{ldconfig}
 
 # === qpid-cpp-client-devel
 
@@ -149,9 +168,9 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_libexecdir}/qpid/tests
 %{_libdir}/cmake/Qpid
 
-%post client-devel -p /sbin/ldconfig
+%post client-devel -p %{ldconfig}
 
-%postun client-devel -p /sbin/ldconfig
+%postun client-devel -p %{ldconfig}
 
 # === qpid-cpp-client-devel-docs
 
@@ -216,7 +235,7 @@ exit 0
 
 %postun server
 %systemd_postun_with_restart qpidd.service
-/sbin/ldconfig
+%{ldconfig}
 
 # === qpid-cpp-server-ha
 
@@ -240,7 +259,7 @@ Requires(postun): systemd-units
 %{_libdir}/qpid/daemon/ha.so
 
 %post server-ha
-/sbin/ldconfig
+%{ldconfig}
 %systemd_post qpidd-primary.service
 
 %preun server-ha
@@ -248,7 +267,7 @@ Requires(postun): systemd-units
 
 %postun server-ha
 %systemd_postun_with_restart qpidd-primary.service
-/sbin/ldconfig
+%{ldconfig}
 
 # === qpid-cpp-client-rdma
 
@@ -268,9 +287,9 @@ Infiniband) as the transport for Qpid messaging.
 %{_libdir}/qpid/client/rdmaconnector.so*
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%post client-rdma -p /sbin/ldconfig
+%post client-rdma -p %{ldconfig}
 
-%postun client-rdma -p /sbin/ldconfig
+%postun client-rdma -p %{ldconfig}
 
 # === qpid-cpp-server-rdma
 
@@ -288,9 +307,9 @@ transport for AMQP messaging.
 %files server-rdma
 %{_libdir}/qpid/daemon/rdma.so
 
-%post server-rdma -p /sbin/ldconfig
+%post server-rdma -p %{ldconfig}
 
-%postun server-rdma -p /sbin/ldconfig
+%postun server-rdma -p %{ldconfig}
 %endif
 
 # === qpid-cpp-server-xml
@@ -310,9 +329,9 @@ messages.
 %files server-xml
 %{_libdir}/qpid/daemon/xml.so
 
-%post server-xml -p /sbin/ldconfig
+%post server-xml -p %{ldconfig}
 
-%postun server-xml -p /sbin/ldconfig
+%postun server-xml -p %{ldconfig}
 
 # === qpid-cpp-server-store
 
@@ -333,9 +352,9 @@ with Berkeley DB.
 %files server-store
 %{_libdir}/qpid/daemon/legacystore.so
 
-%post server-store -p /sbin/ldconfig
+%post server-store -p %{ldconfig}
 
-%postun server-store -p /sbin/ldconfig
+%postun server-store -p %{ldconfig}
 
 
 # === qpid-cpp-server-linearstore
@@ -484,12 +503,15 @@ popd
 # clean up leftover ruby files
 rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
-%post -p /sbin/ldconfig
+%post -p %{ldconfig}
 
-%postun -p /sbin/ldconfig
+%postun -p %{ldconfig}
 
 
 %changelog
+* Thu Jul  3 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-4
+- Parameterized ldconfig location based on RHEL/Fedora release.
+
 * Tue Jun 10 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-3
 - Fixes alignment issues on ARM platforms.
 - Resolves: BZ#1106272
