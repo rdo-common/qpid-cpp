@@ -1,28 +1,9 @@
 # Define pkgdocdir for releases that don't define it already
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
-# since ldconfig is in a different space as of EL7/ we need to macroize it
-%if 0%{?fedora}
-
-%if 0%{?fedora} > 19
-%global ldconfig /usr/sbin/ldconfig
-%else
-%global ldconfig /sbin/ldconfig
-%endif
-
-%else
-
-%if 0%{?rhel} > 6
-%global ldconfig /usr/sbin/ldconfig
-%else
-%global ldconfig /sbin/ldconfig
-%endif
-
-%endif
-
 Name:          qpid-cpp
 Version:       0.28
-Release:       4%{?dist}
+Release:       5%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -70,7 +51,7 @@ Run-time libraries for AMQP client applications developed using Qpid
 C++. Clients exchange messages with an AMQP message broker using
 the AMQP protocol.
 
-# === qpid-cpp-client
+
 
 %package client
 Summary:   Libraries for Qpid C++ client applications
@@ -114,11 +95,11 @@ the AMQP protocol.
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%post client -p %{ldconfig}
+%post client -p /sbin/ldconfig
 
-%postun client -p %{ldconfig}
+%postun client -p /sbin/ldconfig
 
-# === qpid-cpp-client-devel
+
 
 %package client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
@@ -168,11 +149,11 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_libexecdir}/qpid/tests
 %{_libdir}/cmake/Qpid
 
-%post client-devel -p %{ldconfig}
+%post client-devel -p /sbin/ldconfig
 
-%postun client-devel -p %{ldconfig}
+%postun client-devel -p /sbin/ldconfig
 
-# === qpid-cpp-client-devel-docs
+
 
 %package client-devel-docs
 Summary:   AMQP client development documentation
@@ -186,7 +167,7 @@ format for easy browsing.
 %files client-devel-docs
 %doc %{_pkgdocdir}
 
-# === qpid-cpp-server
+
 
 %package server
 Summary:   An AMQP message broker daemon
@@ -235,9 +216,9 @@ exit 0
 
 %postun server
 %systemd_postun_with_restart qpidd.service
-%{ldconfig}
+/sbin/ldconfig
 
-# === qpid-cpp-server-ha
+
 
 %package server-ha
 Summary: Provides extensions to the AMQP message broker to provide high availability
@@ -259,7 +240,7 @@ Requires(postun): systemd-units
 %{_libdir}/qpid/daemon/ha.so
 
 %post server-ha
-%{ldconfig}
+/sbin/ldconfig
 %systemd_post qpidd-primary.service
 
 %preun server-ha
@@ -267,9 +248,9 @@ Requires(postun): systemd-units
 
 %postun server-ha
 %systemd_postun_with_restart qpidd-primary.service
-%{ldconfig}
+/sbin/ldconfig
 
-# === qpid-cpp-client-rdma
+
 
 %ifnarch s390 s390x
 %package client-rdma
@@ -287,11 +268,11 @@ Infiniband) as the transport for Qpid messaging.
 %{_libdir}/qpid/client/rdmaconnector.so*
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%post client-rdma -p %{ldconfig}
+%post client-rdma -p /sbin/ldconfig
 
-%postun client-rdma -p %{ldconfig}
+%postun client-rdma -p /sbin/ldconfig
 
-# === qpid-cpp-server-rdma
+
 
 %package server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
@@ -307,12 +288,12 @@ transport for AMQP messaging.
 %files server-rdma
 %{_libdir}/qpid/daemon/rdma.so
 
-%post server-rdma -p %{ldconfig}
+%post server-rdma -p /sbin/ldconfig
 
-%postun server-rdma -p %{ldconfig}
+%postun server-rdma -p /sbin/ldconfig
 %endif
 
-# === qpid-cpp-server-xml
+
 
 %package server-xml
 Summary:  XML extensions for the Qpid daemon
@@ -329,11 +310,11 @@ messages.
 %files server-xml
 %{_libdir}/qpid/daemon/xml.so
 
-%post server-xml -p %{ldconfig}
+%post server-xml -p /sbin/ldconfig
 
-%postun server-xml -p %{ldconfig}
+%postun server-xml -p /sbin/ldconfig
 
-# === qpid-cpp-server-store
+
 
 %package server-store
 Summary:   Red Hat persistence extension to the Qpid messaging system
@@ -352,12 +333,12 @@ with Berkeley DB.
 %files server-store
 %{_libdir}/qpid/daemon/legacystore.so
 
-%post server-store -p %{ldconfig}
+%post server-store -p /sbin/ldconfig
 
-%postun server-store -p %{ldconfig}
+%postun server-store -p /sbin/ldconfig
 
 
-# === qpid-cpp-server-linearstore
+
 #
 # % package server-linearstore
 # Summary: Red Hat persistence extension to the Qpid messaging system
@@ -376,7 +357,7 @@ with Berkeley DB.
 # % {_libdir}/qpid/daemon/linearstore.so
 # % {_libdir}/liblinearstoreutils.so
 
-# === qpid-tools
+
 
 %package -n qpid-tools
 Summary:   Management and diagnostic tools for Apache Qpid
@@ -503,12 +484,17 @@ popd
 # clean up leftover ruby files
 rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
-%post -p %{ldconfig}
+%post -p /sbin/ldconfig
 
-%postun -p %{ldconfig}
+%postun -p /sbin/ldconfig
 
 
 %changelog
+* Thu Jul 10 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-5
+- Removed parameterized ldconfig.
+- Removed comments between subpackages.
+- * This is what appears to have caused the (post)install error messages.
+
 * Thu Jul  3 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-4
 - Parameterized ldconfig location based on RHEL/Fedora release.
 
