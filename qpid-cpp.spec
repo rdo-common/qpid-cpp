@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.28
-Release:       5%{?dist}
+Release:       6%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -56,11 +56,14 @@ the AMQP protocol.
 %package client
 Summary:   Libraries for Qpid C++ client applications
 
+# NOTE: The follow provide will be removed with 0.32
 Provides:  qpid(client)%{?_isa} = %{version}
 
 # !!! Remove with 0.28
 Provides:      qpid-cpp-client-ssl = %{version}
 Obsoletes:     qpid-cpp-client-ssl <= 0.24
+
+Provides:  qpid(cpp-client)%{?_isa} = %{version}
 
 Requires:  boost
 Requires:  chkconfig
@@ -104,8 +107,12 @@ the AMQP protocol.
 %package client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
 
+# NOTE: The follow provide will be removed with 0.32
 Provides:  qpid(client-devel)%{?_isa} = %{version}
 Requires:  qpid(client)%{?_isa} = %{version}
+
+Provides:  qpid(cpp-client-devel)%{?_isa} = %{version}
+Requires:  qpid(cpp-client)%{?_isa} = %{version}
 Requires:  boost-devel
 Requires:  boost-filesystem
 Requires:  boost-program-options
@@ -172,12 +179,14 @@ format for easy browsing.
 %package server
 Summary:   An AMQP message broker daemon
 
+# NOTE: The follow provide will be removed with 0.32
 Provides:  qpid(server)%{?_isa} = %{version}
+Requires:  qpid(client)%{?_isa} = %{version}
 # !!! Remove with 0.28
 Provides:      qpid-cpp-server-ssl = %{version}
 Obsoletes:     qpid-cpp-server-ssl <= 0.24
 
-Requires:  qpid(client)%{?_isa} = %{version}
+Provides:  qpid(cpp-server)%{?_isa} = %{version}
 Requires:  cyrus-sasl
 Requires:  qpid-proton-c%{?_isa} >= 0.5
 
@@ -223,8 +232,12 @@ exit 0
 %package server-ha
 Summary: Provides extensions to the AMQP message broker to provide high availability
 
+# NOTE: The follow provide will be removed with 0.32
 Provides: qpid(server-ha)%{?_isa} = %{version}
 Requires: qpid(server)%{?_isa} = %{version}
+
+Provides: qpid(cpp-server-ha)%{?_isa} = %{version}
+Requires: qpid(cpp-server)%{?_isa} = %{version}
 Requires: qpid-qmf%{?_isa}
 # for systemd
 Requires(post): systemd-units
@@ -256,8 +269,12 @@ Requires(postun): systemd-units
 %package client-rdma
 Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
 
+# NOTE: The follow provide will be removed with 0.32
 Provides: qpid(client-rdma)%{?_isa} = %{version}
 Requires: qpid(client)%{?_isa} = %{version}
+
+Provides: qpid(cpp-client-rdma)%{?_isa} = %{version}
+Requires: qpid(cpp-client)%{?_isa} = %{version}
 
 %description client-rdma
 A client plugin and support library to support RDMA protocols (including
@@ -277,9 +294,14 @@ Infiniband) as the transport for Qpid messaging.
 %package server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
 
+# NOTE: The follow provide will be removed with 0.32
 Provides: qpid(server-rdma)%{?_isa} = %{version}
 Requires: qpid(server)%{?_isa} = %{version}
 Requires: qpid(client-rdma)%{?_isa} = %{version}
+
+Provides: qpid(cpp-server-rdma)%{?_isa} = %{version}
+Requires: qpid(cpp-server)%{?_isa} = %{version}
+Requires: qpid(cpp-client-rdma}%{?_isa} = %{version}
 
 %description server-rdma
 A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
@@ -298,8 +320,12 @@ transport for AMQP messaging.
 %package server-xml
 Summary:  XML extensions for the Qpid daemon
 
+# NOTE: The follow provide will be removed with 0.32
 Provides: qpid(server-xml)%{?_isa} = %{version}
 Requires: qpid(server)%{?_isa} = %{version}
+
+Provides: qpid(cpp-server-xml}%{?_isa} = %{version}
+Requires: qpid(cpp-server}%{?_isa} = %{version}
 Requires: xqilla
 Requires: xerces-c
 
@@ -320,8 +346,12 @@ messages.
 Summary:   Red Hat persistence extension to the Qpid messaging system
 License:   LGPLv2+
 
+# NOTE: The follow provide will be removed with 0.32
 Provides:  qpid(server-store)%{?_isa} = %{version}
 Requires:  qpid(server)%{?_isa} = %{version}
+
+Provides:  qpid(cpp-server-store)%{?_isa} = %{version}
+Requires:  qpid(cpp-server)%{?_isa} = %{version}
 Requires:  db4
 Requires:  libaio
 
@@ -344,8 +374,8 @@ with Berkeley DB.
 # Summary: Red Hat persistence extension to the Qpid messaging system
 # License: LGPLv2+
 #
-# Provides: qpid(server-linearstore) = %{version}
-# Requires: qpid(server)%{?_isa} = %{version}
+# Provides: qpid(cpp-server-linearstore) = %{version}
+# Requires: qpid(cpp-server)%{?_isa} = %{version}
 # Requires: db4
 # Requires: libaio
 #
@@ -490,6 +520,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Thu Aug 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-6
+- Renamed the virtual provides to conform with project needs.
+
 * Thu Jul 10 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-5
 - Removed parameterized ldconfig.
 - Removed comments between subpackages.
