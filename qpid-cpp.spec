@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.28
-Release:       6%{?dist}
+Release:       7%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -58,10 +58,6 @@ Summary:   Libraries for Qpid C++ client applications
 
 # NOTE: The follow provide will be removed with 0.32
 Provides:  qpid(client)%{?_isa} = %{version}
-
-# !!! Remove with 0.28
-Provides:      qpid-cpp-client-ssl = %{version}
-Obsoletes:     qpid-cpp-client-ssl <= 0.24
 
 Provides:  qpid(cpp-client)%{?_isa} = %{version}
 
@@ -182,9 +178,6 @@ Summary:   An AMQP message broker daemon
 # NOTE: The follow provide will be removed with 0.32
 Provides:  qpid(server)%{?_isa} = %{version}
 Requires:  qpid(client)%{?_isa} = %{version}
-# !!! Remove with 0.28
-Provides:      qpid-cpp-server-ssl = %{version}
-Obsoletes:     qpid-cpp-server-ssl <= 0.24
 
 Provides:  qpid(cpp-server)%{?_isa} = %{version}
 Requires:  cyrus-sasl
@@ -301,7 +294,7 @@ Requires: qpid(client-rdma)%{?_isa} = %{version}
 
 Provides: qpid(cpp-server-rdma)%{?_isa} = %{version}
 Requires: qpid(cpp-server)%{?_isa} = %{version}
-Requires: qpid(cpp-client-rdma}%{?_isa} = %{version}
+Requires: qpid(cpp-client-rdma)%{?_isa} = %{version}
 
 %description server-rdma
 A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
@@ -325,7 +318,7 @@ Provides: qpid(server-xml)%{?_isa} = %{version}
 Requires: qpid(server)%{?_isa} = %{version}
 
 Provides: qpid(cpp-server-xml}%{?_isa} = %{version}
-Requires: qpid(cpp-server}%{?_isa} = %{version}
+Requires: qpid(cpp-server)%{?_isa} = %{version}
 Requires: xqilla
 Requires: xerces-c
 
@@ -520,6 +513,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Fri Aug 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-7
+- Removed ssl package references.
+
 * Thu Aug 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-6
 - Renamed the virtual provides to conform with project needs.
 
