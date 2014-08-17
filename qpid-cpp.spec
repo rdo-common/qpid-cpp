@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.28
-Release:       7%{?dist}
+Release:       8%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -513,6 +513,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.28-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Fri Aug 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-7
 - Removed ssl package references.
 
