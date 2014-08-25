@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.28
-Release:       8%{?dist}
+Release:       9%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -317,7 +317,7 @@ Summary:  XML extensions for the Qpid daemon
 Provides: qpid(server-xml)%{?_isa} = %{version}
 Requires: qpid(server)%{?_isa} = %{version}
 
-Provides: qpid(cpp-server-xml}%{?_isa} = %{version}
+Provides: qpid(cpp-server-xml)%{?_isa} = %{version}
 Requires: qpid(cpp-server)%{?_isa} = %{version}
 Requires: xqilla
 Requires: xerces-c
@@ -359,26 +359,6 @@ with Berkeley DB.
 %post server-store -p /sbin/ldconfig
 
 %postun server-store -p /sbin/ldconfig
-
-
-
-#
-# % package server-linearstore
-# Summary: Red Hat persistence extension to the Qpid messaging system
-# License: LGPLv2+
-#
-# Provides: qpid(cpp-server-linearstore) = %{version}
-# Requires: qpid(cpp-server)%{?_isa} = %{version}
-# Requires: db4
-# Requires: libaio
-#
-# % description server-linearstore
-# Red Hat persistence extension to the Qpid AMQP broker: persistent message
-# storage using a libaio-based asynchronous journal.
-#
-# % files server-linearstore
-# % {_libdir}/qpid/daemon/linearstore.so
-# % {_libdir}/liblinearstoreutils.so
 
 
 
@@ -513,6 +493,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Mon Aug 25 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-9
+- Removed the linear store block that was commented out.
+
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.28-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
