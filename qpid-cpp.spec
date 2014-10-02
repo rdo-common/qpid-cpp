@@ -2,18 +2,16 @@
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 Name:          qpid-cpp
-Version:       0.28
-Release:       9%{?dist}
+Version:       0.30
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
-Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-%{version}.tar.gz
+Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-cpp-%{version}.tar.gz
 Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch0002:     0002-NO-JIRA-Remove-unused-code.patch
-Patch0003:     0003-QPID-3650-Avoid-unaligned-memory-access.patch
-Patch0004:     0004-QPID-3650-Avoid-unaligned-memory-access.patch
-Patch1000:     qpid-cpp-aarch64.patch
+Patch0002:     0002-NO-JIRA-Remove-dead-unused-code.patch
+Patch0003:     0003-QPID-6128-Fix-compiling-SocketAddress-on-ARM.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -24,6 +22,7 @@ BuildRequires: pkgconfig
 BuildRequires: ruby
 BuildRequires: python
 BuildRequires: python-devel
+BuildRequires: python-setuptools
 BuildRequires: cyrus-sasl-devel
 BuildRequires: cyrus-sasl-lib
 BuildRequires: cyrus-sasl
@@ -72,11 +71,11 @@ C++. Clients exchange messages with an AMQP message broker using
 the AMQP protocol.
 
 %files client
-%doc cpp/DESIGN
-%doc cpp/LICENSE
-%doc cpp/NOTICE
-%doc cpp/README.txt
-%doc cpp/RELEASE_NOTES
+%doc DESIGN
+%doc LICENSE
+%doc NOTICE
+%doc README.txt
+%doc RELEASE_NOTES
 %{_libdir}/libqpidcommon.so*
 %{_libdir}/libqpidclient.so*
 %{_libdir}/libqpidtypes.so*
@@ -126,15 +125,10 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_includedir}/qpid/swig_perl_typemaps.i
 %{_includedir}/qpid/swig_python_typemaps.i
 %{_includedir}/qpid/swig_ruby_typemaps.i
-%{_includedir}/qpid/amqp_0_10
 %{_includedir}/qpid/client
-%{_includedir}/qpid/console
 %{_includedir}/qpid/framing
 %{_includedir}/qpid/sys
-%{_includedir}/qpid/log
-%{_includedir}/qpid/management
 %{_includedir}/qpid/messaging
-%{_includedir}/qpid/agent
 %{_includedir}/qpid/types
 %{_libdir}/libqpidcommon.so
 %{_libdir}/libqpidclient.so
@@ -149,6 +143,8 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_bindir}/qpid-latency-test
 %{_bindir}/qpid-client-test
 %{_bindir}/qpid-txtest
+%{_bindir}/qpid-send
+%{_bindir}/qpid-receive
 %{_libexecdir}/qpid/tests
 %{_libdir}/cmake/Qpid
 
@@ -241,9 +237,9 @@ Requires(postun): systemd-units
 %{summary}.
 
 %files server-ha
-%{_bindir}/qpid-ha
 %{_unitdir}/qpidd-primary.service
 %{_libdir}/qpid/daemon/ha.so
+%doc README-HA.txt
 
 %post server-ha
 /sbin/ldconfig
@@ -362,42 +358,17 @@ with Berkeley DB.
 
 
 
-%package -n qpid-tools
-Summary:   Management and diagnostic tools for Apache Qpid
-
-Requires:  python-qpid >= 0.8
-Requires:  python-qpid-qmf
-
-%description -n qpid-tools
-Management and diagnostic tools for Apache Qpid brokers and clients.
-
-%files -n qpid-tools
-%{_bindir}/qpid-config
-%{_bindir}/qpid-printevents
-%{_bindir}/qpid-queue-stats
-%{_bindir}/qpid-route
-%{_bindir}/qpid-stat
-%{_bindir}/qpid-tool
-%{_bindir}/qpid-receive
-%{_bindir}/qpid-send
-%doc LICENSE NOTICE
-%if "%{python_version}" >= "2.6"
-%{python_sitelib}/qpid_tools-*.egg-info
-%endif
-
 # ==================
 # prep/build/install
 # ==================
 
 %prep
-%setup -q -n qpid-%{version}
+# % setup -q -n qpid-cpp-%{version}
+%setup
 
 %patch0001 -p2
-%patch0002 -p2
-%patch0003 -p2
-%patch0004 -p2
-
-%patch1000 -p1
+%patch0002 -p3
+%patch0003 -p3
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
@@ -406,39 +377,16 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %global rh_qpid_tests_clients "replaying_sender resuming_receiver declare_queues"
 
 %build
-pushd cpp
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} .
 make %{?_smp_mflags}
 make docs-user-api
 
-pushd ../python
-./setup.py build
-popd
-pushd ../tools
-./setup.py build
-popd
 
-popd
 
 %install
 mkdir -p -m0755 %{buildroot}/%{_bindir}
 mkdir -p -m0755 %{buildroot}/%{_unitdir}
 
-pushd python
-%{__python} setup.py install \
-   --skip-build \
-   --install-purelib %{python_sitearch} \
-   --root %{buildroot}
-popd
-
-pushd tools
-%{__python} setup.py install \
-    --skip-build \
-    --install-purelib %{python_sitelib} \
-    --root %{buildroot}
-popd
-
-pushd cpp
 make install DESTDIR=%{buildroot}/
 
 # clean up items we're not installing
@@ -452,20 +400,23 @@ rm -f  %{buildroot}/%{ruby_sitelib}
 rm -rf %{buildroot}/%{_libdir}/perl5
 rm -rf %{buildroot}/%{_libdir}/*qmf*
 rm -f  %{buildroot}/%{_libdir}/pkgconfig/qmf2.pc
-rm -rf %{buildroot}/%{python_sitearch}/*qpid_messaging*
-rm -rf %{buildroot}/%{python_sitearch}/qpid_python*egg-info
-rm -rf %{buildroot}/%{python_sitearch}/mllib
-rm -rf %{buildroot}/%{python_sitearch}/qpid
-rm -rf %{buildroot}/%{python_sitelib}/qmfgen
-rm -rf %{buildroot}/%{python_sitelib}/qpidtoollibs
+rm -rf %{buildroot}/%{python2_sitearch}/*qpid_messaging*
+rm -rf %{buildroot}/%{python2_sitearch}/qpid_python*egg-info
+rm -rf %{buildroot}/%{python2_sitearch}/mllib
+rm -rf %{buildroot}/%{python2_sitearch}/qpid
+rm -rf %{buildroot}/%{python2_sitelib}/qmfgen
+rm -rf %{buildroot}/%{python2_sitelib}/qpidtoollibs
+rm -rf %{buildroot}/%{python2_sitearch}/*qmf*
 rm -rf %{buildroot}/%{_libdir}/qpid/daemon/store.so*
 rm -rf %{buildroot}/%{_initrddir}/qpidd-primary
+rm -rf %{buildroot}/%{_datadir}/qpid-tools
+rm -rf %{buildroot}/%{_libexecdir}/qpid-qls-analyze
 
 # install systemd files
 mkdir -p %{buildroot}/%{_unitdir}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/etc/qpidd.service \
+install -pm 644 %{_builddir}/qpid-cpp-%{version}/cpp/etc/qpidd.service \
     %{buildroot}/%{_unitdir}
-install -pm 644 %{_builddir}/qpid-%{version}/cpp/etc/qpidd-primary.service \
+install -pm 644 %{_builddir}/qpid-cpp-%{version}/cpp/etc/qpidd-primary.service \
     %{buildroot}/%{_unitdir}
 rm -f %{buildroot}/%{_initrddir}/qpidd
 rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd.service
@@ -482,8 +433,6 @@ mkdir -p %{buildroot}/%{_localstatedir}/run
 touch %{buildroot}/%{_localstatedir}/run/qpidd
 mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
-popd
-
 # clean up leftover ruby files
 rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
@@ -493,13 +442,19 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Thu Oct  2 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-1
+- Rebased on Qpid 0.30.
+- Upstream tarball filename changed from qpid-##.#.tar.gz to qpid-cpp-##.#.tar.gz.
+- qpid-tools moved out to a separate package.
+- Moved qpid-send and qpid-receive to the qpid-cpp-client-devel package.
+
 * Mon Aug 25 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-9
 - Removed the linear store block that was commented out.
 
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.28-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
-* Fri Aug 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-7
+* Fri Aug 15 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-7
 - Removed ssl package references.
 
 * Thu Aug 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-6
