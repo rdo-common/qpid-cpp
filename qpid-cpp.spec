@@ -3,12 +3,13 @@
 
 Name:          qpid-cpp
 Version:       0.30
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-cpp-%{version}.tar.gz
+Source1:       http://www.apache.org/dist/qpid/%{version}/qpid-tools-%{version}.tar.gz
 Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch0002:     0002-NO-JIRA-Remove-dead-unused-code.patch
 Patch0003:     0003-QPID-6128-Fix-compiling-SocketAddress-on-ARM.patch
@@ -254,6 +255,32 @@ Requires(postun): systemd-units
 
 
 
+%package -n qpid-tools
+Summary: Management and diagostic tools for Apache Qpid
+
+Requires: python-qpid >= 0.8
+Requires: python-qpid-qmf
+
+%description -n qpid-tools
+Management and diagnostic tools for Apache Qpid brokers and clients.
+
+%files -n qpid-tools
+%{_bindir}/qpid-config
+%{_bindir}/qpid-ha
+%{_bindir}/qpid-printevents
+%{_bindir}/qpid-queue-stats
+%{_bindir}/qpid-route
+%{_bindir}/qpid-stat
+%{_bindir}/qpid-tool
+%{_bindir}/qpid-receive
+%{_bindir}/qpid-send
+%doc LICENSE NOTICE
+%if "%{python_version}" >= "2.6"
+%{python_sitelib}/qpid_tools-*.egg-info
+%endif
+
+
+
 %ifnarch s390 s390x
 %package client-rdma
 Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
@@ -363,8 +390,8 @@ with Berkeley DB.
 # ==================
 
 %prep
-# % setup -q -n qpid-cpp-%{version}
-%setup
+%setup -q -n qpid-cpp-%{version}
+%setup -q -a 1
 
 %patch0001 -p2
 %patch0002 -p3
@@ -386,6 +413,12 @@ make docs-user-api
 %install
 mkdir -p -m0755 %{buildroot}/%{_bindir}
 mkdir -p -m0755 %{buildroot}/%{_unitdir}
+
+pushd qpid-tools-%{version}
+%{__python} setup.py install \
+    --install-purelib %{python_sitelib} \
+    --root %{buildroot}
+popd
 
 make install DESTDIR=%{buildroot}/
 
@@ -442,6 +475,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed Oct  8 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-2
+- Readded the qpid-tools subpackage rather than moving it to a new package.
+
 * Thu Oct  2 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-1
 - Rebased on Qpid 0.30.
 - Upstream tarball filename changed from qpid-##.#.tar.gz to qpid-cpp-##.#.tar.gz.
