@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.30
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -13,6 +13,7 @@ Source1:       http://www.apache.org/dist/qpid/%{version}/qpid-tools-%{version}.
 Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch0002:     0002-NO-JIRA-Remove-dead-unused-code.patch
 Patch0003:     0003-QPID-6128-Fix-compiling-SocketAddress-on-ARM.patch
+Patch0004:     0004-QPID-6150-Add-__init__.py-to-setup.py-for-linear-sto.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -385,9 +386,26 @@ with Berkeley DB.
 
 
 
-# ==================
-# prep/build/install
-# ==================
+%package server-linearstore
+Summary: Red Hat persistence extension to the Qpid messaging sytem
+License: LGPLv2+
+
+Provides: qpid(cpp-server-store)%{?_isa} = %{version}
+Requires: qpid(cpp-server)%{?_isa} = %{version}
+Requires: db4
+Requires: libaio
+
+%description server-linearstore
+Red Hat persistence extension to the Qpid AMQP broker: persistent message
+storage using a libaio-based asynchronous journal.
+
+%files server-linearstore
+%{_libdir}/qpid/daemon/linearstore.so
+%{_libdir}/liblinearstoreutils.so
+%{_libexecdir}/qpid-qls-analyze
+%{_datadir}/qpid-tools/python/qlslibs
+
+
 
 %prep
 %setup -q -n qpid-cpp-%{version}
@@ -397,6 +415,12 @@ with Berkeley DB.
 %patch0002 -p3
 %patch0003 -p3
 
+pushd qpid-tools-%{version}
+%patch0004 -p3
+# create the file since it's not included in the source tarball
+touch src/py/qlslibs/__init__.py
+popd
+
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
 
 %global rh_qpid_tests_failover "failover_soak run_failover_soak"
@@ -404,7 +428,9 @@ with Berkeley DB.
 %global rh_qpid_tests_clients "replaying_sender resuming_receiver declare_queues"
 
 %build
-%cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} .
+%cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
+       -DBUILD_LINEARSTORE=true \
+       .
 make %{?_smp_mflags}
 make docs-user-api
 
@@ -442,8 +468,6 @@ rm -rf %{buildroot}/%{python2_sitelib}/qpidtoollibs
 rm -rf %{buildroot}/%{python2_sitearch}/*qmf*
 rm -rf %{buildroot}/%{_libdir}/qpid/daemon/store.so*
 rm -rf %{buildroot}/%{_initrddir}/qpidd-primary
-rm -rf %{buildroot}/%{_datadir}/qpid-tools
-rm -rf %{buildroot}/%{_libexecdir}/qpid-qls-analyze
 
 # install systemd files
 mkdir -p %{buildroot}/%{_unitdir}
@@ -475,6 +499,11 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Tue Oct 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-3
+- Enabled building the linear store.
+- Added qpid-cpp-server-linearstore package.
+- QPID-6150: qpid-qls-analyze tool cannot find Python modules
+
 * Wed Oct  8 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-2
 - Readded the qpid-tools subpackage rather than moving it to a new package.
 
