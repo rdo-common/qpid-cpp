@@ -1,7 +1,7 @@
-From 99e5abadd834f9d07f745ac80fe9cc745b7368c1 Mon Sep 17 00:00:00 2001
+From 6a980bbf9648e3529d2722de4aa6efd58e0f6206 Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <mcpierce@apache.org>
 Date: Tue, 14 Oct 2014 17:08:53 +0000
-Subject: [PATCH] QPID-6150: Add __init__.py to setup.py for linear store.
+Subject: [PATCH 4/6] QPID-6150: Add __init__.py to setup.py for linear store.
 
 The file was not being included in the source tarball.
 

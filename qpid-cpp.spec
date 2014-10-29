@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.30
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -14,6 +14,8 @@ Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch0002:     0002-NO-JIRA-Remove-dead-unused-code.patch
 Patch0003:     0003-QPID-6128-Fix-compiling-SocketAddress-on-ARM.patch
 Patch0004:     0004-QPID-6150-Add-__init__.py-to-setup.py-for-linear-sto.patch
+Patch0005:     0005-NO-JIRA-Change-python.i-to-qpid_messaging.i-in-extra.patch
+Patch0006:     0006-QPID-6170-Adds-build-support-for-aarch64-and-ppc64le.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -414,6 +416,8 @@ storage using a libaio-based asynchronous journal.
 %patch0001 -p2
 %patch0002 -p3
 %patch0003 -p3
+%patch0005 -p3
+%patch0006 -p3
 
 pushd qpid-tools-%{version}
 %patch0004 -p3
@@ -499,6 +503,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed Oct 29 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-4
+- QPID-6170: Fixes builds on aarch64 and ppc64le architectures.
+
 * Tue Oct 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-3
 - Enabled building the linear store.
 - Added qpid-cpp-server-linearstore package.
