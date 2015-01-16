@@ -16,6 +16,10 @@ Patch0003:     0003-QPID-6128-Fix-compiling-SocketAddress-on-ARM.patch
 Patch0004:     0004-QPID-6150-Add-__init__.py-to-setup.py-for-linear-sto.patch
 Patch0005:     0005-NO-JIRA-Change-python.i-to-qpid_messaging.i-in-extra.patch
 Patch0006:     0006-QPID-6170-Adds-build-support-for-aarch64-and-ppc64le.patch
+# BZ#1181721
+Patch0007:     0007-QPID-6310-ensure-session-is-attached-even-for-unsupp.patch
+Patch0008:     0008-QPID-6310-handle-case-where-content-bearing-method-i.patch
+Patch0009:     0009-QPID-6310-check-validity-of-ranges-when-decoding-seq.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -418,6 +422,9 @@ storage using a libaio-based asynchronous journal.
 %patch0003 -p3
 %patch0005 -p3
 %patch0006 -p3
+%patch0007 -p3
+%patch0008 -p3
+%patch0009 -p3
 
 pushd qpid-tools-%{version}
 %patch0004 -p3
@@ -503,6 +510,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Fri Jan 16 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-5
+- Resolves: BZ#1181721
+
 * Wed Oct 29 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-4
 - QPID-6170: Fixes builds on aarch64 and ppc64le architectures.
 

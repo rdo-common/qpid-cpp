@@ -1,0 +1,26 @@
+From 1d3f332d59c7571003ea4fe48b8cde0236f7f778 Mon Sep 17 00:00:00 2001
+From: Gordon Sim <gsim@apache.org>
+Date: Tue, 13 Jan 2015 10:25:02 +0000
+Subject: [PATCH 7/9] QPID-6310 ensure session is attached even for unsupported
+ controls
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1651319 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/src/qpid/amqp_0_10/SessionHandler.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/qpid/cpp/src/qpid/amqp_0_10/SessionHandler.cpp b/qpid/cpp/src/qpid/amqp_0_10/SessionHandler.cpp
+index 43f39c2..bd0dcbf 100644
+--- a/qpid/cpp/src/qpid/amqp_0_10/SessionHandler.cpp
++++ b/qpid/cpp/src/qpid/amqp_0_10/SessionHandler.cpp
+@@ -276,6 +276,7 @@ void SessionHandler::flush(bool expected, bool confirmed, bool completed) {
+ }
+ 
+ void SessionHandler::gap(const SequenceSet& /*commands*/) {
++    checkAttached();
+     throw NotImplementedException("session.gap not supported");
+ }
+ 
+-- 
+2.1.0
+

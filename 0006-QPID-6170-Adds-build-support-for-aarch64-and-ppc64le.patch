@@ -1,0 +1,52 @@
+From d74c6441a1e4cb364337f338287b4790ca9c98fd Mon Sep 17 00:00:00 2001
+From: "Darryl L. Pierce" <dpierce@redhat.com>
+Date: Wed, 29 Oct 2014 11:13:04 -0400
+Subject: [PATCH 6/9] QPID-6170: Adds build support for aarch64 and ppc64le
+ architectures.
+
+Contributed by Marcin Juszkiewicz <mjuszkiewicz@redhat.com>
+---
+ qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h | 21 ++++++++++-----------
+ 1 file changed, 10 insertions(+), 11 deletions(-)
+
+diff --git a/qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h b/qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h
+index 01d92ee..6fa8471 100644
+--- a/qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h
++++ b/qpid/cpp/src/qpid/legacystore/jrnl/jcfg.h
+@@ -33,23 +33,22 @@
+ #ifndef QPID_LEGACYSTORE_JRNL_JCFG_H
+ #define QPID_LEGACYSTORE_JRNL_JCFG_H
+ 
+-#if defined(__i386__) || (__arm__) /* little endian, 32 bits */
++#include <endian.h>
++
++#if __BYTE_ORDER == __LITTLE_ENDIAN
+ #define JRNL_LITTLE_ENDIAN
+-#define JRNL_32_BIT
+-#elif defined(__PPC__) || defined(__s390__)  /* big endian, 32 bits */
++#else
+ #define JRNL_BIG_ENDIAN
++#endif
++
++#include <bits/wordsize.h>
++
++#if __WORDSIZE == 32
+ #define JRNL_32_BIT
+-#elif defined(__ia64__) || defined(__x86_64__) || defined(__alpha__) || (__arm64__) /* little endian, 64 bits */
+-#define JRNL_LITTLE_ENDIAN
+-#define JRNL_64_BIT
+-#elif defined(__powerpc64__) || defined(__s390x__) /* big endian, 64 bits */
+-#define JRNL_BIG_ENDIAN
+-#define JRNL_64_BIT
+ #else
+-#error endian?
++#define JRNL_64_BIT
+ #endif
+ 
+-
+ /**
+ * <b>Rule:</b> Data block size (JRNL_DBLK_SIZE) MUST be a power of 2 such that
+ * <pre>
+-- 
+2.1.0
+
