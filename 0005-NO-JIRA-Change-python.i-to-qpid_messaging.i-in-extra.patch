@@ -1,7 +1,7 @@
 From 6c77d9085b00b265264a1bb6f508d0658c091c40 Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <dpierce@redhat.com>
 Date: Mon, 6 Oct 2014 08:12:38 -0400
-Subject: [PATCH 5/9] NO-JIRA: Change python.i to qpid_messaging.i in extra
+Subject: [PATCH 05/10] NO-JIRA: Change python.i to qpid_messaging.i in extra
  build
 
 ---

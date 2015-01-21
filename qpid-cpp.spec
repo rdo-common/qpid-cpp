@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.30
-Release:       4%{?dist}
+Release:       6%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -20,6 +20,8 @@ Patch0006:     0006-QPID-6170-Adds-build-support-for-aarch64-and-ppc64le.patch
 Patch0007:     0007-QPID-6310-ensure-session-is-attached-even-for-unsupp.patch
 Patch0008:     0008-QPID-6310-handle-case-where-content-bearing-method-i.patch
 Patch0009:     0009-QPID-6310-check-validity-of-ranges-when-decoding-seq.patch
+# BZ#1184488
+Patch0010:     0010-txshift-switch-to-uint-for-workers.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -510,6 +512,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed Jan 21 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-6
+- Resolves: BZ#1184488
+
 * Fri Jan 16 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-5
 - Resolves: BZ#1181721
 

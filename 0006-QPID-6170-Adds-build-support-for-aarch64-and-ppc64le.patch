@@ -1,7 +1,7 @@
 From d74c6441a1e4cb364337f338287b4790ca9c98fd Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <dpierce@redhat.com>
 Date: Wed, 29 Oct 2014 11:13:04 -0400
-Subject: [PATCH 6/9] QPID-6170: Adds build support for aarch64 and ppc64le
+Subject: [PATCH 06/10] QPID-6170: Adds build support for aarch64 and ppc64le
  architectures.
 
 Contributed by Marcin Juszkiewicz <mjuszkiewicz@redhat.com>

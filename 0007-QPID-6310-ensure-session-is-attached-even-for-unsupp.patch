@@ -1,8 +1,8 @@
 From 1d3f332d59c7571003ea4fe48b8cde0236f7f778 Mon Sep 17 00:00:00 2001
 From: Gordon Sim <gsim@apache.org>
 Date: Tue, 13 Jan 2015 10:25:02 +0000
-Subject: [PATCH 7/9] QPID-6310 ensure session is attached even for unsupported
- controls
+Subject: [PATCH 07/10] QPID-6310 ensure session is attached even for
+ unsupported controls
 
 git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1651319 13f79535-47bb-0310-9956-ffa450edef68
 ---
