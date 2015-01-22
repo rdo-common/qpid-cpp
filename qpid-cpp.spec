@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.30
-Release:       6%{?dist}
+Release:       7%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -427,6 +427,7 @@ storage using a libaio-based asynchronous journal.
 %patch0007 -p3
 %patch0008 -p3
 %patch0009 -p3
+%patch0010 -p3
 
 pushd qpid-tools-%{version}
 %patch0004 -p3
@@ -512,6 +513,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Thu Jan 22 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-7
+- Apply patch 10.
+
 * Wed Jan 21 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-6
 - Resolves: BZ#1184488
 
