@@ -1,0 +1,64 @@
+From 9ef192201bb786345da15d05d15cd2b7b7deb647 Mon Sep 17 00:00:00 2001
+From: Gordon Sim <gsim@apache.org>
+Date: Wed, 21 Jan 2015 14:50:52 +0000
+Subject: [PATCH 12/12] QPID-6325: further improve 0-10 connection handling
+ logic
+
+git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1653547 13f79535-47bb-0310-9956-ffa450edef68
+---
+ qpid/cpp/src/qpid/broker/ConnectionHandler.cpp | 14 +++++++-------
+ qpid/cpp/src/qpid/broker/ConnectionHandler.h   |  3 ++-
+ 2 files changed, 9 insertions(+), 8 deletions(-)
+
+diff --git a/qpid/cpp/src/qpid/broker/ConnectionHandler.cpp b/qpid/cpp/src/qpid/broker/ConnectionHandler.cpp
+index eece59d..8972040 100644
+--- a/qpid/cpp/src/qpid/broker/ConnectionHandler.cpp
++++ b/qpid/cpp/src/qpid/broker/ConnectionHandler.cpp
+@@ -242,17 +242,17 @@ void ConnectionHandler::Handler::open(const string& /*virtualHost*/,
+         AclModule* acl =  connection.getBroker().getAcl();
+         if (acl && acl->userAclRules()) {
+             if (!acl->authorise(connection.getUserId(),acl::ACT_CREATE,acl::OBJ_LINK,"")){
+-                proxy.close(framing::connection::CLOSE_CODE_CONNECTION_FORCED,
+-                            QPID_MSG("ACL denied " << connection.getUserId()
+-                                        << " creating a federation link"));
++                connection.close(framing::connection::CLOSE_CODE_CONNECTION_FORCED,
++                                 QPID_MSG("ACL denied " << connection.getUserId()
++                                          << " creating a federation link"));
+                 return;
+             }
+         } else {
+             if (connection.getBroker().isAuthenticating()) {
+-                proxy.close(framing::connection::CLOSE_CODE_CONNECTION_FORCED,
+-                            QPID_MSG("User " << connection.getUserId()
+-                                << " federation connection denied. Systems with authentication "
+-                                   "enabled must specify ACL create link rules."));
++                connection.close(framing::connection::CLOSE_CODE_CONNECTION_FORCED,
++                                 QPID_MSG("User " << connection.getUserId()
++                                          << " federation connection denied. Systems with authentication "
++                                          "enabled must specify ACL create link rules."));
+                 return;
+             }
+         }
+diff --git a/qpid/cpp/src/qpid/broker/ConnectionHandler.h b/qpid/cpp/src/qpid/broker/ConnectionHandler.h
+index 7af2fe3..30155fb 100644
+--- a/qpid/cpp/src/qpid/broker/ConnectionHandler.h
++++ b/qpid/cpp/src/qpid/broker/ConnectionHandler.h
+@@ -100,13 +100,14 @@ class ConnectionHandler : public framing::FrameHandler
+     std::auto_ptr<Handler> handler;
+ 
+     bool handle(const qpid::framing::AMQMethodBody& method);
++    void close(framing::connection::CloseCode code, const std::string& text);
+   public:
+     ConnectionHandler(amqp_0_10::Connection& connection, bool isClient );
+-    void close(framing::connection::CloseCode code, const std::string& text);
+     void heartbeat();
+     void handle(framing::AMQFrame& frame);
+     void setSecureConnection(SecureConnection* secured);
+     bool isOpen() { return handler->isOpen; }
++  friend class amqp_0_10::Connection;
+ };
+ 
+ 
+-- 
+2.1.0
+

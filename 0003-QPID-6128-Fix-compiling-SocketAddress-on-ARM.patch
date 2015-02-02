@@ -1,7 +1,7 @@
 From 3e22a83f7247cd0c2b0da1e3a55de78952d99391 Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <dpierce@redhat.com>
 Date: Wed, 1 Oct 2014 11:12:49 -0400
-Subject: [PATCH 03/10] QPID-6128: Fix compiling SocketAddress on ARM
+Subject: [PATCH 03/12] QPID-6128: Fix compiling SocketAddress on ARM
 
 ---
  qpid/cpp/src/qpid/sys/posix/SocketAddress.cpp | 16 ++++++++++++----

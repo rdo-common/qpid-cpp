@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.30
-Release:       8%{?dist}
+Release:       9%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -22,6 +22,9 @@ Patch0008:     0008-QPID-6310-handle-case-where-content-bearing-method-i.patch
 Patch0009:     0009-QPID-6310-check-validity-of-ranges-when-decoding-seq.patch
 # BZ#1184488
 Patch0010:     0010-txshift-switch-to-uint-for-workers.patch
+# BZ#1186308
+Patch0011:     0011-QPID-6325-improve-0-10-connection-handling-logic.patch
+Patch0012:     0012-QPID-6325-further-improve-0-10-connection-handling-l.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -428,6 +431,8 @@ storage using a libaio-based asynchronous journal.
 %patch0008 -p3
 %patch0009 -p3
 %patch0010 -p3
+%patch0011 -p3
+%patch0012 -p3
 
 pushd qpid-tools-%{version}
 %patch0004 -p3
@@ -513,6 +518,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Mon Fed  2 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-9
+- Resolves: BZ#1186308
+
 * Tue Jan 27 2015 Petr Machata <pmachata@redhat.com> - 0.30-8
 - Rebuild for boost 1.57.0
 

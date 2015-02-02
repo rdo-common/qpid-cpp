@@ -1,7 +1,7 @@
 From aa2a9247305b4363f2f1bebec9dd6cc0a518496e Mon Sep 17 00:00:00 2001
 From: Gordon Sim <gsim@apache.org>
 Date: Tue, 13 Jan 2015 10:25:15 +0000
-Subject: [PATCH 09/10] QPID-6310: check validity of ranges when decoding
+Subject: [PATCH 09/12] QPID-6310: check validity of ranges when decoding
  sequence set
 
 git-svn-id: https://svn.apache.org/repos/asf/qpid/trunk@1651321 13f79535-47bb-0310-9956-ffa450edef68
