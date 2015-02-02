@@ -518,7 +518,7 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
-* Mon Fed  2 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-9
+* Mon Feb  2 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-9
 - Resolves: BZ#1186308
 
 * Tue Jan 27 2015 Petr Machata <pmachata@redhat.com> - 0.30-8
