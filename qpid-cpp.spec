@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.30
-Release:       9%{?dist}
+Release:       10%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -518,6 +518,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed Feb 04 2015 Petr Machata <pmachata@redhat.com> - 0.30-10
+- Bump for rebuild.
+
 * Mon Feb  2 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-9
 - Resolves: BZ#1186308
 
