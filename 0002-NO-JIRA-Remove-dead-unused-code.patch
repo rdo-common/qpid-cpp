@@ -1,4 +1,4 @@
-From 49e0b769ce4a2f4bfc4a499adaedbf43a4cf7ffd Mon Sep 17 00:00:00 2001
+From 55116da4408d47d2e99f9468890df1161350bf2b Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <dpierce@redhat.com>
 Date: Tue, 30 Sep 2014 10:27:54 -0400
 Subject: [PATCH 02/12] NO-JIRA: Remove dead/unused code

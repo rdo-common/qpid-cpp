@@ -1,4 +1,4 @@
-From aa2a9247305b4363f2f1bebec9dd6cc0a518496e Mon Sep 17 00:00:00 2001
+From ef28aaa39fa7c6ae6d0dcbbe87d28ee2d041b35a Mon Sep 17 00:00:00 2001
 From: Gordon Sim <gsim@apache.org>
 Date: Tue, 13 Jan 2015 10:25:15 +0000
 Subject: [PATCH 09/12] QPID-6310: check validity of ranges when decoding

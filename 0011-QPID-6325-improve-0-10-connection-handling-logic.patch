@@ -1,4 +1,4 @@
-From 48137ff5bb743ceb6d504d912e4a73d461c21f6d Mon Sep 17 00:00:00 2001
+From 64c310ebfabd5979cc4e6e83e27964bd55d3c907 Mon Sep 17 00:00:00 2001
 From: Gordon Sim <gsim@apache.org>
 Date: Tue, 20 Jan 2015 10:00:17 +0000
 Subject: [PATCH 11/12] QPID-6325: improve 0-10 connection handling logic

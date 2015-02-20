@@ -1,4 +1,4 @@
-From d377a75fc454bd329f9dc340dd13aaab080fcf3a Mon Sep 17 00:00:00 2001
+From d88de656433c6ec0326af56ff2a41a9ffaa9475b Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <mcpierce@gmail.com>
 Date: Wed, 3 Apr 2013 10:07:37 -0400
 Subject: [PATCH 01/12] NO-JIRA: qpidd.service file for use on Fedora
@@ -14,7 +14,7 @@ as a service.
 
 diff --git a/qpid/cpp/etc/qpidd-primary.service b/qpid/cpp/etc/qpidd-primary.service
 new file mode 100644
-index 0000000..f15168c
+index 0000000..874d51a
 --- /dev/null
 +++ b/qpid/cpp/etc/qpidd-primary.service
 @@ -0,0 +1,15 @@
@@ -29,7 +29,7 @@ index 0000000..f15168c
 +Group=qpidd
 +Type=simple
 +EnvironmentFile=/etc/sysconfig/qpidd
-+ExecStart=/usr/sbin/qpid-ha -b localhost:$QPID_PORT promote
++ExecStart=/usr/bin/qpid-ha -b localhost:$QPID_PORT promote
 +
 +[Install]
 +WantedBy=multi-user.target

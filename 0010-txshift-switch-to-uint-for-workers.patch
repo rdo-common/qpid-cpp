@@ -1,4 +1,4 @@
-From eaf900f854def9f33d6a1b1670443ed96a51c10c Mon Sep 17 00:00:00 2001
+From 437520da62eb53f3fea20ac2515f375341a26fb0 Mon Sep 17 00:00:00 2001
 From: "Darryl L. Pierce" <dpierce@redhat.com>
 Date: Wed, 21 Jan 2015 10:45:06 -0500
 Subject: [PATCH 10/12] txshift: switch to uint for workers
