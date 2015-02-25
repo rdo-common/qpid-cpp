@@ -3,7 +3,7 @@
 
 Name:          qpid-cpp
 Version:       0.30
-Release:       11%{?dist}
+Release:       12%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -286,6 +286,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %{_bindir}/qpid-tool
 %{_bindir}/qpid-receive
 %{_bindir}/qpid-send
+%{python_sitelib}/qpidtoollibs
 %doc LICENSE NOTICE
 %if "%{python_version}" >= "2.6"
 %{python_sitelib}/qpid_tools-*.egg-info
@@ -483,7 +484,6 @@ rm -rf %{buildroot}/%{python2_sitearch}/qpid_python*egg-info
 rm -rf %{buildroot}/%{python2_sitearch}/mllib
 rm -rf %{buildroot}/%{python2_sitearch}/qpid
 rm -rf %{buildroot}/%{python2_sitelib}/qmfgen
-rm -rf %{buildroot}/%{python2_sitelib}/qpidtoollibs
 rm -rf %{buildroot}/%{python2_sitearch}/*qmf*
 rm -rf %{buildroot}/%{_libdir}/qpid/daemon/store.so*
 rm -rf %{buildroot}/%{_initrddir}/qpidd-primary
@@ -518,6 +518,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed Feb 25 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-12
+- Added qpidtoollibs to the qpid-tools package.
+
 * Fri Feb 20 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.30-11
 - Fixed path to qpid-ha in the systemd service descriptor.
 
