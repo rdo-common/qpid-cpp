@@ -40,7 +40,7 @@ BuildRequires: nspr-devel
 BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
 BuildRequires: libaio-devel
-BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.5
+BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.9
 BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: swig
