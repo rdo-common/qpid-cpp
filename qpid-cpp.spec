@@ -7,7 +7,7 @@
 
 Name:          qpid-cpp
 Version:       0.32
-Release:       1%{?dist}
+Release:       1%{?dist}.1
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -599,6 +599,9 @@ mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
 
 %changelog
+* Tue Apr  7 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-1.1
+- Bumped the release to force a build against Proton 0.9 in F22.
+
 * Mon Apr  6 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-1
 - Rebased on Qpid 0.32.
 - Added build flag to enable building the legacy store.
