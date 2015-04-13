@@ -7,7 +7,7 @@
 
 Name:          qpid-cpp
 Version:       0.32
-Release:       1%{?dist}.1
+Release:       2%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -18,6 +18,7 @@ Source2:       http://www.apache.org/dist/qpid/%{version}/qpid-python-%{version}
 Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch0002:     0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
 Patch0003:     0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
+Patch0004:     0006-QPID-6170-Adds-build-support-for-aarch64-and-ppc64le.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -500,6 +501,7 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %patch0001 -p2
 %patch0002 -p3
 %patch0003 -p3
+%patch0004 -p3
 
 
 pushd qpid-tools-%{version}
@@ -599,6 +601,9 @@ mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
 
 %changelog
+* Mon Apr 13 2015 Peter Robinson <pbrobinson@fedoraproject.org> 0.32-2
+- Re-add patch that fixes builds on aarch64/ppc64le
+
 * Tue Apr  7 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-1.1
 - Bumped the release to force a build against Proton 0.9 in F22.
 
