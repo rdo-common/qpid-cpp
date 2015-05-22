@@ -7,7 +7,7 @@
 
 Name:          qpid-cpp
 Version:       0.32
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -291,7 +291,6 @@ Requires: python-qpid-common = %{version}-%{release}
 %doc LICENSE
 %{_bindir}/qpid-python-test
 %{python_sitelib}/qpid
-%exclude %{python_sitelib}/qpid/tests
 %if "%{python_version}" >= "2.6"
 %{python_sitelib}/qpid_python-*.egg-info
 %endif
@@ -601,6 +600,10 @@ mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
 
 %changelog
+* Fri May 22 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-3
+- Include the qpid.tests module in python-qpid
+- Resolves: BZ#1224260
+
 * Mon Apr 13 2015 Peter Robinson <pbrobinson@fedoraproject.org> 0.32-2
 - Re-add patch that fixes builds on aarch64/ppc64le
 
