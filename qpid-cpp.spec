@@ -7,7 +7,7 @@
 
 Name:          qpid-cpp
 Version:       0.32
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -152,8 +152,6 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_bindir}/qpid-latency-test
 %{_bindir}/qpid-client-test
 %{_bindir}/qpid-txtest
-%{_bindir}/qpid-send
-%{_bindir}/qpid-receive
 %{_libexecdir}/qpid/tests
 %{_libdir}/cmake/Qpid
 
@@ -311,11 +309,11 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %{_bindir}/qpid-ha
 %{_bindir}/qpid-printevents
 %{_bindir}/qpid-queue-stats
+%{_bindir}/qpid-receive
 %{_bindir}/qpid-route
+%{_bindir}/qpid-send
 %{_bindir}/qpid-stat
 %{_bindir}/qpid-tool
-%{_bindir}/qpid-receive
-%{_bindir}/qpid-send
 %{python_sitelib}/qpidtoollibs
 %doc LICENSE NOTICE
 %if "%{python_version}" >= "2.6"
@@ -600,6 +598,9 @@ mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
 
 %changelog
+* Wed May 27 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-4
+- Removed qpid-send and qpid-receive from qpid-cpp-client-devel.
+
 * Fri May 22 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-3
 - Include the qpid.tests module in python-qpid
 - Resolves: BZ#1224260
