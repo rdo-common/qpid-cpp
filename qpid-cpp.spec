@@ -7,7 +7,7 @@
 
 Name:          qpid-cpp
 Version:       0.32
-Release:       4%{?dist}
+Release:       5%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -598,6 +598,9 @@ mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
 
 %changelog
+* Wed Jun 03 2015 Jitka Plesnikova <jplesnik@redhat.com> - 0.32-5
+- Perl 5.22 rebuild
+
 * Wed May 27 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-4
 - Removed qpid-send and qpid-receive from qpid-cpp-client-devel.
 
