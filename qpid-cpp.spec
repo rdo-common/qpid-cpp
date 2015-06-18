@@ -7,7 +7,7 @@
 
 Name:          qpid-cpp
 Version:       0.32
-Release:       5%{?dist}
+Release:       6%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -598,6 +598,9 @@ mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
 
 %changelog
+* Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.32-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Wed Jun 03 2015 Jitka Plesnikova <jplesnik@redhat.com> - 0.32-5
 - Perl 5.22 rebuild
 
