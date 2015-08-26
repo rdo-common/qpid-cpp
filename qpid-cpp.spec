@@ -2,23 +2,18 @@
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 %global _perldocdir %{_docdir}/perl-qpid-messaging-%{version}
 %global _pythondocdir %{_docdir}/python-qpid-messaging-%{version}
-%global gem_name qpid_messaging
-%global gem_version 0.32
 
 Name:          qpid-cpp
-Version:       0.32
-Release:       8%{?dist}
+Version:       0.34
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
-Source0:       http://www.apache.org/dist/qpid/%{version}/qpid-cpp-%{version}.tar.gz
-Source1:       http://www.apache.org/dist/qpid/%{version}/qpid-tools-%{version}.tar.gz
-Source2:       http://www.apache.org/dist/qpid/%{version}/qpid-python-%{version}.tar.gz
+Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}.tar.gz
 Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch0002:     0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
 Patch0003:     0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
-Patch0004:     0006-QPID-6170-Adds-build-support-for-aarch64-and-ppc64le.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -64,15 +59,12 @@ the AMQP protocol.
 %package client
 Summary:   Libraries for Qpid C++ client applications
 
-# NOTE: The follow provide will be removed with 0.32
-Provides:  qpid(client)%{?_isa} = %{version}-%{release}
-
 Provides:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 
 Requires:  boost
 Requires:  chkconfig
 Requires:  initscripts
-Requires:  qpid-proton-c%{?_isa} >= 0.5
+Requires:  qpid-proton-c%{?_isa} >= 0.9
 
 %description client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -111,10 +103,6 @@ the AMQP protocol.
 %package client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
 
-# NOTE: The follow provide will be removed with 0.32
-Provides:  qpid(client-devel)%{?_isa} = %{version}-%{release}
-Requires:  qpid(client)%{?_isa} = %{version}-%{release}
-
 Provides:  qpid(cpp-client-devel)%{?_isa} = %{version}-%{release}
 Requires:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  boost-devel
@@ -124,8 +112,8 @@ Requires:  libuuid-devel
 Requires:  python
 
 %description client-devel
-Libraries, header files and documentation for developing AMQP clients
-in C++ using Qpid.  Qpid implements the AMQP messaging specification.
+Libraries and header files for developing AMQP clients in C++ using Qpid.
+Qpid implements the AMQP messaging specification.
 
 %files client-devel
 %dir %{_includedir}/qpid
@@ -152,6 +140,10 @@ in C++ using Qpid.  Qpid implements the AMQP messaging specification.
 %{_bindir}/qpid-latency-test
 %{_bindir}/qpid-client-test
 %{_bindir}/qpid-txtest
+%{_bindir}/qpid-ping
+%{_bindir}/qpid-txtest2
+%{_bindir}/qpid-send
+%{_bindir}/qpid-receive
 %{_libexecdir}/qpid/tests
 %{_libdir}/cmake/Qpid
 
@@ -178,13 +170,9 @@ format for easy browsing.
 %package server
 Summary:   An AMQP message broker daemon
 
-# NOTE: The follow provide will be removed with 0.32
-Provides:  qpid(server)%{?_isa} = %{version}-%{release}
-Requires:  qpid(client)%{?_isa} = %{version}-%{release}
-
 Provides:  qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires:  cyrus-sasl
-Requires:  qpid-proton-c%{?_isa} >= 0.5
+Requires:  qpid-proton-c%{?_isa} >= 0.9
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -195,7 +183,7 @@ A message broker daemon that receives stores and routes messages using
 the open AMQP messaging protocol.
 
 %files server
-%{_libdir}/libqpidbroker.so*
+%{_libdir}/libqpidbroker.so.*
 %{_sbindir}/qpidd
 %{_unitdir}/qpidd.service
 %config(noreplace) %{_sysconfdir}/qpid/qpidd.conf
@@ -223,14 +211,33 @@ exit 0
 %systemd_postun_with_restart qpidd.service
 /sbin/ldconfig
 
+# === Package: qpid-cpp-server-devel ===
 
+%package server-devel
+Summary: Libraries and header files for developing Qpid broker extensions
+Group: Development/System
+Requires: %{name}-client-devel = %{version}-%{release}
+Requires: %{name}-server = %{version}-%{release}
+Requires: boost-filesystem
+Requires: boost-program-options
+Obsoletes: qpidd-devel <= %{version}
+
+%description server-devel
+Libraries and header files for developing extensions to the
+Qpid broker daemon.
+
+%files server-devel
+%defattr(-,root,root,-)
+%_libdir/libqpidbroker.so
+
+%post server-devel
+/sbin/ldconfig
+
+%postun server-devel
+/sbin/ldconfig
 
 %package server-ha
 Summary: Provides extensions to the AMQP message broker to provide high availability
-
-# NOTE: The follow provide will be removed with 0.32
-Provides: qpid(server-ha)%{?_isa} = %{version}-%{release}
-Requires: qpid(server)%{?_isa} = %{version}-%{release}
 
 Provides: qpid(cpp-server-ha)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-server)%{?_isa} = %{version}-%{release}
@@ -261,74 +268,9 @@ Requires(postun): systemd-units
 
 
 
-%package -n python-qpid-common
-Summary: Shared code for Qpid Python language bindings
-
-%description -n python-qpid-common
-%{summary}.
-
-
-%files -n python-qpid-common
-%doc LICENSE
-%doc examples
-%{python_sitelib}/mllib
-%{python_sitelib}/qpid/*.py*
-%{python_sitelib}/qpid/specs
-
-
-
-%package -n python-qpid
-Summary: Python client library for AMQP written in pure Python
-
-Requires: python-qpid-common = %{version}-%{release}
-
-%description -n python-qpid
-%{summary}.
-
-%files -n python-qpid
-%doc LICENSE
-%{_bindir}/qpid-python-test
-%{python_sitelib}/qpid
-%if "%{python_version}" >= "2.6"
-%{python_sitelib}/qpid_python-*.egg-info
-%endif
-
-
-
-%package -n qpid-tools
-Summary: Management and diagostic tools for Apache Qpid
-
-Requires: python-qpid >= 0.8
-Requires: python-qpid-qmf
-
-%description -n qpid-tools
-Management and diagnostic tools for Apache Qpid brokers and clients.
-
-%files -n qpid-tools
-%{_bindir}/qpid-config
-%{_bindir}/qpid-ha
-%{_bindir}/qpid-printevents
-%{_bindir}/qpid-queue-stats
-%{_bindir}/qpid-receive
-%{_bindir}/qpid-route
-%{_bindir}/qpid-send
-%{_bindir}/qpid-stat
-%{_bindir}/qpid-tool
-%{python_sitelib}/qpidtoollibs
-%doc LICENSE NOTICE
-%if "%{python_version}" >= "2.6"
-%{python_sitelib}/qpid_tools-*.egg-info
-%endif
-
-
-
 %ifnarch s390 s390x
 %package client-rdma
 Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
-
-# NOTE: The follow provide will be removed with 0.32
-Provides: qpid(client-rdma)%{?_isa} = %{version}-%{release}
-Requires: qpid(client)%{?_isa} = %{version}-%{release}
 
 Provides: qpid(cpp-client-rdma)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
@@ -351,11 +293,6 @@ Infiniband) as the transport for Qpid messaging.
 %package server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
 
-# NOTE: The follow provide will be removed with 0.32
-Provides: qpid(server-rdma)%{?_isa} = %{version}-%{release}
-Requires: qpid(server)%{?_isa} = %{version}-%{release}
-Requires: qpid(client-rdma)%{?_isa} = %{version}-%{release}
-
 Provides: qpid(cpp-server-rdma)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-client-rdma)%{?_isa} = %{version}-%{release}
@@ -377,10 +314,6 @@ transport for AMQP messaging.
 %package server-xml
 Summary:  XML extensions for the Qpid daemon
 
-# NOTE: The follow provide will be removed with 0.32
-Provides: qpid(server-xml)%{?_isa} = %{version}-%{release}
-Requires: qpid(server)%{?_isa} = %{version}-%{release}
-
 Provides: qpid(cpp-server-xml)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires: xqilla
@@ -399,49 +332,22 @@ messages.
 
 
 
-%package server-store
-Summary:   Red Hat persistence extension to the Qpid messaging system
-
-# TODO - server-store to become linearstore with 0.34
-Requires:  qpid(server)%{?_isa} = %{version}-%{release}
-
-Provides:  qpid(cpp-server-store)%{?_isa} = %{version}-%{release}
-Requires:  qpid(cpp-server)%{?_isa} = %{version}-%{release}
-Requires:  db4
-Requires:  libaio
-
-%description server-store
-Red Hat persistence extension to the Qpid AMQP broker: persistent message
-storage using either a libaio-based asynchronous journal, or synchronously
-with Berkeley DB.
-
-%files server-store
-%{_libdir}/qpid/daemon/legacystore.so
-
-%post server-store -p /sbin/ldconfig
-
-%postun server-store -p /sbin/ldconfig
-
-
-
 %package server-linearstore
 Summary: Red Hat persistence extension to the Qpid messaging sytem
 
-Provides: qpid(cpp-server-store)%{?_isa} = %{version}-%{release}
+Provides: qpid(cpp-server-lineastore)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires: db4
 Requires: libaio
+Obsoletes: qpid-cpp-server-store <= %{version}
+Obsoletes: qpid(cpp-server-store)%{?_isa} <= %{version}
 
 %description server-linearstore
 Red Hat persistence extension to the Qpid AMQP broker: persistent message
 storage using a libaio-based asynchronous journal.
-
 %files server-linearstore
 %{_libdir}/qpid/daemon/linearstore.so
 %{_libdir}/liblinearstoreutils.so
-%{_libexecdir}/qpid-qls-analyze
-%{_datadir}/qpid-tools/python/qlslibs
-
 
 
 %package -n perl-qpid-messaging
@@ -468,7 +374,7 @@ Provides:  perl-qpid = %{version}
 Summary: Python bindings for the Qpid messaging framework
 
 Requires: python
-Requires: qpid(client)%{?_isa} = %{version}-%{release}
+Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires: python-qpid-common
 
 # remove with qpid-cpp 0.36
@@ -492,59 +398,30 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 
 %prep
 %setup -q -n qpid-cpp-%{version}
-%setup -D -q -a 1
-%setup -D -q -a 2
 
 %patch0001 -p2
 %patch0002 -p3
 %patch0003 -p3
-%patch0004 -p3
 
 
-pushd qpid-tools-%{version}
-# create the file since it's not included in the source tarball
-touch src/py/qlslibs/__init__.py
-popd
 
-%global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest"
+%global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest qpid-ping qpid-txtest2"
 
-%global rh_qpid_tests_failover "failover_soak run_failover_soak"
-
-%global rh_qpid_tests_clients "replaying_sender resuming_receiver declare_queues"
 
 %build
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
+       -DBUILD_LEGACYSTORE=false \
        -DBUILD_LINEARSTORE=true \
-       -DBUILD_LEGACYSTORE=true \
        -DPERL_PFX_ARCHLIB=%{perl_vendorarch} \
        -DBUILD_BINDING_RUBY=false \
        .
 make %{?_smp_mflags}
 make docs-user-api
 
-pushd qpid-python-%{version}
-CFLAGS="$RPM_OPT_FLAGS" %{__python} setup.py build
-popd
 
 %install
 mkdir -p -m0755 %{buildroot}/%{_bindir}
 mkdir -p -m0755 %{buildroot}/%{_unitdir}
-
-pushd qpid-tools-%{version}
-%{__python} setup.py install \
-    --install-purelib %{python_sitelib} \
-    --root %{buildroot}
-popd
-
-pushd qpid-python-%{version}
-%{__python} setup.py install --skip-build --root $RPM_BUILD_ROOT
-
-chmod +x %{buildroot}/%{python_sitelib}/qpid/codec.py
-chmod +x %{buildroot}/%{python_sitelib}/qpid/tests/codec.py
-chmod +x %{buildroot}/%{python_sitelib}/qpid/reference.py
-chmod +x %{buildroot}/%{python_sitelib}/qpid/managementdata.py
-chmod +x %{buildroot}/%{python_sitelib}/qpid/disp.py
-popd
 
 # install examples
 mkdir -p -m0755 %{buildroot}%{_perldocdir}/examples
@@ -562,11 +439,18 @@ make install DESTDIR=%{buildroot}/
 
 # clean up items we're not installing
 rm -f  %{buildroot}/%{_bindir}/qmf*
+rm -f  %{buildroot}/%{_bindir}/qpid-python-test
 rm -rf %{buildroot}/%{_includedir}/qmf
-rm -f  %{buildroot}/%{_libdir}/libqpidbroker.so
+rm -f  %{buildroot}/%{_libdir}/libcqpid_perl.so
+rm -f  %{buildroot}/%{_libdir}/ruby/cqpid.so
+rm -f  %{buildroot}/%{ruby_sitelib}
 rm -rf %{buildroot}/%{_libdir}/*qmf*
 rm -f  %{buildroot}/%{_libdir}/pkgconfig/qmf2.pc
+rm -rf %{buildroot}/%{python2_sitearch}/qpid_python*egg-info
+rm -rf %{buildroot}/%{python2_sitearch}/mllib
+rm -rf %{buildroot}/%{python2_sitearch}/qpid
 rm -rf %{buildroot}/%{python2_sitelib}/qmfgen
+rm -rf %{buildroot}/%{python2_sitelib}/qpidtoollibs
 rm -rf %{buildroot}/%{python2_sitearch}/*qmf*
 rm -rf %{buildroot}/%{_libdir}/qpid/daemon/store.so*
 rm -rf %{buildroot}/%{_initrddir}/qpidd-primary
@@ -592,14 +476,23 @@ mkdir -p %{buildroot}/%{_localstatedir}/run
 touch %{buildroot}/%{_localstatedir}/run/qpidd
 mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
+# clean up leftover ruby files
+rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
+
 %post -p /sbin/ldconfig
 
 %postun -p /sbin/ldconfig
 
 
 %changelog
-* Wed Jul 29 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.32-8
-- Rebuilt for https://fedoraproject.org/wiki/Changes/F23Boost159
+* Thu Jul 30 2015 Irina Boverman <iboverma@redhat.com> - 0.34-1
+- Rebased to 0.34
+- Added qpid-cpp-server-devel
+- Added qpid-send and qpid-qpid-receive to qpid-client-devel sub-package
+- Removed python-qpid-common, python-qpid, qpid-tools and qpid-server-store sub-packages
+  Note: python-qpid-common and python-qpid will be 
+        added to python-qpid package
+        qpid-tools will be added to qpid-tools package
 
 * Wed Jul 22 2015 David Tardon <dtardon@redhat.com> - 0.32-7
 - rebuild for Boost 1.58
@@ -612,7 +505,6 @@ mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 
 * Wed May 27 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-4
 - Removed qpid-send and qpid-receive from qpid-cpp-client-devel.
-
 * Fri May 22 2015 Darryl L. Pierce <dpierce@redhat.com> - 0.32-3
 - Include the qpid.tests module in python-qpid
 - Resolves: BZ#1224260
@@ -657,22 +549,11 @@ mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
 * Wed Oct 29 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-4
 - QPID-6170: Fixes builds on aarch64 and ppc64le architectures.
 
-* Tue Oct 14 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-3
-- Enabled building the linear store.
-- Added qpid-cpp-server-linearstore package.
-- QPID-6150: qpid-qls-analyze tool cannot find Python modules
-
-* Wed Oct  8 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-2
-- Readded the qpid-tools subpackage rather than moving it to a new package.
-
 * Thu Oct  2 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.30-1
 - Rebased on Qpid 0.30.
 - Upstream tarball filename changed from qpid-##.#.tar.gz to qpid-cpp-##.#.tar.gz.
 - qpid-tools moved out to a separate package.
 - Moved qpid-send and qpid-receive to the qpid-cpp-client-devel package.
-
-* Mon Aug 25 2014 Darryl L. Pierce <dpierce@redhat.com> - 0.28-9
-- Removed the linear store block that was commented out.
 
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.28-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
