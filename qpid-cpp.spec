@@ -485,8 +485,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
-* Thu Jul 30 2015 Irina Boverman <iboverma@redhat.com> - 0.34-1
+* Wed Sep  2 2015 Irina Boverman <iboverma@redhat.com> - 0.34-1
 - Rebased to 0.34
+- Rebuilt against qpid-proton-0.10-1
 - Added qpid-cpp-server-devel
 - Added qpid-send and qpid-qpid-receive to qpid-client-devel sub-package
 - Removed python-qpid-common, python-qpid, qpid-tools and qpid-server-store sub-packages
