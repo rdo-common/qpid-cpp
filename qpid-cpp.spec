@@ -5,7 +5,7 @@
 
 Name:          qpid-cpp
 Version:       0.34
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -14,6 +14,7 @@ Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}
 Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch0002:     0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
 Patch0003:     0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
+Patch4:        qpid-boost-test-message.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -402,6 +403,7 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %patch0001 -p2
 %patch0002 -p3
 %patch0003 -p3
+%patch4 -p1
 
 
 
@@ -485,7 +487,11 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
-* Wed Sep  2 2015 Irina Boverman <iboverma@redhat.com> - 0.34-1
+* Wed Sep  2 2015 Irina Boverman <iboverma@redhat.com> - 0.34-3
+- Rebuilt against qpid-proton-0.10-1
+
+* Sun Aug 30 2015 Jonathan Wakely <jwakely@redhat.com> 0.34-2
+- Patched and rebuilt for Boost 1.59
 - Rebased to 0.34
 - Rebuilt against qpid-proton-0.10-1
 - Added qpid-cpp-server-devel
