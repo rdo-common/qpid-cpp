@@ -36,7 +36,7 @@ BuildRequires: nspr-devel
 BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
 BuildRequires: libaio-devel
-BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.9
+BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.10
 BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: swig
@@ -64,7 +64,7 @@ Provides:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  boost
 Requires:  chkconfig
 Requires:  initscripts
-Requires:  qpid-proton-c%{?_isa} >= 0.9
+Requires:  qpid-proton-c%{?_isa} >= 0.10
 
 %description client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -172,7 +172,7 @@ Summary:   An AMQP message broker daemon
 
 Provides:  qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires:  cyrus-sasl
-Requires:  qpid-proton-c%{?_isa} >= 0.9
+Requires:  qpid-proton-c%{?_isa} >= 0.10
 
 Requires(post): systemd
 Requires(preun): systemd
