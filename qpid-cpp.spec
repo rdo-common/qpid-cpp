@@ -5,7 +5,7 @@
 
 Name:          qpid-cpp
 Version:       0.34
-Release:       4%{?dist}
+Release:       5%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -172,6 +172,7 @@ format for easy browsing.
 Summary:   An AMQP message broker daemon
 
 Provides:  qpid(cpp-server)%{?_isa} = %{version}-%{release}
+Requires:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  cyrus-sasl
 Requires:  qpid-proton-c%{?_isa} >= 0.10
 
@@ -487,6 +488,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Tue Dec  1 2015 Irina Boverman <iboverma@redhat.com> - 0.34-5
+- Resolves: BZ#1286881
+
 * Thu Sep 03 2015 Jonathan Wakely <jwakely@redhat.com> - 0.34-4
 - Rebuilt for Boost 1.59
 
