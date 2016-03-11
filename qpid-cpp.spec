@@ -5,7 +5,7 @@
 
 Name:          qpid-cpp
 Version:       0.34
-Release:       7%{?dist}
+Release:       8%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -47,6 +47,10 @@ BuildRequires: perl(ExtUtils::MakeMaker)
 BuildRequires: libibverbs-devel
 BuildRequires: librdmacm-devel
 %endif
+
+# Filter bogus libcqpid_perl.so() Provides, this is intentional rpm-build
+# feature, bug #1309664
+%global __provides_exclude_from %{?__provides_exclude_from:%{__provides_exclude_from}|}^%{perl_vendorarch}/auto/.*\\.so$
 
 
 %description
@@ -488,6 +492,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Fri Mar 11 2016 Petr Pisar <ppisar@redhat.com> - 0.34-8
+- Do not provide private libraries (bug #1309664)
+
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.34-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
