@@ -40,7 +40,7 @@ BuildRequires: nspr-devel
 BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
 BuildRequires: libaio-devel
-BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.10
+BuildRequires: qpid-proton-c-devel%{?_isa} >= 0.12.1
 BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: swig
@@ -72,7 +72,7 @@ Provides:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  boost
 Requires:  chkconfig
 Requires:  initscripts
-Requires:  qpid-proton-c%{?_isa} >= 0.10
+Requires:  qpid-proton-c%{?_isa} >= 0.12.1
 
 %description client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -181,7 +181,7 @@ Summary:   An AMQP message broker daemon
 Provides:  qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  cyrus-sasl
-Requires:  qpid-proton-c%{?_isa} >= 0.10
+Requires:  qpid-proton-c%{?_isa} >= 0.12.1
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -497,6 +497,7 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 %changelog
 * Wed Mar 23 2016 Petr Pisar <ppisar@redhat.com> - 0.34-8
 - Do not provide private libraries (bug #1309664)
+- Rebuilt against qpid-proton 0.12.1-1
 
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.34-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
