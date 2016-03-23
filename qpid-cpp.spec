@@ -15,6 +15,8 @@ Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch0002:     0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
 Patch0003:     0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
 Patch4:        qpid-boost-test-message.patch
+Patch5:        0001-QPID-6858-update-swig-type-mapping-to-compile-with-b.patch
+Patch6:        ENTMQCL-309.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -23,6 +25,7 @@ BuildRequires: libtool
 BuildRequires: doxygen
 BuildRequires: pkgconfig
 BuildRequires: ruby
+BuildRequires: ruby-devel
 BuildRequires: python
 BuildRequires: python-devel
 BuildRequires: python-setuptools
@@ -409,8 +412,8 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %patch0002 -p3
 %patch0003 -p3
 %patch4 -p1
-
-
+%patch5 -p3
+%patch6 -p3
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest qpid-ping qpid-txtest2"
 
@@ -492,7 +495,7 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
-* Fri Mar 11 2016 Petr Pisar <ppisar@redhat.com> - 0.34-8
+* Wed Mar 23 2016 Petr Pisar <ppisar@redhat.com> - 0.34-8
 - Do not provide private libraries (bug #1309664)
 
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.34-7
