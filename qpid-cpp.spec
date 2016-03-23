@@ -424,6 +424,7 @@ Provides:  python-qpid_messaging = %{version}-%{release}
        -DBUILD_LINEARSTORE=true \
        -DPERL_PFX_ARCHLIB=%{perl_vendorarch} \
        -DBUILD_BINDING_RUBY=false \
+       "-DCMAKE_CXX_FLAGS=-Wno-error=switch $CXXFLAGS" \
        .
 make %{?_smp_mflags}
 make docs-user-api
