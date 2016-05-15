@@ -5,7 +5,7 @@
 
 Name:          qpid-cpp
 Version:       0.34
-Release:       8%{?dist}
+Release:       9%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -496,6 +496,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Sun May 15 2016 Jitka Plesnikova <jplesnik@redhat.com> - 0.34-9
+- Perl 5.24 rebuild
+
 * Wed Mar 23 2016 Petr Pisar <ppisar@redhat.com> - 0.34-8
 - Do not provide private libraries (bug #1309664)
 - Rebuilt against qpid-proton 0.12.1-1
