@@ -44,6 +44,8 @@ BuildRequires: qpid-proton-c-devel >= 0.12.1
 BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: swig
+BuildRequires: perl-devel
+BuildRequires: perl-generators
 BuildRequires: perl(ExtUtils::MakeMaker)
 
 %ifnarch s390 s390x
