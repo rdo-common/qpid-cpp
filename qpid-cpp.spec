@@ -5,7 +5,7 @@
 
 Name:          qpid-cpp
 Version:       0.34
-Release:       9%{?dist}
+Release:       10%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -40,7 +40,7 @@ BuildRequires: nspr-devel
 BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
 BuildRequires: libaio-devel
-BuildRequires: qpid-proton-c-devel >= 0.12.1
+BuildRequires: qpid-proton-c-devel >= 0.13.0
 BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: swig
@@ -74,7 +74,7 @@ Provides:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  boost
 Requires:  chkconfig
 Requires:  initscripts
-Requires:  qpid-proton-c%{?_isa} >= 0.12.1
+Requires:  qpid-proton-c%{?_isa} >= 0.13.0
 
 %description client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -183,7 +183,7 @@ Summary:   An AMQP message broker daemon
 Provides:  qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  cyrus-sasl
-Requires:  qpid-proton-c%{?_isa} >= 0.12.1
+Requires:  qpid-proton-c%{?_isa} >= 0.13.0
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -498,6 +498,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Fri Jun 24 2016 Jitka Plesnikova <jplesnik@redhat.com> - 0.34-10
+- Rebuilt against qpid-proton 0.13.0-1
+
 * Sun May 15 2016 Jitka Plesnikova <jplesnik@redhat.com> - 0.34-9
 - Perl 5.24 rebuild
 
