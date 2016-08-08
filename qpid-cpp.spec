@@ -5,7 +5,7 @@
 
 Name:          qpid-cpp
 Version:       0.34
-Release:       11%{?dist}
+Release:       12%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -421,12 +421,19 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 
 
 %build
+
+CXX11FLAG="-std=c++11"
+
+%if 0%{?rhel} <= 6
+CXX11FLAG=""
+%endif
+
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
        -DBUILD_LEGACYSTORE=false \
        -DBUILD_LINEARSTORE=true \
        -DPERL_PFX_ARCHLIB=%{perl_vendorarch} \
        -DBUILD_BINDING_RUBY=false \
-       "-DCMAKE_CXX_FLAGS=-Wno-error=switch $CXXFLAGS" \
+       "-DCMAKE_CXX_FLAGS=-Wno-error=switch $CXX11FLAG $CXXFLAGS" \
        .
 make %{?_smp_mflags}
 make docs-user-api
@@ -498,6 +505,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Mon Aug  8 2016 Irina Boverman <iboverma@redhat.com> - 0.34-12
+- Added "-std=c++11" flag
+
 * Tue Jul 19 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.34-11
 - https://fedoraproject.org/wiki/Changes/Automatic_Provides_for_Python_RPM_Packages
 
