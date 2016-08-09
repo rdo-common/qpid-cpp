@@ -424,8 +424,10 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 
 CXX11FLAG="-std=c++11"
 
+%if 0%{?rhel} 
 %if 0%{?rhel} <= 6
 CXX11FLAG=""
+%endif
 %endif
 
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
