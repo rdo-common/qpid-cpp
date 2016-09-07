@@ -479,9 +479,9 @@ rm -rf %{buildroot}/%{_initrddir}/qpidd-primary
 
 # install systemd files
 mkdir -p %{buildroot}/%{_unitdir}
-install -pm 644 %{_builddir}/qpid-cpp-%{version}/cpp/etc/qpidd.service \
+install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/qpidd.service \
     %{buildroot}/%{_unitdir}
-install -pm 644 %{_builddir}/qpid-cpp-%{version}/cpp/etc/qpidd-primary.service \
+install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/qpidd-primary.service \
     %{buildroot}/%{_unitdir}
 rm -f %{buildroot}/%{_initrddir}/qpidd
 rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd.service
