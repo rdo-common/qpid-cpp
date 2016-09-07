@@ -4,19 +4,19 @@
 %global _pythondocdir %{_docdir}/python-qpid-messaging-%{version}
 
 Name:          qpid-cpp
-Version:       0.34
-Release:       12%{?dist}
+Version:       1.35.0
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}.tar.gz
 Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-Patch0002:     0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
-Patch0003:     0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
-Patch4:        qpid-boost-test-message.patch
-Patch5:        0001-QPID-6858-update-swig-type-mapping-to-compile-with-b.patch
-Patch6:        ENTMQCL-309.patch
+#Patch0002:     0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
+#Patch0003:     0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
+#Patch4:        qpid-boost-test-message.patch
+#Patch5:        0001-QPID-6858-update-swig-type-mapping-to-compile-with-b.patch
+#Patch6:        ENTMQCL-309.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -40,7 +40,7 @@ BuildRequires: nspr-devel
 BuildRequires: xqilla-devel
 BuildRequires: xerces-c-devel
 BuildRequires: libaio-devel
-BuildRequires: qpid-proton-c-devel >= 0.13.0
+BuildRequires: qpid-proton-c-devel >= 0.14.0
 BuildRequires: libdb-devel
 BuildRequires: libdb4-cxx-devel
 BuildRequires: swig
@@ -74,7 +74,7 @@ Provides:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  boost
 Requires:  chkconfig
 Requires:  initscripts
-Requires:  qpid-proton-c%{?_isa} >= 0.13.0
+Requires:  qpid-proton-c%{?_isa} >= 0.14.0
 
 %description client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -183,7 +183,7 @@ Summary:   An AMQP message broker daemon
 Provides:  qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires:  cyrus-sasl
-Requires:  qpid-proton-c%{?_isa} >= 0.13.0
+Requires:  qpid-proton-c%{?_isa} >= 0.14.0
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -410,12 +410,12 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %prep
 %setup -q -n qpid-cpp-%{version}
 
-%patch0001 -p2
-%patch0002 -p3
-%patch0003 -p3
-%patch4 -p1
-%patch5 -p3
-%patch6 -p3
+%patch0001 -p0
+#%patch0002 -p1
+#%patch0003 -p1
+#%patch4 -p1
+#%patch5 -p3
+#%patch6 -p3
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest qpid-ping qpid-txtest2"
 
@@ -507,6 +507,9 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
+* Wed Sep  7 2016 Irina Boverman <iboverma@redhat.com> - 1.35-1
+- Rebased to 1.35
+
 * Mon Aug  8 2016 Irina Boverman <iboverma@redhat.com> - 0.34-12
 - Added "-std=c++11" flag
 
