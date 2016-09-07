@@ -410,7 +410,7 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %prep
 %setup -q -n qpid-cpp-%{version}
 
-%patch0001 -p0
+%patch0001 -p3
 #%patch0002 -p1
 #%patch0003 -p1
 #%patch4 -p1
