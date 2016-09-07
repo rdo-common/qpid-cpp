@@ -262,7 +262,6 @@ Requires(postun): systemd-units
 %files server-ha
 %{_unitdir}/qpidd-primary.service
 %{_libdir}/qpid/daemon/ha.so
-%doc README-HA.txt
 
 %post server-ha
 /sbin/ldconfig
