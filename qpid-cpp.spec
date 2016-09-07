@@ -82,11 +82,9 @@ C++. Clients exchange messages with an AMQP message broker using
 the AMQP protocol.
 
 %files client
-%doc DESIGN
-%doc LICENSE
-%doc NOTICE
-%doc README.txt
-%doc RELEASE_NOTES
+%doc LICENSE.txt
+%doc NOTICE.txt
+%doc README.md
 %{_libdir}/libqpidcommon.so*
 %{_libdir}/libqpidclient.so*
 %{_libdir}/libqpidtypes.so*
