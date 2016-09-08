@@ -14,9 +14,6 @@ Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}
 Patch1:        0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch2:        0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
 Patch3:        0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
-#Patch4:        qpid-boost-test-message.patch
-#Patch5:        0001-QPID-6858-update-swig-type-mapping-to-compile-with-b.patch
-#Patch6:        ENTMQCL-309.patch
 
 BuildRequires: gcc-c++
 BuildRequires: cmake
@@ -410,9 +407,6 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %patch1 -p3
 %patch2 -p3
 %patch3 -p3
-#%patch4 -p1
-#%patch5 -p3
-#%patch6 -p3
 
 %global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest qpid-ping qpid-txtest2"
 
@@ -504,8 +498,8 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
-* Wed Sep  7 2016 Irina Boverman <iboverma@redhat.com> - 1.35-1
-- Rebased to 1.35
+* Thu Sep  8 2016 Irina Boverman <iboverma@redhat.com> - 1.35.0-1
+- Rebased to 1.35.0
 
 * Mon Aug  8 2016 Irina Boverman <iboverma@redhat.com> - 0.34-12
 - Added "-std=c++11" flag
