@@ -11,9 +11,9 @@ License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}.tar.gz
-Patch0001:     0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-#Patch0002:     0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
-#Patch0003:     0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
+Patch1:        0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+Patch2:        0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
+Patch3:        0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
 #Patch4:        qpid-boost-test-message.patch
 #Patch5:        0001-QPID-6858-update-swig-type-mapping-to-compile-with-b.patch
 #Patch6:        ENTMQCL-309.patch
@@ -407,9 +407,9 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %prep
 %setup -q -n qpid-cpp-%{version}
 
-%patch0001 -p3
-#%patch0002 -p1
-#%patch0003 -p1
+%patch1 -p3
+%patch2 -p3
+%patch3 -p3
 #%patch4 -p1
 #%patch5 -p3
 #%patch6 -p3
