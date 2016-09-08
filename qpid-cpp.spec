@@ -373,7 +373,7 @@ Provides:  perl-qpid = %{version}
 
 %files -n perl-qpid-messaging
 %{perl_vendorarch}/*
-%doc LICENSE
+%doc LICENSE.txt
 %doc %{_perldocdir}
 
 
@@ -397,7 +397,7 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %{summary}.
 
 %files -n python-qpid-messaging
-%doc LICENSE
+%doc LICENSE.txt
 %{python2_sitearch}/qpid_messaging.py*
 %{python2_sitearch}/_qpid_messaging.so
 %{_pythondocdir}/examples
