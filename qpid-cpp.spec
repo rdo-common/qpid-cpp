@@ -3,51 +3,70 @@
 %global _perldocdir %{_docdir}/perl-qpid-messaging-%{version}
 %global _pythondocdir %{_docdir}/python-qpid-messaging-%{version}
 
+# We ship a .pc file but don't need to depend on pkg-config
+%global __requires_exclude pkg-config
+%global __provides_exclude_from ^(%{python_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
+%global proton_min_ver 0.16.0
+
 Name:          qpid-cpp
 Version:       1.35.0
-Release:       3%{?dist}
+Release:       2%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}.tar.gz
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 Patch1:        0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
+%endif
+%if 0%{?fedora}
 Patch2:        0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
 Patch3:        0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
+%endif
 
-BuildRequires: gcc-c++
-BuildRequires: cmake
 BuildRequires: boost-devel
-BuildRequires: libtool
-BuildRequires: doxygen
-BuildRequires: pkgconfig
-BuildRequires: ruby
-BuildRequires: ruby-devel
-BuildRequires: python
-BuildRequires: python-devel
-BuildRequires: python-setuptools
+BuildRequires: boost-filesystem
+BuildRequires: boost-program-options
+BuildRequires: cmake
+BuildRequires: cyrus-sasl
 BuildRequires: cyrus-sasl-devel
 BuildRequires: cyrus-sasl-lib
-BuildRequires: cyrus-sasl
-BuildRequires: boost-program-options
-BuildRequires: boost-filesystem
-BuildRequires: libuuid-devel
-BuildRequires: nss-devel
-BuildRequires: nspr-devel
-BuildRequires: xqilla-devel
-BuildRequires: xerces-c-devel
+%if (0%{?rhel} && 0%{?rhel} < 7)
+BuildRequires: db4-devel
+%endif
+BuildRequires: doxygen
+BuildRequires: gcc-c++
 BuildRequires: libaio-devel
-BuildRequires: qpid-proton-c-devel >= 0.14.0
-BuildRequires: libdb-devel
+%if 0%{?fedora}
 BuildRequires: libdb4-cxx-devel
-BuildRequires: swig
-BuildRequires: perl-devel
-BuildRequires: perl-generators
-BuildRequires: perl(ExtUtils::MakeMaker)
-
+%endif
+%if (0%{?rhel} && 0%{?rhel} == 7)
+BuildRequires: libdb-cxx-devel
+%endif
 %ifnarch s390 s390x
 BuildRequires: libibverbs-devel
 BuildRequires: librdmacm-devel
+%endif
+BuildRequires: libuuid-devel
+BuildRequires: make
+BuildRequires: nspr-devel
+BuildRequires: nss-devel
+%if 0%{?fedora}
+BuildRequires: perl-devel
+BuildRequires: perl(ExtUtils::MakeMaker)
+BuildRequires: perl-generators
+%endif
+BuildRequires: pkgconfig
+BuildRequires: python
+BuildRequires: python-devel
+BuildRequires: python-setuptools
+BuildRequires: qpid-proton-c-devel >= %{proton_min_ver}
+BuildRequires: ruby
+BuildRequires: ruby-devel
+BuildRequires: swig
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} < 7)
+BuildRequires: xerces-c-devel
+BuildRequires: xqilla-devel
 %endif
 
 # Filter bogus libcqpid_perl.so() Provides, this is intentional rpm-build
@@ -62,16 +81,25 @@ C++. Clients exchange messages with an AMQP message broker using
 the AMQP protocol.
 
 
-
 %package client
 Summary:   Libraries for Qpid C++ client applications
-
+%if 0%{?fedora}
 Provides:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
+%endif
+Obsoletes: %{name}-client-ssl
 
-Requires:  boost
-Requires:  chkconfig
+Requires:  boost-filesystem
+Requires:  boost-program-options
+Requires:  boost-system
+Requires:  qpid-proton-c%{?_isa} >= %{proton_min_ver}
+
+%if (0%{?rhel} && 0%{?rhel} < 7)
 Requires:  initscripts
-Requires:  qpid-proton-c%{?_isa} >= 0.14.0
+Requires(post):/sbin/chkconfig
+Requires(preun):/sbin/chkconfig
+Requires(preun):/sbin/service
+Requires(postun):/sbin/service
+%endif
 
 %description client
 Run-time libraries for AMQP client applications developed using Qpid
@@ -79,23 +107,20 @@ C++. Clients exchange messages with an AMQP message broker using
 the AMQP protocol.
 
 %files client
+%defattr(-,root,root,-)
 %doc LICENSE.txt
 %doc NOTICE.txt
 %doc README.md
-%{_libdir}/libqpidcommon.so*
-%{_libdir}/libqpidclient.so*
-%{_libdir}/libqpidtypes.so*
-%{_libdir}/libqpidmessaging.so*
+%doc INSTALL.txt
+%{_libdir}/libqpidcommon.so.*
+%{_libdir}/libqpidclient.so.*
+%{_libdir}/libqpidtypes.so.*
+%{_libdir}/libqpidmessaging.so.*
 %dir %{_libdir}/qpid
-
 %ifnarch s390 s390x
-%{_libdir}/qpid/client/*
-%endif
-
-%ifnarch s390 s390x
+%dir %{_libdir}/qpid/client
 %exclude %{_libdir}/qpid/client/rdmaconnector.so*
 %endif
-
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
@@ -104,12 +129,13 @@ the AMQP protocol.
 %postun client -p /sbin/ldconfig
 
 
-
 %package client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
-
+%if 0%{?fedora}
 Provides:  qpid(cpp-client-devel)%{?_isa} = %{version}-%{release}
 Requires:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
+%endif
+Requires:  %{name}-client = %{version}-%{release}
 Requires:  boost-devel
 Requires:  boost-filesystem
 Requires:  boost-program-options
@@ -121,6 +147,7 @@ Libraries and header files for developing AMQP clients in C++ using Qpid.
 Qpid implements the AMQP messaging specification.
 
 %files client-devel
+%defattr(-,root,root,-)
 %dir %{_includedir}/qpid
 %{_includedir}/qpid/*.h
 %{_includedir}/qpid/qpid.i
@@ -137,70 +164,83 @@ Qpid implements the AMQP messaging specification.
 %{_libdir}/libqpidtypes.so
 %{_libdir}/libqpidmessaging.so
 %{_libdir}/pkgconfig/qpid.pc
-%{_datadir}/qpid
+%{_libdir}/cmake/Qpid/QpidConfig.cmake
+%{_libdir}/cmake/Qpid/QpidConfigVersion.cmake
+%{_datadir}/qpid/examples/messaging
 %defattr(755,root,root,-)
-%{_bindir}/qpid-perftest
-%{_bindir}/qpid-topic-listener
-%{_bindir}/qpid-topic-publisher
-%{_bindir}/qpid-latency-test
-%{_bindir}/qpid-client-test
-%{_bindir}/qpid-txtest
-%{_bindir}/qpid-ping
-%{_bindir}/qpid-txtest2
+%{_libexecdir}/qpid/tests/qpid-perftest
+%{_libexecdir}/qpid/tests/qpid-topic-listener
+%{_libexecdir}/qpid/tests/qpid-topic-publisher
+%{_libexecdir}/qpid/tests/qpid-latency-test
+%{_libexecdir}/qpid/tests/qpid-client-test
+%{_libexecdir}/qpid/tests/qpid-txtest
+%{_libexecdir}/qpid/tests/qpid-ping
+%{_libexecdir}/qpid/tests/qpid-txtest2
+%{_libexecdir}/qpid/tests/receiver
+%{_libexecdir}/qpid/tests/sender
 %{_bindir}/qpid-send
 %{_bindir}/qpid-receive
-%{_libexecdir}/qpid/tests
-%{_libdir}/cmake/Qpid
 
 %post client-devel -p /sbin/ldconfig
 
 %postun client-devel -p /sbin/ldconfig
 
 
-
-%package client-devel-docs
+%package client-docs
 Summary:   AMQP client development documentation
-
 BuildArch: noarch
+Obsoletes: %{name}-client-devel-docs
 
-%description client-devel-docs
+%description client-docs
 This package includes the AMQP clients development documentation in HTML
 format for easy browsing.
 
-%files client-devel-docs
+%files client-docs
+%defattr(-,root,root,-)
 %doc %{_pkgdocdir}
-
-
 
 %package server
 Summary:   An AMQP message broker daemon
-
+%if 0%{?fedora}
 Provides:  qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires:  qpid(cpp-client)%{?_isa} = %{version}-%{release}
+%endif
+Requires:  %{name}-client = %{version}-%{release}
 Requires:  cyrus-sasl
-Requires:  qpid-proton-c%{?_isa} >= 0.14.0
-
+Requires:  qpid-proton-c%{?_isa} >= %{proton_min_ver}
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
+%endif
+Obsoletes: %{name}-server-ssl
+Obsoletes: %{name}-server-devel
 
 %description server
 A message broker daemon that receives stores and routes messages using
 the open AMQP messaging protocol.
 
 %files server
-%{_libdir}/libqpidbroker.so.*
+%defattr(-,root,root,-)
+%{_libdir}/libqpidbroker.so*
 %{_sbindir}/qpidd
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 %{_unitdir}/qpidd.service
+%else
+%{_initrddir}/qpidd
+%endif
 %config(noreplace) %{_sysconfdir}/qpid/qpidd.conf
 %config(noreplace) %{_sysconfdir}/sasl2/qpidd.conf
 %dir %{_libdir}/qpid/daemon
 %{_libdir}/qpid/daemon/amqp.so
-%attr(755, qpidd, qpidd) %{_localstatedir}/lib/qpidd
-%ghost %attr(755, qpidd, qpidd) /var/run/qpidd
+%attr(755, qpidd, qpidd) %dir %{_localstatedir}/lib/qpidd
+%attr(755, qpidd, qpidd) %dir %{_localstatedir}/run/qpidd
 %doc %{_mandir}/man1/qpidd*
 
 %pre server
+# Only needed for Fedora & Epel builds
+rm -fr /var/run/qpidd
+#
 getent group qpidd >/dev/null || groupadd -r qpidd
 getent passwd qpidd >/dev/null || \
   useradd -r -M -g qpidd -d %{_localstatedir}/lib/qpidd -s /sbin/nologin \
@@ -208,83 +248,109 @@ getent passwd qpidd >/dev/null || \
 exit 0
 
 %post server
+%if (0%{?rhel} && 0%{?rhel} < 7)
+# This adds the proper /etc/rc*.d links for the script
+/sbin/chkconfig --add qpidd
+/sbin/ldconfig
+%else
 %systemd_post qpidd.service
+%endif 
 
 %preun server
+%if (0%{?rhel} && 0%{?rhel} < 7)
+# Check that this is actual deinstallation, not just removing for upgrade.
+if [ $1 = 0 ]; then
+  /sbin/service qpidd stop >/dev/null 2>&1 || :
+  /sbin/chkconfig --del qpidd
+fi
+%else
 %systemd_preun qpidd.service
+%endif
 
 %postun server
+%if (0%{?rhel} && 0%{?rhel} < 7)
+if [ "$1" -ge "1" ]; then
+  /sbin/service qpidd condrestart >/dev/null 2>&1 || :
+fi
+%else
 %systemd_postun_with_restart qpidd.service
+%endif
 /sbin/ldconfig
 
-# === Package: qpid-cpp-server-devel ===
-
-%package server-devel
-Summary: Libraries and header files for developing Qpid broker extensions
-Group: Development/System
-Requires: %{name}-client-devel = %{version}-%{release}
-Requires: %{name}-server = %{version}-%{release}
-Requires: boost-filesystem
-Requires: boost-program-options
-Obsoletes: qpidd-devel <= %{version}
-
-%description server-devel
-Libraries and header files for developing extensions to the
-Qpid broker daemon.
-
-%files server-devel
-%defattr(-,root,root,-)
-%_libdir/libqpidbroker.so
-
-%post server-devel
-/sbin/ldconfig
-
-%postun server-devel
-/sbin/ldconfig
 
 %package server-ha
 Summary: Provides extensions to the AMQP message broker to provide high availability
-
+%if 0%{?fedora}
 Provides: qpid(cpp-server-ha)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-server)%{?_isa} = %{version}-%{release}
-Requires: qpid-qmf%{?_isa}
+%endif
+Requires: %{name}-server = %{version}-%{release}
+Requires: %{name}-client = %{version}-%{release}
+Obsoletes: %{name}-server-cluster
+
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 # for systemd
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
+%endif
 
 %description server-ha
 %{summary}.
 
 %files server-ha
+%defattr(-,root,root,-)
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 %{_unitdir}/qpidd-primary.service
+%else
+%{_initrddir}/qpidd-primary
+%endif
 %{_libdir}/qpid/daemon/ha.so
 
 %post server-ha
-/sbin/ldconfig
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 %systemd_post qpidd-primary.service
+%else
+/sbin/chkconfig --add qpidd-primary
+%endif
+/sbin/ldconfig
 
 %preun server-ha
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 %systemd_preun qpidd-primary.service
+%else
+if [ $1 = 0 ]; then
+  /sbin/service qpidd-primary stop > /dev/null 2>&1 || :
+  /sbin/chkconfig --del qpidd-primary
+fi
+%endif
 
 %postun server-ha
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 %systemd_postun_with_restart qpidd-primary.service
+%else
+if [ $1 -ge 1 ]; then
+  /sbin/service qpidd-primary condrestart >/dev/null 2>&1 || :
+fi
+%endif
 /sbin/ldconfig
-
 
 
 %ifnarch s390 s390x
 %package client-rdma
 Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
-
+%if 0%{?fedora}
 Provides: qpid(cpp-client-rdma)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
+%endif
+Requires: %{name}-client = %{version}-%{release}
 
 %description client-rdma
 A client plugin and support library to support RDMA protocols (including
 Infiniband) as the transport for Qpid messaging.
 
 %files client-rdma
+%defattr(-,root,root,-)
 %{_libdir}/librdmawrap.so*
 %{_libdir}/qpid/client/rdmaconnector.so*
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
@@ -294,19 +360,23 @@ Infiniband) as the transport for Qpid messaging.
 %postun client-rdma -p /sbin/ldconfig
 
 
-
 %package server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
-
+%if 0%{?fedora}
 Provides: qpid(cpp-server-rdma)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-server)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-client-rdma)%{?_isa} = %{version}-%{release}
+%endif
+Requires: %{name}-server = %{version}-%{release}
+Requires: %{name}-client = %{version}-%{release}
+Requires: %{name}-client-rdma = %{version}-%{release}
 
 %description server-rdma
 A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
 transport for AMQP messaging.
 
 %files server-rdma
+%defattr(-,root,root,-)
 %{_libdir}/qpid/daemon/rdma.so
 
 %post server-rdma -p /sbin/ldconfig
@@ -314,13 +384,14 @@ transport for AMQP messaging.
 %postun server-rdma -p /sbin/ldconfig
 %endif
 
-
-
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} < 7)
 %package server-xml
 Summary:  XML extensions for the Qpid daemon
-
+%if 0%{?fedora}
 Provides: qpid(cpp-server-xml)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-server)%{?_isa} = %{version}-%{release}
+%endif
+Requires: %{name}-server = %{version}-%{release}
 Requires: xqilla
 Requires: xerces-c
 
@@ -334,36 +405,48 @@ messages.
 %post server-xml -p /sbin/ldconfig
 
 %postun server-xml -p /sbin/ldconfig
-
+%endif
 
 
 %package server-linearstore
 Summary: Red Hat persistence extension to the Qpid messaging sytem
-
+%if 0%{?fedora}
 Provides: qpid(cpp-server-lineastore)%{?_isa} = %{version}-%{release}
 Requires: qpid(cpp-server)%{?_isa} = %{version}-%{release}
+%endif
+Requires: %{name}-server = %{version}-%{release}
+Requires: %{name}-client = %{version}-%{release}
+%if 0%{?fedora}
+Requires: libdb4
+%endif
+%if (0%{?rhel} && 0%{?rhel} == 7)
+Requires: libdb
+%endif
+%if (0%{?rhel} && 0%{?rhel} < 7)
 Requires: db4
+%endif
 Requires: libaio
-Obsoletes: qpid-cpp-server-store <= %{version}
-Obsoletes: qpid(cpp-server-store)%{?_isa} <= %{version}
+Obsoletes: %{name}-server-store
+Conflicts: %{name}-server-store
 
 %description server-linearstore
 Red Hat persistence extension to the Qpid AMQP broker: persistent message
 storage using a libaio-based asynchronous journal.
+
 %files server-linearstore
+%defattr(-,root,root,-)
 %{_libdir}/qpid/daemon/linearstore.so
 %{_libdir}/liblinearstoreutils.so
 
+%post server-linearstore -p /sbin/ldconfig
+%postun server-linearstore -p /sbin/ldconfig
 
+%if 0%{?fedora}
 %package -n perl-qpid-messaging
-Summary:  Perl bindings for the QPid messaging framework
+Summary:  Perl bindings for the Qpid messaging framework
 
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
-
-# remove with qpid-cpp 0.36
-Obsoletes: perl-qpid < %{version}
-Provides:  perl-qpid = %{version}
+Requires: qpid-cpp-client = %{version}-%{release}
 
 %description -n perl-qpid-messaging
 %{summary}.
@@ -374,17 +457,12 @@ Provides:  perl-qpid = %{version}
 %doc %{_perldocdir}
 
 
-
 %package -n python-qpid-messaging
 Summary: Python bindings for the Qpid messaging framework
 
 Requires: python
 Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
-Requires: python-qpid-common
-
-# remove with qpid-cpp 0.36
-Obsoletes: python-qpid_messaging < %{version}
-Provides:  python-qpid_messaging = %{version}-%{release}
+Requires: python-qpid >= 1.35.0
 
 %{?filter_setup:
   %filter_provides_in %{python_sitearch}/.*\.so$
@@ -398,99 +476,264 @@ Provides:  python-qpid_messaging = %{version}-%{release}
 %{python2_sitearch}/qpid_messaging.py*
 %{python2_sitearch}/_qpid_messaging.so
 %{_pythondocdir}/examples
+%endif
 
 
+%package -n qpid-tools
+Summary:  Management and diagostic tools for Apache Qpid
+BuildArch: noarch
+
+Requires:  python-qpid >= 1.35.0
+Requires:  python-qpid-qmf = %{version}-%{release}
+
+%description -n qpid-tools
+Management and diagnostic tools for Apache Qpid brokers and clients.
+
+%files -n qpid-tools
+%{_bindir}/qpid-config
+%{_bindir}/qpid-ha
+%{_bindir}/qpid-printevents
+%{_bindir}/qpid-queue-stats
+%{_bindir}/qpid-route
+%{_bindir}/qpid-stat
+%{_bindir}/qpid-tool
+%{python_sitelib}/qpidtoollibs
+%{_libexecdir}/qpid-qls-analyze
+%dir %{_datadir}/qpid-tools
+%dir %{_datadir}/qpid-tools/python
+%{_datadir}/qpid-tools/python/qlslibs
+%doc NOTICE.txt
+%doc LICENSE.txt
+
+%if "%{python_version}" >= "2.6"
+%{python_sitelib}/qpid_tools-*.egg-info
+%endif
+
+
+%package -n qpid-qmf
+Summary: The QPID Management Framework
+%if 0%{?fedora}
+Requires:  qpid(cpp-client)%{?_isa}
+%endif
+Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release} 
+
+%description -n qpid-qmf
+The Qpid Management Framework is a general-purpose management bus built on Qpid
+messaging. It takes advantage of the scalability, security, and rich
+capabilities of Qpid to provide flexible and easy-to-use manageability to a
+large set of applications.
+
+%files -n qpid-qmf
+%{_libdir}/libqmf2.so.*
+
+%post -n qpid-qmf -p /sbin/ldconfig
+
+%postun -n qpid-qmf -p /sbin/ldconfig
+
+
+%package -n qpid-qmf-devel
+Summary:   Header files and tools for developing QMF extensions
+Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
+%if 0%{?fedora}
+Requires:  qpid(cpp-client-devel)%{?_isa}
+%endif
+Requires:  qpid-cpp-client-devel%{?_isa} = %{version}-%{release}
+
+%description -n qpid-qmf-devel
+Header files and code-generation tools needed for developers of QMF-managed
+components.
+
+%files -n qpid-qmf-devel
+%{_includedir}/qmf
+%{_libdir}/libqmf2.so
+%{_bindir}/qmf-gen
+%{python_sitelib}/qmfgen
+%{_libdir}/pkgconfig/qmf2.pc
+
+%post -n qpid-qmf-devel -p /sbin/ldconfig
+
+%postun -n qpid-qmf-devel -p /sbin/ldconfig
+
+
+%package -n python-qpid-qmf
+Summary:   The QPID Management Framework bindings for python
+
+Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
+Requires:  %{name}-client%{?_isa} = %{version}-%{release}
+
+%description -n python-qpid-qmf
+An extensible management framework layered on QPID messaging, bindings
+for python.
+
+%files -n python-qpid-qmf
+%{python_sitelib}/qmf
+%{python_sitearch}/qmf2.py*
+%{python_sitearch}/cqmf2.py*
+%{python_sitearch}/_cqmf2.so
+
+%post -n python-qpid-qmf -p /sbin/ldconfig
+
+%postun -n python-qpid-qmf -p /sbin/ldconfig
+
+
+%if 0%{?fedora}
+%package -n ruby-qpid-qmf
+Summary:   The QPID Management Framework bindings for ruby
+
+Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
+
+%description -n ruby-qpid-qmf
+An extensible management framework layered on QPID messaging, bindings
+for ruby.
+
+%files -n ruby-qpid-qmf
+%{ruby_vendorlibdir}/qmf2.rb
+%{ruby_vendorarchdir}/cqpid.so
+%{ruby_vendorarchdir}/cqmf2.so
+
+%post -n ruby-qpid-qmf -p /sbin/ldconfig
+
+%postun -n ruby-qpid-qmf -p /sbin/ldconfig
+%endif
 
 %prep
 %setup -q -n qpid-cpp-%{version}
 
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 %patch1 -p3
+%endif
+%if 0%{?fedora}
 %patch2 -p3
 %patch3 -p3
-
-%global perftests "qpid-perftest qpid-topic-listener qpid-topic-publisher qpid-latency-test qpid-client-test qpid-txtest qpid-ping qpid-txtest2"
-
+%endif
 
 %build
 
 CXX11FLAG="-std=c++11"
 
-%if 0%{?rhel} 
-%if 0%{?rhel} <= 6
-CXX11FLAG=""
-%endif
+%if (0%{?rhel} && 0%{?rhel} <= 6)
+CXX11FLAG="-w"
 %endif
 
+%if 0%{?fedora}
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
        -DBUILD_LEGACYSTORE=false \
        -DBUILD_LINEARSTORE=true \
        -DPERL_PFX_ARCHLIB=%{perl_vendorarch} \
-       -DBUILD_BINDING_RUBY=false \
-       "-DCMAKE_CXX_FLAGS=-Wno-error=switch $CXX11FLAG $CXXFLAGS" \
+       -DBUILD_BINDING_RUBY=true \
+       "-DCMAKE_CXX_FLAGS=$CXX11FLAG $CXXFLAGS" \
        .
+%endif
+%if 0%{?rhel}
+%cmake  -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
+        -DBUILD_LEGACYSTORE=false \
+        -DBUILD_LINEARSTORE=true \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_EXE_LINKER_FLAGS="-Wl,-z,relro,-z,now" \
+        -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,relro" \
+        -DCMAKE_MODULE_LINKER_FLAGS="-Wl,-z,relro" \
+       "-DCMAKE_CXX_FLAGS=$CXX11FLAG $CXXFLAGS" \
+        .
+%endif
+
 make %{?_smp_mflags}
 make docs-user-api
 
-
 %install
+rm -rf %{buildroot}
+
+pushd management/python
+%{__python} setup.py install \
+    --install-purelib %{python_sitelib} \
+    --root %{buildroot}
+popd
+
+chmod +x %{buildroot}/%{python_sitelib}/qpidtoollibs/disp.py
+
 mkdir -p -m0755 %{buildroot}/%{_bindir}
 mkdir -p -m0755 %{buildroot}/%{_unitdir}
 
+%if 0%{?fedora}
 # install examples
 mkdir -p -m0755 %{buildroot}%{_perldocdir}/examples
 mkdir -p -m0755 %{buildroot}%{_pythondocdir}/examples
 
-pushd bindings/qpid/examples/perl
-install -pm 644 * %{buildroot}%{_perldocdir}/examples
-popd
-
 pushd bindings/qpid/examples/python
+install -pm 644 * %{buildroot}%{_perldocdir}/examples
 install -pm 644 * %{buildroot}%{_pythondocdir}/examples
 popd
+%endif
 
-make install DESTDIR=%{buildroot}/
+%make_install
 
-# clean up items we're not installing
-rm -f  %{buildroot}/%{_bindir}/qmf*
-rm -f  %{buildroot}/%{_bindir}/qpid-python-test
-rm -rf %{buildroot}/%{_includedir}/qmf
-rm -f  %{buildroot}/%{_libdir}/libcqpid_perl.so
-rm -f  %{buildroot}/%{_libdir}/ruby/cqpid.so
-rm -f  %{buildroot}/%{ruby_sitelib}
-rm -rf %{buildroot}/%{_libdir}/*qmf*
-rm -f  %{buildroot}/%{_libdir}/pkgconfig/qmf2.pc
-rm -rf %{buildroot}/%{python2_sitearch}/qpid_python*egg-info
-rm -rf %{buildroot}/%{python2_sitearch}/mllib
-rm -rf %{buildroot}/%{python2_sitearch}/qpid
-rm -rf %{buildroot}/%{python2_sitelib}/qmfgen
-rm -rf %{buildroot}/%{python2_sitelib}/qpidtoollibs
-rm -rf %{buildroot}/%{python2_sitearch}/*qmf*
-rm -rf %{buildroot}/%{_libdir}/qpid/daemon/store.so*
-rm -rf %{buildroot}/%{_initrddir}/qpidd-primary
+# enable auth by default
+echo "auth=yes" >> %{buildroot}/etc/qpid/qpidd.conf
 
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 # install systemd files
 mkdir -p %{buildroot}/%{_unitdir}
 install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/qpidd.service \
     %{buildroot}/%{_unitdir}
 install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/qpidd-primary.service \
     %{buildroot}/%{_unitdir}
-rm -f %{buildroot}/%{_initrddir}/qpidd
-rm -f %{buildroot}/%{_sysconfdir}/init.d/qpidd.service
+%endif
 
-# install perftests utilities
-mkdir -p %{buildroot}/%{_bindir}
-pushd src/tests
-for ptest in %{perftests}; do
-  libtool --mode=install install -m755 $ptest %{buildroot}/%{_bindir}
-done
-popd
+install -d -m0755 %{buildroot}%{_localstatedir}/lib/qpidd
+install -d -m0755 %{buildroot}%_libdir/qpid
+install -d -m0755 %{buildroot}/var/run/qpidd
 
-mkdir -p %{buildroot}/%{_localstatedir}/run
-touch %{buildroot}/%{_localstatedir}/run/qpidd
-mkdir -p %{buildroot}/%{_localstatedir}/lib/qpidd
+# Set executable bit on shared libraries to ensure the binaries are stripped
+chmod +x %{buildroot}/%{python_sitearch}/*so
+
+# QMF Python management
+install -d %{_builddir}/qpid-cpp-%{version}/managementgen/qmfgen \
+           %{buildroot}/%{python_sitelib}
+
+%if 0%{?fedora}
+# QMF Ruby package
+install -d %{buildroot}%{ruby_vendorlibdir}
+install -d %{buildroot}%{ruby_vendorarchdir}
+
+install -pm 644 %{_builddir}/qpid-cpp-%{version}/bindings/qmf2/ruby/qmf2.rb \
+    %{buildroot}%{ruby_vendorlibdir}
+%endif
+
+%if 0%{?fedora}
+install -pm 755 %{_builddir}/qpid-cpp-%{version}/bindings/qpid/ruby/cqpid_ruby.so \
+     %{buildroot}%{ruby_vendorarchdir}/cqpid.so
+install -pm 755 %{_builddir}/qpid-cpp-%{version}/bindings/qmf2/ruby/cqmf2_ruby.so \
+    %{buildroot}%{ruby_vendorarchdir}/cqmf2.so
+%endif
+
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
+rm -f %{buildroot}/%{_initrddir}/qpidd*
+%endif
+rm -f %{buildroot}/%{_libdir}/qpid/daemon/store.so*
+
+# clean up leftover examples files:
+rm -f %{buildroot}/%{_datadir}/qpid/examples/README.txt
+rm -f %{buildroot}/%{_datadir}/qpid/examples/qmf2/agent.cpp
+rm -f %{buildroot}/%{_datadir}/qpid/examples/qmf2/event_driven_list_agents.cpp
+rm -f %{buildroot}/%{_datadir}/qpid/examples/qmf2/list_agents.cpp
+rm -f %{buildroot}/%{_datadir}/qpid/examples/qmf2/print_events.cpp
 
 # clean up leftover ruby files
+%if (0%{?rhel} && 0%{?rhel} <= 6)
+rm -fr %{buildroot}/usr/%{_lib}/ruby/site_ruby
+%else
 rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
+%endif
+
+# clean up rhel build
+%if 0%{?rhel}
+rm -f  %{buildroot}/%{python_sitearch}/_qpid_messaging.so
+rm -f  %{buildroot}/%{python_sitearch}/qpid_messaging.py*
+# These bits will be build if perl-devel package is installed
+rm -fr %{buildroot}%_libdir/perl5
+%endif
+
+%clean
+rm -rf %{buildroot}
 
 %post -p /sbin/ldconfig
 
@@ -498,11 +741,12 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 
 %changelog
-* Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.35.0-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
-
-* Fri Jan 27 2017 Jonathan Wakely <jwakely@redhat.com> - 1.35.0-2
-- Rebuilt for Boost 1.63
+* Mon Feb 20 2017 Irina Boverman <iboverma@redhat.com> - 1.35.0-2
+- Added qpid-tools and python-qpid-qmf sub-packages previously built
+  as separate packages
+- Moved qmf from python_sitearch to python_sitelib
+- Removed qpid-cpp-server-devel
+- Renamed qpid-cpp-client-devel-docs to qpid-cpp-client-docs
 
 * Thu Sep  8 2016 Irina Boverman <iboverma@redhat.com> - 1.35.0-1
 - Rebased to 1.35.0
