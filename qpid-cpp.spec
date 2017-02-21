@@ -6,7 +6,7 @@
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
 %global __provides_exclude_from ^(%{python_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
-%global proton_min_ver 0.16.0
+%global proton_min_ver 0.14.0
 
 Name:          qpid-cpp
 Version:       1.35.0
