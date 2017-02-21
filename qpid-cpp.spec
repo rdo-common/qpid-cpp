@@ -625,7 +625,7 @@ GCC7FLAG="-Wno-implicit-fallthrough"
        -DBUILD_LINEARSTORE=true \
        -DPERL_PFX_ARCHLIB=%{perl_vendorarch} \
        -DBUILD_BINDING_RUBY=true \
-       "-DCMAKE_CXX_FLAGS=$CXX11FLAG $GCC7FLAG $CXXFLAGS \
+       "-DCMAKE_CXX_FLAGS=$CXX11FLAG $GCC7FLAG $CXXFLAGS" \
        .
 %endif
 %if 0%{?rhel}
