@@ -616,12 +616,16 @@ CXX11FLAG="-w"
 %endif
 
 %if 0%{?fedora}
+GCC7FLAG="-Wno-implicit-fallthrough"
+%endif
+
+%if 0%{?fedora}
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
        -DBUILD_LEGACYSTORE=false \
        -DBUILD_LINEARSTORE=true \
        -DPERL_PFX_ARCHLIB=%{perl_vendorarch} \
        -DBUILD_BINDING_RUBY=true \
-       "-DCMAKE_CXX_FLAGS=$CXX11FLAG $CXXFLAGS" \
+       "-DCMAKE_CXX_FLAGS=$CXX11FLAG $GCC7FLAG $CXXFLAGS \
        .
 %endif
 %if 0%{?rhel}
@@ -747,6 +751,7 @@ rm -rf %{buildroot}
 - Moved qmf from python_sitearch to python_sitelib
 - Removed qpid-cpp-server-devel
 - Renamed qpid-cpp-client-devel-docs to qpid-cpp-client-docs
+- Added GCC7 flag -Wno-implicit-fallthrough
 
 * Thu Sep  8 2016 Irina Boverman <iboverma@redhat.com> - 1.35.0-1
 - Rebased to 1.35.0
