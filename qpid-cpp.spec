@@ -10,7 +10,7 @@
 
 Name:          qpid-cpp
 Version:       1.35.0
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -745,7 +745,7 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Tue Feb 21 2017 Irina Boverman <iboverma@redhat.com> - 1.35.0-3
+* Tue Feb 21 2017 Irina Boverman <iboverma@redhat.com> - 1.35.0-4
 - Added qpid-tools and python-qpid-qmf sub-packages previously built
   as separate packages
 - Moved qmf from python_sitearch to python_sitelib
