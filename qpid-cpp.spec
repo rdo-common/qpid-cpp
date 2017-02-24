@@ -6,11 +6,11 @@
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
 %global __provides_exclude_from ^(%{python_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
-%global proton_min_ver 0.17.0
+%global proton_min_ver 0.14.0
 
 Name:          qpid-cpp
 Version:       1.35.0
-Release:       2%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -745,7 +745,7 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Thu Feb 23 2017 Irina Boverman <iboverma@redhat.com> - 1.35.0-2
+* Mon Feb 20 2017 Irina Boverman <iboverma@redhat.com> - 1.35.0-4
 - Added qpid-tools and python-qpid-qmf sub-packages previously built
   as separate packages
 - Moved qmf from python_sitearch to python_sitelib
