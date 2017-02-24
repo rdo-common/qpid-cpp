@@ -609,14 +609,16 @@ for ruby.
 
 %build
 
-CXX11FLAG="-std=c++11"
-
 %if (0%{?rhel} && 0%{?rhel} <= 6)
 CXX11FLAG="-w"
+%else
+CXX11FLAG="-std=c++11"
 %endif
 
-%if 0%{?fedora}
+%if (0%{?fedora} && 0%{?fedora} >= 26)
 GCC7FLAG="-Wno-implicit-fallthrough"
+%else
+GCC7FLAG=""
 %endif
 
 %if 0%{?fedora}
