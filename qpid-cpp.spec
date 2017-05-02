@@ -9,8 +9,8 @@
 %global proton_min_ver 0.14.0
 
 Name:          qpid-cpp
-Version:       1.35.0
-Release:       4%{?dist}
+Version:       1.36.0
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -747,6 +747,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon May  1 2017 Irina Boverman <iboverma@redhat.com> - 1.36.0-1
+- Rebased to 1.36.0
+
 * Mon Feb 20 2017 Irina Boverman <iboverma@redhat.com> - 1.35.0-4
 - Added qpid-tools and python-qpid-qmf sub-packages previously built
   as separate packages
