@@ -616,7 +616,7 @@ CXX11FLAG="-std=c++11"
 %endif
 
 %if (0%{?fedora} && 0%{?fedora} >= 26)
-GCC7FLAG="-Wno-implicit-fallthrough"
+GCC7FLAG="-Wno-implicit-fallthrough -Wno-error=deprecated-declarations"
 %else
 GCC7FLAG=""
 %endif
