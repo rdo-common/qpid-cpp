@@ -759,6 +759,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jun 09 2017 Irina Boverman <iboverma@redhat.com> - 1.36.0-
+- Added man pages
+
 * Sun Jun 04 2017 Jitka Plesnikova <jplesnik@redhat.com> - 1.36.0-2
 - Perl 5.26 rebuild
 
