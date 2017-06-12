@@ -23,7 +23,6 @@ Patch1:        0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
 Patch2:        0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
 Patch3:        0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
 %endif
-Patch4:        0001-Added-man-pages.patch
 
 BuildRequires: boost-devel
 BuildRequires: boost-filesystem
@@ -181,8 +180,6 @@ Qpid implements the AMQP messaging specification.
 %{_libexecdir}/qpid/tests/sender
 %{_bindir}/qpid-send
 %{_bindir}/qpid-receive
-%doc %{_mandir}/man1/qpid-send*
-%doc %{_mandir}/man1/qpid-receive*
 
 %post client-devel -p /sbin/ldconfig
 
@@ -507,13 +504,6 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %{_datadir}/qpid-tools/python/qlslibs
 %doc NOTICE.txt
 %doc LICENSE.txt
-%doc %{_mandir}/man1/qpid-config*
-%doc %{_mandir}/man1/qpid-ha*
-%doc %{_mandir}/man1/qpid-printevents*
-%doc %{_mandir}/man1/qpid-queue-stats*
-%doc %{_mandir}/man1/qpid-route*
-%doc %{_mandir}/man1/qpid-stat*
-%doc %{_mandir}/man1/qpid-tool*
 
 %if "%{python_version}" >= "2.6"
 %{python_sitelib}/qpid_tools-*.egg-info
@@ -559,7 +549,6 @@ components.
 %{_bindir}/qmf-gen
 %{python_sitelib}/qmfgen
 %{_libdir}/pkgconfig/qmf2.pc
-%doc %{_mandir}/man1/qmf-gen*
 
 %post -n qpid-qmf-devel -p /sbin/ldconfig
 
@@ -759,9 +748,6 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Fri Jun 09 2017 Irina Boverman <iboverma@redhat.com> - 1.36.0-
-- Added man pages
-
 * Sun Jun 04 2017 Jitka Plesnikova <jplesnik@redhat.com> - 1.36.0-2
 - Perl 5.26 rebuild
 
