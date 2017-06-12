@@ -606,7 +606,6 @@ for ruby.
 %patch2 -p3
 %patch3 -p3
 %endif
-%patch4 -p1
 
 %build
 
