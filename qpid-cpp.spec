@@ -10,7 +10,7 @@
 
 Name:          qpid-cpp
 Version:       1.36.0
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -747,6 +747,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jul 07 2017 Igor Gnatenko <ignatenko@redhat.com> - 1.36.0-3
+- Rebuild due to bug in RPM (RHBZ #1468476)
+
 * Sun Jun 04 2017 Jitka Plesnikova <jplesnik@redhat.com> - 1.36.0-2
 - Perl 5.26 rebuild
 
