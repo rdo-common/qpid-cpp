@@ -10,7 +10,7 @@
 
 Name:          qpid-cpp
 Version:       1.36.0
-Release:       6%{?dist}
+Release:       7%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -43,7 +43,7 @@ BuildRequires: libdb4-cxx-devel
 %if (0%{?rhel} && 0%{?rhel} == 7)
 BuildRequires: libdb-cxx-devel
 %endif
-%ifnarch s390 s390x
+%ifnarch s390 s390x %{arm}
 BuildRequires: libibverbs-devel
 BuildRequires: librdmacm-devel
 %endif
@@ -117,7 +117,7 @@ the AMQP protocol.
 %{_libdir}/libqpidtypes.so.*
 %{_libdir}/libqpidmessaging.so.*
 %dir %{_libdir}/qpid
-%ifnarch s390 s390x
+%ifnarch s390 s390x %{arm}
 %dir %{_libdir}/qpid/client
 %exclude %{_libdir}/qpid/client/rdmaconnector.so*
 %endif
@@ -336,7 +336,7 @@ fi
 /sbin/ldconfig
 
 
-%ifnarch s390 s390x
+%ifnarch s390 s390x %{arm}
 %package client-rdma
 Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
 %if 0%{?fedora}
@@ -747,6 +747,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Aug 25 2017 Adam Williamson <awilliam@redhat.com> - 1.36.0-7
+- Disable RDMA on 32-bit ARM (#1484155)
+
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.36.0-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
