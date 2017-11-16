@@ -6,11 +6,11 @@
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
 %global __provides_exclude_from ^(%{python_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
-%global proton_min_ver 0.14.0
+%global proton_min_ver 0.18.0
 
 Name:          qpid-cpp
 Version:       1.36.0
-Release:       7%{?dist}
+Release:       8%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -747,6 +747,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Nov 16 2017 Irina Boverman <iboverma@redhat.com> - 1.36.0-8
+- Rebuilt against qpid-proton 0.18.1
+
 * Fri Aug 25 2017 Adam Williamson <awilliam@redhat.com> - 1.36.0-7
 - Disable RDMA on 32-bit ARM (#1484155)
 
