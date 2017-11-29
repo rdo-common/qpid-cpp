@@ -9,20 +9,13 @@
 %global proton_min_ver 0.18.0
 
 Name:          qpid-cpp
-Version:       1.36.0
-Release:       8%{?dist}
+Version:       1.37.0
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}.tar.gz
-%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
-Patch1:        0001-NO-JIRA-qpidd.service-file-for-use-on-Fedora.patch
-%endif
-%if 0%{?fedora}
-Patch2:        0002-NO-JIRA-Allow-overriding-the-Perl-install-location.patch
-Patch3:        0003-NO-JIRA-Allow-overriding-the-Ruby-install-location.patch
-%endif
 
 BuildRequires: boost-devel
 BuildRequires: boost-filesystem
@@ -599,14 +592,6 @@ for ruby.
 %prep
 %setup -q -n qpid-cpp-%{version}
 
-%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
-%patch1 -p3
-%endif
-%if 0%{?fedora}
-%patch2 -p3
-%patch3 -p3
-%endif
-
 %build
 
 %if (0%{?rhel} && 0%{?rhel} <= 6)
@@ -616,7 +601,7 @@ CXX11FLAG="-std=c++11"
 %endif
 
 %if (0%{?fedora} && 0%{?fedora} >= 26)
-GCC7FLAG="-Wno-implicit-fallthrough -Wno-deprecated-declarations -Wno-error=maybe-uninitialized"
+GCC7FLAG="-Wno-error=maybe-uninitialized"
 %else
 GCC7FLAG=""
 %endif
@@ -678,9 +663,9 @@ echo "auth=yes" >> %{buildroot}/etc/qpid/qpidd.conf
 %if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 # install systemd files
 mkdir -p %{buildroot}/%{_unitdir}
-install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/qpidd.service \
+install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/fedora/qpidd.service \
     %{buildroot}/%{_unitdir}
-install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/qpidd-primary.service \
+install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/fedora/qpidd-primary.service \
     %{buildroot}/%{_unitdir}
 %endif
 
@@ -738,6 +723,8 @@ rm -f  %{buildroot}/%{python_sitearch}/qpid_messaging.py*
 rm -fr %{buildroot}%_libdir/perl5
 %endif
 
+rm %{buildroot}/%{_bindir}/*.bat
+
 %clean
 rm -rf %{buildroot}
 
@@ -747,6 +734,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Nov 29 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-1
+- Rebased to 1.37.0
+
 * Thu Nov 16 2017 Irina Boverman <iboverma@redhat.com> - 1.36.0-8
 - Rebuilt against qpid-proton 0.18.1
 
