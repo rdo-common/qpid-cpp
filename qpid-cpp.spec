@@ -7,6 +7,7 @@
 %global __requires_exclude pkg-config
 %global __provides_exclude_from ^(%{python_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
 %global proton_min_ver 0.18.0
+%global python_qpid_ver 1.37.0
 
 Name:          qpid-cpp
 Version:       1.37.0
@@ -455,7 +456,7 @@ Summary: Python bindings for the Qpid messaging framework
 
 Requires: python
 Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
-Requires: python-qpid >= 1.35.0
+Requires: python-qpid >= %{python_qpid_ver}
 
 %{?filter_setup:
   %filter_provides_in %{python_sitearch}/.*\.so$
@@ -476,7 +477,7 @@ Requires: python-qpid >= 1.35.0
 Summary:  Management and diagostic tools for Apache Qpid
 BuildArch: noarch
 
-Requires:  python-qpid >= 1.35.0
+Requires:  python-qpid >= %{python_qpid_ver}
 Requires:  python-qpid-qmf = %{version}-%{release}
 
 %description -n qpid-tools
