@@ -1,7 +1,12 @@
 # Define pkgdocdir for releases that don't define it already
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 %global _perldocdir %{_docdir}/perl-qpid-messaging-%{version}
+
+%if 0%{?fedora}
 %global _pythondocdir %{_docdir}/python2-qpid-messaging-%{version}
+%else
+%global _pythondocdir %{_docdir}/python-qpid-messaging-%{version}
+%endif
 
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
@@ -10,7 +15,7 @@
 
 Name:          qpid-cpp
 Version:       1.37.0
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -50,9 +55,17 @@ BuildRequires: perl(ExtUtils::MakeMaker)
 BuildRequires: perl-generators
 %endif
 BuildRequires: pkgconfig
+
+%if 0%{?fedora}
+BuildRequires: python2
+BuildRequires: python2-devel
+BuildRequires: python2-setuptools
+%else
 BuildRequires: python
 BuildRequires: python-devel
 BuildRequires: python-setuptools
+%endif
+
 BuildRequires: qpid-proton-c-devel >= %{proton_min_ver}
 BuildRequires: ruby
 BuildRequires: ruby-devel
@@ -133,7 +146,12 @@ Requires:  boost-devel
 Requires:  boost-filesystem
 Requires:  boost-program-options
 Requires:  libuuid-devel
+
+%if 0%{?fedora}
+Requires:  python2
+%else
 Requires:  python
+%endif
 
 %description client-devel
 Libraries and header files for developing AMQP clients in C++ using Qpid.
@@ -449,27 +467,59 @@ Requires: qpid-cpp-client = %{version}-%{release}
 %doc LICENSE.txt
 %doc %{_perldocdir}
 
-
+%if 0%{?fedora}
 %package -n python2-qpid-messaging
+%else
+%package -n python-qpid-messaging
+%endif
+
 Summary: Python bindings for the Qpid messaging framework
 
+%if 0%{?fedora}
+Requires: python2
+%else
 Requires: python
+%endif
+
 Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires: python-qpid
-%{?python_provide:%python_provide python2-qpid-messaging}
 
+%if 0%{?fedora}
+%{?python_provide:%python_provide python2-qpid-messaging}
+%endif
+
+%if 0%{?fedora}
+%{?filter_setup:
+  %filter_provides_in %{python2_sitearch}/.*\.so$
+  %filter_setup}
+%else
 %{?filter_setup:
   %filter_provides_in %{python_sitearch}/.*\.so$
   %filter_setup}
+%endif
 
+%if 0%{?fedora}
 %description -n python2-qpid-messaging
+%else
+%description -n python-qpid-messaging
+%endif
+
 %{summary}.
 
+%if 0%{?fedora}
 %files -n python2-qpid-messaging
 %doc LICENSE.txt
 %{python2_sitearch}/qpid_messaging.py*
 %{python2_sitearch}/_qpid_messaging.so
 %{_pythondocdir}/examples
+%else
+%files -n python-qpid-messaging
+%doc LICENSE.txt
+%{python_sitearch}/qpid_messaging.py*
+%{python_sitearch}/_qpid_messaging.so
+%{_pythondocdir}/examples
+%endif
+
 %endif
 
 
@@ -478,7 +528,7 @@ Summary:  Management and diagostic tools for Apache Qpid
 BuildArch: noarch
 
 Requires:  python-qpid
-Requires:  python2-qpid-qmf = %{version}-%{release}
+Requires:  python-qpid-qmf = %{version}-%{release}
 
 %description -n qpid-tools
 Management and diagnostic tools for Apache Qpid brokers and clients.
@@ -491,7 +541,13 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %{_bindir}/qpid-route
 %{_bindir}/qpid-stat
 %{_bindir}/qpid-tool
+
+%if 0%{?fedora}
+%{python2_sitelib}/qpidtoollibs
+%else
 %{python_sitelib}/qpidtoollibs
+%endif
+
 %{_libexecdir}/qpid-qls-analyze
 %dir %{_datadir}/qpid-tools
 %dir %{_datadir}/qpid-tools/python
@@ -500,15 +556,23 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %doc LICENSE.txt
 
 %if "%{python_version}" >= "2.6"
+
+%if 0%{?fedora}
+%{python2_sitelib}/qpid_tools-*.egg-info
+%else
 %{python_sitelib}/qpid_tools-*.egg-info
+%endif
+
 %endif
 
 
 %package -n qpid-qmf
 Summary: The QPID Management Framework
+
 %if 0%{?fedora}
 Requires:  qpid(cpp-client)%{?_isa}
 %endif
+
 Requires:  qpid-cpp-client%{?_isa} = %{version}-%{release} 
 
 %description -n qpid-qmf
@@ -541,34 +605,67 @@ components.
 %{_includedir}/qmf
 %{_libdir}/libqmf2.so
 %{_bindir}/qmf-gen
+
+%if 0%{?fedora}
+%{python2_sitelib}/qmfgen
+%else
 %{python_sitelib}/qmfgen
+%endif
+
 %{_libdir}/pkgconfig/qmf2.pc
 
 %post -n qpid-qmf-devel -p /sbin/ldconfig
 
 %postun -n qpid-qmf-devel -p /sbin/ldconfig
 
-
+%if 0%{?fedora}
 %package -n python2-qpid-qmf
+%else
+%package -n python-qpid-qmf
+%endif
+
 Summary:   The QPID Management Framework bindings for python
 
 Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
 Requires:  %{name}-client%{?_isa} = %{version}-%{release}
-%{?python_provide:%python_provide python2-qpid-qmf}
 
+%if 0%{?fedora}
+%{?python_provide:%python_provide python2-qpid-qmf}
+%endif
+
+%if 0%{?fedora}
 %description -n python2-qpid-qmf
+%else
+%description -n python-qpid-qmf
+%endif
+
 An extensible management framework layered on QPID messaging, bindings
 for python.
 
+%if 0%{?fedora}
 %files -n python2-qpid-qmf
+%{python2_sitelib}/qmf
+%{python2_sitearch}/qmf2.py*
+%{python2_sitearch}/cqmf2.py*
+%{python2_sitearch}/_cqmf2.so
+
+%post -n python2-qpid-qmf -p /sbin/ldconfig
+
+%postun -n python2-qpid-qmf -p /sbin/ldconfig
+
+%else
+
+%files -n python-qpid-qmf
 %{python_sitelib}/qmf
 %{python_sitearch}/qmf2.py*
 %{python_sitearch}/cqmf2.py*
 %{python_sitearch}/_cqmf2.so
 
-%post -n python2-qpid-qmf -p /sbin/ldconfig
+%post -n python-qpid-qmf -p /sbin/ldconfig
 
-%postun -n python2-qpid-qmf -p /sbin/ldconfig
+%postun -n python-qpid-qmf -p /sbin/ldconfig
+
+%endif
 
 
 %if 0%{?fedora}
@@ -636,12 +733,24 @@ make docs-user-api
 rm -rf %{buildroot}
 
 pushd management/python
+
+%if 0%{?fedora}
+%{__python2} setup.py install \
+    --install-purelib %{python2_sitelib} \
+    --root %{buildroot}
+%else
 %{__python} setup.py install \
     --install-purelib %{python_sitelib} \
     --root %{buildroot}
+%endif
+
 popd
 
+%if 0%{?fedora}
+chmod +x %{buildroot}/%{python2_sitelib}/qpidtoollibs/disp.py
+%else
 chmod +x %{buildroot}/%{python_sitelib}/qpidtoollibs/disp.py
+%endif
 
 mkdir -p -m0755 %{buildroot}/%{_bindir}
 mkdir -p -m0755 %{buildroot}/%{_unitdir}
@@ -679,8 +788,13 @@ install -d -m0755 %{buildroot}/var/run/qpidd
 chmod +x %{buildroot}/%{python_sitearch}/*so
 
 # QMF Python management
+%if 0%{?fedora}
+install -d %{_builddir}/qpid-cpp-%{version}/managementgen/qmfgen \
+           %{buildroot}/%{python2_sitelib}
+%else
 install -d %{_builddir}/qpid-cpp-%{version}/managementgen/qmfgen \
            %{buildroot}/%{python_sitelib}
+%endif
 
 %if 0%{?fedora}
 # QMF Ruby package
@@ -736,6 +850,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Nov 30 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-3
+- Updated python requirements
+
 * Thu Nov 30 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-2
 - Updated dependencies
 - Changed package names from python-* to python2-*
