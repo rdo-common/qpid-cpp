@@ -1,17 +1,16 @@
 # Define pkgdocdir for releases that don't define it already
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 %global _perldocdir %{_docdir}/perl-qpid-messaging-%{version}
-%global _pythondocdir %{_docdir}/python-qpid-messaging-%{version}
+%global _pythondocdir %{_docdir}/python2-qpid-messaging-%{version}
 
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
 %global __provides_exclude_from ^(%{python_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
 %global proton_min_ver 0.18.0
-%global python_qpid_ver 1.37.0
 
 Name:          qpid-cpp
 Version:       1.37.0
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -451,21 +450,22 @@ Requires: qpid-cpp-client = %{version}-%{release}
 %doc %{_perldocdir}
 
 
-%package -n python-qpid-messaging
+%package -n python2-qpid-messaging
 Summary: Python bindings for the Qpid messaging framework
 
 Requires: python
 Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
-Requires: python-qpid >= %{python_qpid_ver}
+Requires: python-qpid
+%{?python_provide:%python_provide python2-qpid-messaging}
 
 %{?filter_setup:
   %filter_provides_in %{python_sitearch}/.*\.so$
   %filter_setup}
 
-%description -n python-qpid-messaging
+%description -n python2-qpid-messaging
 %{summary}.
 
-%files -n python-qpid-messaging
+%files -n python2-qpid-messaging
 %doc LICENSE.txt
 %{python2_sitearch}/qpid_messaging.py*
 %{python2_sitearch}/_qpid_messaging.so
@@ -477,8 +477,8 @@ Requires: python-qpid >= %{python_qpid_ver}
 Summary:  Management and diagostic tools for Apache Qpid
 BuildArch: noarch
 
-Requires:  python-qpid >= %{python_qpid_ver}
-Requires:  python-qpid-qmf = %{version}-%{release}
+Requires:  python-qpid
+Requires:  python2-qpid-qmf = %{version}-%{release}
 
 %description -n qpid-tools
 Management and diagnostic tools for Apache Qpid brokers and clients.
@@ -549,25 +549,26 @@ components.
 %postun -n qpid-qmf-devel -p /sbin/ldconfig
 
 
-%package -n python-qpid-qmf
+%package -n python2-qpid-qmf
 Summary:   The QPID Management Framework bindings for python
 
 Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
 Requires:  %{name}-client%{?_isa} = %{version}-%{release}
+%{?python_provide:%python_provide python2-qpid-qmf}
 
-%description -n python-qpid-qmf
+%description -n python2-qpid-qmf
 An extensible management framework layered on QPID messaging, bindings
 for python.
 
-%files -n python-qpid-qmf
+%files -n python2-qpid-qmf
 %{python_sitelib}/qmf
 %{python_sitearch}/qmf2.py*
 %{python_sitearch}/cqmf2.py*
 %{python_sitearch}/_cqmf2.so
 
-%post -n python-qpid-qmf -p /sbin/ldconfig
+%post -n python2-qpid-qmf -p /sbin/ldconfig
 
-%postun -n python-qpid-qmf -p /sbin/ldconfig
+%postun -n python2-qpid-qmf -p /sbin/ldconfig
 
 
 %if 0%{?fedora}
@@ -735,6 +736,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Nov 30 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-2
+- Updated dependencies
+- Changed package names from python-* to python2-*
+
 * Wed Nov 29 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-1
 - Rebased to 1.37.0
 
