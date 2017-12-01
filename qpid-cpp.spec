@@ -25,6 +25,11 @@ License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}.tar.gz
+Source1:        licenses.xml
+
+%global _pkglicensedir %{_licensedir}/%{name}-%{version}
+%{!?_licensedir:%global license %doc}
+%{!?_licensedir:%global _pkglicensedir %{_pkgdocdir}}
 
 BuildRequires: boost-devel
 BuildRequires: boost-filesystem
@@ -110,7 +115,8 @@ the AMQP protocol.
 
 %files client
 %defattr(-,root,root,-)
-%doc LICENSE.txt
+%license %{_pkglicensedir}/LICENSE.txt
+%license %{_pkglicensedir}/licenses.xml
 %doc NOTICE.txt
 %doc README.md
 %doc INSTALL.txt
@@ -200,6 +206,9 @@ format for easy browsing.
 %files client-docs
 %defattr(-,root,root,-)
 %doc %{_pkgdocdir}
+%license %{_pkglicensedir}/LICENSE.txt
+%license %{_pkglicensedir}/licenses.xml
+
 
 %package server
 Summary:   An AMQP message broker daemon
@@ -455,7 +464,6 @@ Requires: qpid-cpp-client = %{version}-%{release}
 
 %files -n perl-qpid-messaging
 %{perl_vendorarch}/*
-%doc LICENSE.txt
 %doc %{_perldocdir}
 
 
@@ -477,7 +485,6 @@ Requires: python-qpid
 %{summary}.
 
 %files -n %{pythonx}-qpid-messaging
-%doc LICENSE.txt
 %{python2_sitearch}/qpid_messaging.py*
 %{python2_sitearch}/_qpid_messaging.so
 %{_pythondocdir}/examples
@@ -508,8 +515,6 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %dir %{_datadir}/qpid-tools
 %dir %{_datadir}/qpid-tools/python
 %{_datadir}/qpid-tools/python/qlslibs
-%doc NOTICE.txt
-%doc LICENSE.txt
 
 %if "%{python_version}" >= "2.6"
 %{python2_sitelib}/qpid_tools-*.egg-info
@@ -562,6 +567,7 @@ components.
 
 %postun -n qpid-qmf-devel -p /sbin/ldconfig
 
+
 %package -n %{pythonx}-qpid-qmf
 Summary:   The QPID Management Framework bindings for python
 
@@ -612,10 +618,9 @@ for ruby.
 
 %build
 
-%if (0%{?rhel} && 0%{?rhel} <= 6)
-CXX11FLAG="-w"
-%else
 CXX11FLAG="-std=c++11"
+%if (0%{?rhel} && 0%{?rhel} <= 6)
+CXX11FLAG="-w -std=c++0x"
 %endif
 
 %if (0%{?fedora} && 0%{?fedora} >= 26)
@@ -630,7 +635,7 @@ GCC7FLAG=""
        -DBUILD_LINEARSTORE=true \
        -DPERL_PFX_ARCHLIB=%{perl_vendorarch} \
        -DBUILD_BINDING_RUBY=true \
-       "-DCMAKE_CXX_FLAGS=$CXX11FLAG $GCC7FLAG $CXXFLAGS" \
+       "-DCMAKE_CXX_FLAGS=$CXXFLAGS $CXX11FLAG $GCC7FLAG" \
        .
 %endif
 %if 0%{?rhel}
@@ -641,7 +646,7 @@ GCC7FLAG=""
         -DCMAKE_EXE_LINKER_FLAGS="-Wl,-z,relro,-z,now" \
         -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-z,relro" \
         -DCMAKE_MODULE_LINKER_FLAGS="-Wl,-z,relro" \
-       "-DCMAKE_CXX_FLAGS=$CXX11FLAG $CXXFLAGS" \
+       "-DCMAKE_CXX_FLAGS=$CXXFLAGS $CXX11FLAG" \
         .
 %endif
 
@@ -721,6 +726,15 @@ rm -f %{buildroot}/%{_initrddir}/qpidd*
 %endif
 rm -f %{buildroot}/%{_libdir}/qpid/daemon/store.so*
 
+%if 0%{?rhel} && 0%{?rhel} <= 6
+install -pm 644 %{SOURCE1} %{buildroot}%{_pkgdocdir}
+%else
+install -dm 755 %{buildroot}%{_pkglicensedir}
+install -pm 644 %{SOURCE1} %{buildroot}%{_pkglicensedir}
+install -pm 644 %{buildroot}%{_pkgdocdir}/LICENSE.txt %{buildroot}%{_pkglicensedir}
+rm -f %{buildroot}%{_pkgdocdir}/LICENSE.txt
+%endif
+
 # clean up leftover examples files:
 rm -f %{buildroot}/%{_datadir}/qpid/examples/README.txt
 rm -f %{buildroot}/%{_datadir}/qpid/examples/qmf2/agent.cpp
@@ -754,8 +768,9 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Thu Nov 30 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-3
+* Fri Dec 1 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-3
 - Updated python requirements
+- Updated licensing
 
 * Thu Nov 30 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-2
 - Updated dependencies
