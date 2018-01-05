@@ -19,7 +19,7 @@
 
 Name:          qpid-cpp
 Version:       1.37.0
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -768,6 +768,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jan 05 2018 Mamoru TASAKA <mtasaka@fedoraproject.org> - 1.37.0-4
+- F-28: rebuild for ruby25
+
 * Fri Dec 1 2017 Irina Boverman <iboverma@redhat.com> - 1.37.0-3
 - Updated python requirements
 - Updated licensing
