@@ -19,7 +19,7 @@
 
 Name:          qpid-cpp
 Version:       1.37.0
-Release:       5%{?dist}
+Release:       6%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -768,6 +768,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.37.0-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Tue Jan 23 2018 Jonathan Wakely <jwakely@redhat.com> - 1.37.0-5
 - Rebuilt for Boost 1.66
 
