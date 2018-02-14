@@ -759,9 +759,6 @@ rm -fr %{buildroot}%_libdir/perl5
 
 rm %{buildroot}/%{_bindir}/*.bat
 
-%clean
-rm -rf %{buildroot}
-
 %post -p /sbin/ldconfig
 
 %postun -p /sbin/ldconfig
