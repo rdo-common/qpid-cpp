@@ -624,7 +624,7 @@ CXX11FLAG="-w -std=c++0x"
 %endif
 
 %if 0%{?fedora}
-export ADDFLAGS="-Wno-error=maybe-uninitialized -Wno-error=catch-value="
+export ADDFLAGS="-Wno-error=maybe-uninitialized -Wno-error=catch-value= -Wno-error=cast-function-type"
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
        -DBUILD_LEGACYSTORE=false \
        -DBUILD_LINEARSTORE=true \
