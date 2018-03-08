@@ -71,7 +71,7 @@ BuildRequires: qpid-proton-c-devel >= %{proton_min_ver}
 BuildRequires: ruby
 BuildRequires: ruby-devel
 BuildRequires: swig
-%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} < 7)
+%if 0%{?fedora} < 29 || (0%{?rhel} && 0%{?rhel} < 7)
 BuildRequires: xerces-c-devel
 BuildRequires: xqilla-devel
 %endif
