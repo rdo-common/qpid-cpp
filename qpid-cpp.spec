@@ -395,7 +395,7 @@ transport for AMQP messaging.
 %postun server-rdma -p /sbin/ldconfig
 %endif
 
-%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} < 7)
+%if 0%{?fedora} < 29 || (0%{?rhel} && 0%{?rhel} < 7)
 %package server-xml
 Summary:  XML extensions for the Qpid daemon
 %if 0%{?fedora}
