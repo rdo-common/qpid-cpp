@@ -623,19 +623,14 @@ CXX11FLAG="-std=c++11"
 CXX11FLAG="-w -std=c++0x"
 %endif
 
-%if (0%{?fedora} && 0%{?fedora} >= 26)
-GCC7FLAG="-Wno-error=maybe-uninitialized"
-%else
-GCC7FLAG=""
-%endif
-
 %if 0%{?fedora}
+export ADDFLAGS="-Wno-error=maybe-uninitialized -Wno-error=catch-value="
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
        -DBUILD_LEGACYSTORE=false \
        -DBUILD_LINEARSTORE=true \
        -DPERL_PFX_ARCHLIB=%{perl_vendorarch} \
        -DBUILD_BINDING_RUBY=true \
-       "-DCMAKE_CXX_FLAGS=$CXXFLAGS $CXX11FLAG $GCC7FLAG" \
+       "-DCMAKE_CXX_FLAGS=$CXXFLAGS $CXX11FLAG $ADDFLAGS" \
        .
 %endif
 %if 0%{?rhel}
