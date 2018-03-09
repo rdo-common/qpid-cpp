@@ -136,7 +136,7 @@ the AMQP protocol.
 %{_libdir}/libqpidtypes.so.*
 %{_libdir}/libqpidmessaging.so.*
 %dir %{_libdir}/qpid
-%if %(_rdma}
+%if %{_rdma}
 %dir %{_libdir}/qpid/client
 %exclude %{_libdir}/qpid/client/rdmaconnector.so*
 %endif
