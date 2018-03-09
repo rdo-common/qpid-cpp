@@ -31,6 +31,17 @@ Source1:        licenses.xml
 %{!?_licensedir:%global license %doc}
 %{!?_licensedir:%global _pkglicensedir %{_pkgdocdir}}
 
+%global _rdma 0
+%if (0%{?rhel} && 0%{?rhel} == 6)
+%ifnarch s390 s390x 
+%global _rdma 1
+%endif
+%else
+%ifnarch %{arm}
+%global _rdma 1
+%endif
+%endif
+
 BuildRequires: boost-devel
 BuildRequires: boost-filesystem
 BuildRequires: boost-program-options
@@ -50,7 +61,7 @@ BuildRequires: libdb4-cxx-devel
 %if (0%{?rhel} && 0%{?rhel} == 7)
 BuildRequires: libdb-cxx-devel
 %endif
-%ifnarch s390 s390x %{arm}
+%if %{_rdma}
 BuildRequires: libibverbs-devel
 BuildRequires: librdmacm-devel
 %endif
@@ -125,7 +136,7 @@ the AMQP protocol.
 %{_libdir}/libqpidtypes.so.*
 %{_libdir}/libqpidmessaging.so.*
 %dir %{_libdir}/qpid
-%ifnarch s390 s390x %{arm}
+%if %(_rdma}
 %dir %{_libdir}/qpid/client
 %exclude %{_libdir}/qpid/client/rdmaconnector.so*
 %endif
@@ -347,7 +358,7 @@ fi
 /sbin/ldconfig
 
 
-%ifnarch s390 s390x %{arm}
+%if %{_rdma}
 %package client-rdma
 Summary:  RDMA Protocol support (including Infiniband) for Qpid clients
 %if 0%{?fedora}
