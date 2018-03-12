@@ -4,7 +4,7 @@
 
 %{!?__python2:%global __python2 %{__python}}
 %{!?__python2:%global python2_sitelib %{python_sitelib}}
-%if 0%{?fedora}
+%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} > 7)
 %global pythonx python2
 %else
 %global pythonx python
@@ -482,7 +482,7 @@ Requires: qpid-cpp-client = %{version}-%{release}
 Summary: Python bindings for the Qpid messaging framework
 Requires: %{pythonx}
 Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
-Requires: python-qpid
+Requires: %{pythonx}-qpid
 
 %if 0%{?fedora}
 %{?python_provide:%python_provide python2-qpid-messaging}
@@ -507,8 +507,8 @@ Requires: python-qpid
 Summary:  Management and diagostic tools for Apache Qpid
 BuildArch: noarch
 
-Requires:  python-qpid
-Requires:  python-qpid-qmf = %{version}-%{release}
+Requires:  %{pythonx}-qpid
+Requires:  %{pythonx}-qpid-qmf = %{version}-%{release}
 
 %description -n qpid-tools
 Management and diagnostic tools for Apache Qpid brokers and clients.
