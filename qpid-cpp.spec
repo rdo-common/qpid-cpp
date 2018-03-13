@@ -1,20 +1,18 @@
 # Define pkgdocdir for releases that don't define it already
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 %global _perldocdir %{_docdir}/perl-qpid-messaging-%{version}
+%global pythonx python2
 
 %{!?__python2:%global __python2 %{__python}}
 %{!?__python2:%global python2_sitelib %{python_sitelib}}
-%if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} > 7)
-%global pythonx python2
-%else
-%global pythonx python
-%endif
+%{!?__python2:%global python2_sitearch %{python_sitearch}}
+%{!?__python2:%global pythonx python}
 
 %global _pythondocdir %{_docdir}/%{pythonx}-qpid-messaging-%{version}
 
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
-%global __provides_exclude_from ^(%{python_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
+%global __provides_exclude_from ^(%{python2_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
 %global proton_min_ver 0.18.0
 
 Name:          qpid-cpp
@@ -25,7 +23,7 @@ License:       ASL 2.0
 URL:           http://qpid.apache.org
 
 Source0:       http://www.apache.org/dist/qpid/cpp/%{version}/%{name}-%{version}.tar.gz
-Source1:        licenses.xml
+Source1:       licenses.xml
 
 %global _pkglicensedir %{_licensedir}/%{name}-%{version}
 %{!?_licensedir:%global license %doc}
@@ -526,10 +524,7 @@ Management and diagnostic tools for Apache Qpid brokers and clients.
 %dir %{_datadir}/qpid-tools
 %dir %{_datadir}/qpid-tools/python
 %{_datadir}/qpid-tools/python/qlslibs
-
-%if "%{python_version}" >= "2.6"
 %{python2_sitelib}/qpid_tools-*.egg-info
-%endif
 
 
 %package -n qpid-qmf
@@ -705,7 +700,7 @@ install -d -m0755 %{buildroot}%_libdir/qpid
 install -d -m0755 %{buildroot}/var/run/qpidd
 
 # Set executable bit on shared libraries to ensure the binaries are stripped
-chmod +x %{buildroot}/%{python_sitearch}/*so
+chmod +x %{buildroot}/%{python2_sitearch}/*so
 
 # QMF Python management
 install -d %{_builddir}/qpid-cpp-%{version}/managementgen/qmfgen \
@@ -757,8 +752,8 @@ rm -rf %{buildroot}/usr/local/%{_lib}/ruby/site_ruby
 
 # clean up rhel build
 %if 0%{?rhel}
-rm -f  %{buildroot}/%{python_sitearch}/_qpid_messaging.so
-rm -f  %{buildroot}/%{python_sitearch}/qpid_messaging.py*
+rm -f  %{buildroot}/%{python2_sitearch}/_qpid_messaging.so
+rm -f  %{buildroot}/%{python2_sitearch}/qpid_messaging.py*
 # These bits will be build if perl-devel package is installed
 rm -fr %{buildroot}%_libdir/perl5
 %endif
