@@ -13,7 +13,7 @@
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
 %global __provides_exclude_from ^(%{python2_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
-%global proton_min_ver 0.18.0
+%global proton_min_ver 0.21.0
 
 Name:          qpid-cpp
 Version:       1.37.0
@@ -766,6 +766,10 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
+* Tue Mar 13 2018 Irina Boverman <iboverma@redhat.com> - 1.37.0-6
+- Updated compiler flags
+- Renuilt against qpid-proton 0.21.0
+
 * Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.37.0-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
