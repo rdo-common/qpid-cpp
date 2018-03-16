@@ -481,10 +481,7 @@ Summary: Python bindings for the Qpid messaging framework
 Requires: %{pythonx}
 Requires: qpid(cpp-client)%{?_isa} = %{version}-%{release}
 Requires: %{pythonx}-qpid
-
-%if 0%{?fedora}
 %{?python_provide:%python_provide python2-qpid-messaging}
-%endif
 
 %{?filter_setup:
   %filter_provides_in %{python2_sitearch}/.*\.so$
@@ -579,10 +576,7 @@ Summary:   The QPID Management Framework bindings for python
 
 Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
 Requires:  %{name}-client%{?_isa} = %{version}-%{release}
-
-%if 0%{?fedora}
 %{?python_provide:%python_provide python2-qpid-qmf}
-%endif
 
 %description -n %{pythonx}-qpid-qmf
 
