@@ -16,8 +16,8 @@
 %global proton_min_ver 0.21.0
 
 Name:          qpid-cpp
-Version:       1.37.0
-Release:       6%{?dist}
+Version:       1.38.0
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -760,6 +760,9 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
+* Thu May  3 2018 Irina Boverman <iboverma@redhat.com> - 1.38.0-1
+- Rebased to 1.38.0
+
 * Tue Mar 13 2018 Irina Boverman <iboverma@redhat.com> - 1.37.0-6
 - Updated compiler flags
 - Renuilt against qpid-proton 0.21.0
