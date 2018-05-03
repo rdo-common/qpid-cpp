@@ -255,7 +255,7 @@ the open AMQP messaging protocol.
 %{_libdir}/qpid/daemon/amqp.so
 %attr(755, qpidd, qpidd) %dir %{_localstatedir}/lib/qpidd
 %attr(755, qpidd, qpidd) %dir %{_localstatedir}/run/qpidd
-%doc %{_mandir}/man1/qpidd*
+%doc %{_mandir}/man1/*
 
 %pre server
 # Only needed for Fedora & Epel builds
