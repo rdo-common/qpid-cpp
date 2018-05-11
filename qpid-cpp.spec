@@ -590,25 +590,6 @@ for python.
 
 %postun -n %{pythonx}-qpid-qmf -p /sbin/ldconfig
 
-%if 0%{?fedora}
-%package -n ruby-qpid-qmf
-Summary:   The QPID Management Framework bindings for ruby
-
-Requires:  qpid-qmf%{?_isa} = %{version}-%{release}
-
-%description -n ruby-qpid-qmf
-An extensible management framework layered on QPID messaging, bindings
-for ruby.
-
-%files -n ruby-qpid-qmf
-%{ruby_vendorlibdir}/qmf2.rb
-%{ruby_vendorarchdir}/cqpid.so
-%{ruby_vendorarchdir}/cqmf2.so
-
-%post -n ruby-qpid-qmf -p /sbin/ldconfig
-
-%postun -n ruby-qpid-qmf -p /sbin/ldconfig
-%endif
 
 %prep
 %setup -q -n qpid-cpp-%{version}
@@ -757,7 +738,8 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
-* Thu May  3 2018 Irina Boverman <iboverma@redhat.com> - 1.38.0-1
+* Fri May 12 2018 Irina Boverman <iboverma@redhat.com> - 1.38.0-1
+- Removed ruby-qpid-qmf subpackage (per upstream changes)
 - Rebased to 1.38.0
 
 * Tue Mar 13 2018 Irina Boverman <iboverma@redhat.com> - 1.37.0-6
