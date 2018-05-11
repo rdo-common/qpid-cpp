@@ -728,7 +728,7 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
-* Fri May 12 2018 Irina Boverman <iboverma@redhat.com> - 1.38.0-1
+* Fri May 11 2018 Irina Boverman <iboverma@redhat.com> - 1.38.0-1
 - Removed ruby-qpid-qmf subpackage (per upstream changes)
 - Rebased to 1.38.0
 
