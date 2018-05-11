@@ -678,22 +678,6 @@ chmod +x %{buildroot}/%{python2_sitearch}/*so
 install -d %{_builddir}/qpid-cpp-%{version}/managementgen/qmfgen \
            %{buildroot}/%{python2_sitelib}
 
-%if 0%{?fedora}
-# QMF Ruby package
-install -d %{buildroot}%{ruby_vendorlibdir}
-install -d %{buildroot}%{ruby_vendorarchdir}
-
-install -pm 644 %{_builddir}/qpid-cpp-%{version}/bindings/qmf2/ruby/qmf2.rb \
-    %{buildroot}%{ruby_vendorlibdir}
-%endif
-
-%if 0%{?fedora}
-install -pm 755 %{_builddir}/qpid-cpp-%{version}/bindings/qpid/ruby/cqpid_ruby.so \
-     %{buildroot}%{ruby_vendorarchdir}/cqpid.so
-install -pm 755 %{_builddir}/qpid-cpp-%{version}/bindings/qmf2/ruby/cqmf2_ruby.so \
-    %{buildroot}%{ruby_vendorarchdir}/cqmf2.so
-%endif
-
 %if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 rm -f %{buildroot}/%{_initrddir}/qpidd*
 %endif
