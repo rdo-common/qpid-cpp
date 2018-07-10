@@ -123,7 +123,6 @@ C++. Clients exchange messages with an AMQP message broker using
 the AMQP protocol.
 
 %files client
-%defattr(-,root,root,-)
 %license %{_pkglicensedir}/LICENSE.txt
 %license %{_pkglicensedir}/licenses.xml
 %doc NOTICE.txt
@@ -164,7 +163,6 @@ Libraries and header files for developing AMQP clients in C++ using Qpid.
 Qpid implements the AMQP messaging specification.
 
 %files client-devel
-%defattr(-,root,root,-)
 %dir %{_includedir}/qpid
 %{_includedir}/qpid/*.h
 %{_includedir}/qpid/qpid.i
@@ -213,7 +211,6 @@ This package includes the AMQP clients development documentation in HTML
 format for easy browsing.
 
 %files client-docs
-%defattr(-,root,root,-)
 %doc %{_pkgdocdir}
 %license %{_pkglicensedir}/LICENSE.txt
 %license %{_pkglicensedir}/licenses.xml
@@ -241,7 +238,6 @@ A message broker daemon that receives stores and routes messages using
 the open AMQP messaging protocol.
 
 %files server
-%defattr(-,root,root,-)
 %{_libdir}/libqpidbroker.so*
 %{_sbindir}/qpidd
 %if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
@@ -319,7 +315,6 @@ Requires(postun): systemd-units
 %{summary}.
 
 %files server-ha
-%defattr(-,root,root,-)
 %if 0%{?fedora} || (0%{?rhel} && 0%{?rhel} >= 7)
 %{_unitdir}/qpidd-primary.service
 %else
@@ -370,7 +365,6 @@ A client plugin and support library to support RDMA protocols (including
 Infiniband) as the transport for Qpid messaging.
 
 %files client-rdma
-%defattr(-,root,root,-)
 %{_libdir}/librdmawrap.so*
 %{_libdir}/qpid/client/rdmaconnector.so*
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
@@ -396,7 +390,6 @@ A Qpid daemon plugin to support RDMA protocols (including Infiniband) as the
 transport for AMQP messaging.
 
 %files server-rdma
-%defattr(-,root,root,-)
 %{_libdir}/qpid/daemon/rdma.so
 
 %post server-rdma -p /sbin/ldconfig
@@ -454,7 +447,6 @@ Red Hat persistence extension to the Qpid AMQP broker: persistent message
 storage using a libaio-based asynchronous journal.
 
 %files server-linearstore
-%defattr(-,root,root,-)
 %{_libdir}/qpid/daemon/linearstore.so
 %{_libdir}/liblinearstoreutils.so
 
