@@ -17,7 +17,7 @@
 
 Name:          qpid-cpp
 Version:       1.38.0
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -720,6 +720,9 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
+* Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.38.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Wed Jun 27 2018 Jitka Plesnikova <jplesnik@redhat.com> - 1.38.0-2
 - Perl 5.28 rebuild
 
