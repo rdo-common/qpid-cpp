@@ -720,7 +720,7 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
-* Tue Jul 24 018 Irina Boverman <iboverma@redhat.com> - 1.38.0-4
+* Tue Jul 24 2018 Irina Boverman <iboverma@redhat.com> - 1.38.0-4
 - Rebuilt against qpid-proton 0.24.0
 
 * Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.38.0-3
