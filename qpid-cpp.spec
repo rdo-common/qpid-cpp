@@ -13,11 +13,11 @@
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
 %global __provides_exclude_from ^(%{python2_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
-%global proton_min_ver 0.21.0
+%global proton_min_ver 0.24.0
 
 Name:          qpid-cpp
 Version:       1.38.0
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -720,6 +720,9 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
+* Tue Jul 24 018 Irina Boverman <iboverma@redhat.com> - 1.38.0-4
+- Rebuilt against qpid-proton 0.24.0
+
 * Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.38.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
