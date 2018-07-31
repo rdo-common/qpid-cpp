@@ -17,7 +17,7 @@
 
 Name:          qpid-cpp
 Version:       1.38.0
-Release:       4%{?dist}
+Release:       5%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -720,6 +720,9 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
+* Tue Jul 31 2018 Florian Weimer <fweimer@redhat.com> - 1.38.0-5
+- Rebuild with fixed binutils
+
 * Tue Jul 24 2018 Irina Boverman <iboverma@redhat.com> - 1.38.0-4
 - Rebuilt against qpid-proton 0.24.0
 
