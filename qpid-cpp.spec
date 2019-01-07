@@ -13,11 +13,11 @@
 # We ship a .pc file but don't need to depend on pkg-config
 %global __requires_exclude pkg-config
 %global __provides_exclude_from ^(%{python2_sitearch}/.*\\.so|%{_libdir}/.libqmf*)$
-%global proton_min_ver 0.24.0
+%global proton_min_ver 0.26.0
 
 Name:          qpid-cpp
-Version:       1.38.0
-Release:       5%{?dist}
+Version:       1.39.0
+Release:       1%{?dist}
 Summary:       Libraries for Qpid C++ client applications
 License:       ASL 2.0
 URL:           http://qpid.apache.org
@@ -720,6 +720,10 @@ rm %{buildroot}/%{_bindir}/*.bat
 
 
 %changelog
+* Mon Jan  7 2019 Irina Boverman <iboverma@redhat.com> - 1.39.0-1
+- Rebased to 1.39.0
+- Rebuilt against qpid-proton 0.26.0
+
 * Tue Jul 31 2018 Florian Weimer <fweimer@redhat.com> - 1.38.0-5
 - Rebuild with fixed binutils
 
