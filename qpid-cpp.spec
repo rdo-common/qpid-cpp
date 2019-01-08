@@ -663,6 +663,9 @@ install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/fedora/qpidd.service \
     %{buildroot}/%{_unitdir}
 install -pm 644 %{_builddir}/qpid-cpp-%{version}/etc/fedora/qpidd-primary.service \
     %{buildroot}/%{_unitdir}
+sed -i 's/env python/env python2/' %{buildroot}%{_bindir}/qmf-gen
+sed -i 's/env python/env python2/' %{buildroot}%{_libexecdir}/qpid-qls-analyze
+sed -i 's/env python/env python2/' %{buildroot}%{python2_sitelib}/qpidtoollibs/disp.py
 %endif
 
 install -d -m0755 %{buildroot}%{_localstatedir}/lib/qpidd
