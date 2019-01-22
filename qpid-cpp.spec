@@ -140,9 +140,7 @@ the AMQP protocol.
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%post client -p /sbin/ldconfig
-
-%postun client -p /sbin/ldconfig
+%ldconfig_scriptlets client
 
 
 %package client-devel
@@ -195,10 +193,6 @@ Qpid implements the AMQP messaging specification.
 %{_libexecdir}/qpid/tests/sender
 %{_bindir}/qpid-send
 %{_bindir}/qpid-receive
-
-%post client-devel -p /sbin/ldconfig
-
-%postun client-devel -p /sbin/ldconfig
 
 
 %package client-docs
@@ -369,9 +363,7 @@ Infiniband) as the transport for Qpid messaging.
 %{_libdir}/qpid/client/rdmaconnector.so*
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%post client-rdma -p /sbin/ldconfig
-
-%postun client-rdma -p /sbin/ldconfig
+%ldconfig_scriptlets client-rdma
 
 
 %package server-rdma
@@ -392,9 +384,7 @@ transport for AMQP messaging.
 %files server-rdma
 %{_libdir}/qpid/daemon/rdma.so
 
-%post server-rdma -p /sbin/ldconfig
-
-%postun server-rdma -p /sbin/ldconfig
+%ldconfig_scriptlets server-rdma
 %endif
 
 %if 0%{?fedora} < 28 || (0%{?rhel} && 0%{?rhel} < 7)
@@ -415,9 +405,7 @@ messages.
 %files server-xml
 %{_libdir}/qpid/daemon/xml.so
 
-%post server-xml -p /sbin/ldconfig
-
-%postun server-xml -p /sbin/ldconfig
+%ldconfig_scriptlets server-xml
 %endif
 
 
@@ -450,8 +438,7 @@ storage using a libaio-based asynchronous journal.
 %{_libdir}/qpid/daemon/linearstore.so
 %{_libdir}/liblinearstoreutils.so
 
-%post server-linearstore -p /sbin/ldconfig
-%postun server-linearstore -p /sbin/ldconfig
+%ldconfig_scriptlets server-linearstore
 
 %if 0%{?fedora}
 %package -n perl-qpid-messaging
@@ -537,9 +524,7 @@ large set of applications.
 %files -n qpid-qmf
 %{_libdir}/libqmf2.so.*
 
-%post -n qpid-qmf -p /sbin/ldconfig
-
-%postun -n qpid-qmf -p /sbin/ldconfig
+%ldconfig_scriptlets -n qpid-qmf
 
 
 %package -n qpid-qmf-devel
@@ -561,9 +546,7 @@ components.
 %{python2_sitelib}/qmfgen
 %{_libdir}/pkgconfig/qmf2.pc
 
-%post -n qpid-qmf-devel -p /sbin/ldconfig
-
-%postun -n qpid-qmf-devel -p /sbin/ldconfig
+%ldconfig_scriptlets -n qpid-qmf-devel
 
 
 %package -n %{pythonx}-qpid-qmf
@@ -584,9 +567,7 @@ for python.
 %files -n %{pythonx}-qpid-qmf
 %{python2_sitelib}/qmf
 
-%post -n %{pythonx}-qpid-qmf -p /sbin/ldconfig
-
-%postun -n %{pythonx}-qpid-qmf -p /sbin/ldconfig
+%ldconfig_scriptlets -n %{pythonx}-qpid-qmf
 
 
 %prep
@@ -717,9 +698,7 @@ rm -fr %{buildroot}%_libdir/perl5
 
 rm %{buildroot}/%{_bindir}/*.bat
 
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets
 
 
 %changelog
