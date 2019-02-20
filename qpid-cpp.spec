@@ -581,7 +581,7 @@ CXX11FLAG="-w -std=c++0x"
 %endif
 
 %if 0%{?fedora}
-export ADDFLAGS="-Wno-error=maybe-uninitialized -Wno-error=catch-value= -Wno-error=cast-function-type -Wno-error=ignored-qualifiers -Wno-error=class-memaccess"
+export ADDFLAGS="-Wno-error=maybe-uninitialized -Wno-error=catch-value= -Wno-error=cast-function-type -Wno-error=ignored-qualifiers -Wno-error=class-memaccess -Wno-error=deprecated-copy"
 %cmake -DDOC_INSTALL_DIR:PATH=%{_pkgdocdir} \
        -DBUILD_LEGACYSTORE=false \
        -DBUILD_LINEARSTORE=true \
