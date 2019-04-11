@@ -140,8 +140,9 @@ the AMQP protocol.
 %dir %{_sysconfdir}/qpid
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%ldconfig_scriptlets client
+%post client -p /sbin/ldconfig
 
+%postun client -p /sbin/ldconfig
 
 %package client-devel
 Summary:   Header files, documentation and testing tools for developing Qpid C++ clients
@@ -363,8 +364,9 @@ Infiniband) as the transport for Qpid messaging.
 %{_libdir}/qpid/client/rdmaconnector.so*
 %config(noreplace) %{_sysconfdir}/qpid/qpidc.conf
 
-%ldconfig_scriptlets client-rdma
+%post client-rdma -p /sbin/ldconfig
 
+%postun client-rdma -p /sbin/ldconfig
 
 %package server-rdma
 Summary:   RDMA Protocol support (including Infiniband) for the Qpid daemon
@@ -384,7 +386,9 @@ transport for AMQP messaging.
 %files server-rdma
 %{_libdir}/qpid/daemon/rdma.so
 
-%ldconfig_scriptlets server-rdma
+%post server-rdma -p /sbin/ldconfig
+
+%postun server-rdma -p /sbin/ldconfig
 %endif
 
 %if 0%{?fedora} < 28 || (0%{?rhel} && 0%{?rhel} < 7)
@@ -405,7 +409,9 @@ messages.
 %files server-xml
 %{_libdir}/qpid/daemon/xml.so
 
-%ldconfig_scriptlets server-xml
+%post server-xml -p /sbin/ldconfig
+
+%postun server-xml -p /sbin/ldconfig
 %endif
 
 
@@ -438,7 +444,9 @@ storage using a libaio-based asynchronous journal.
 %{_libdir}/qpid/daemon/linearstore.so
 %{_libdir}/liblinearstoreutils.so
 
-%ldconfig_scriptlets server-linearstore
+%post server-linearstore -p /sbin/ldconfig
+
+%postun server-linearstore -p /sbin/ldconfig
 
 %if 0%{?fedora}
 %package -n perl-qpid-messaging
@@ -524,7 +532,9 @@ large set of applications.
 %files -n qpid-qmf
 %{_libdir}/libqmf2.so.*
 
-%ldconfig_scriptlets -n qpid-qmf
+%post -n qpid-qmf -p /sbin/ldconfig
+
+%postun -n qpid-qmf -p /sbin/ldconfig
 
 
 %package -n qpid-qmf-devel
@@ -546,8 +556,9 @@ components.
 %{python2_sitelib}/qmfgen
 %{_libdir}/pkgconfig/qmf2.pc
 
-%ldconfig_scriptlets -n qpid-qmf-devel
+%post -n qpid-qmf-devel -p /sbin/ldconfig
 
+%postun -n qpid-qmf-devel -p /sbin/ldconfig
 
 %package -n %{pythonx}-qpid-qmf
 Summary:   The QPID Management Framework bindings for python
@@ -567,7 +578,9 @@ for python.
 %files -n %{pythonx}-qpid-qmf
 %{python2_sitelib}/qmf
 
-%ldconfig_scriptlets -n %{pythonx}-qpid-qmf
+%post -n %{pythonx}-qpid-qmf -p /sbin/ldconfig
+
+%postun -n %{pythonx}-qpid-qmf -p /sbin/ldconfig
 
 
 %prep
@@ -698,7 +711,9 @@ rm -fr %{buildroot}%_libdir/perl5
 
 rm %{buildroot}/%{_bindir}/*.bat
 
-%ldconfig_scriptlets
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
 
 
 %changelog
